@@ -1,40 +1,40 @@
 # Verification
 
-The thread that runs through nearly every post: Claude's output improves most when it has a way to check its own work, and the check is often worth more than more thinking, more reviewers, or a bigger model.
+Nearly every post comes back to this. Claude's output improves most when it has a way to check its own work, and a check is often worth more than extra thinking, extra reviewers, or a bigger model.
 
 ## Give it a check
 
-- **Verification skills have the most measurable impact on output quality.** Worth a dedicated engineer-week; use Playwright or tmux drivers, record a video of what was tested, assert state at each step. (`skills`)
-- **A check cuts turns.** A test, a build, or a script calling the endpoint lets the model find mistakes earlier. (`cost`)
-- **Check for checks before raising effort.** A renamed field that medium effort misses on the client fails a client-level test on the turn it's written; a test run costs one turn, more effort adds thinking to every turn. (`cost`)
+- **Verification skills have the most measurable effect on output quality.** They're worth a week of an engineer's time. Drive the product with Playwright or tmux, record a video of what was tested, and assert state at each step. (`skills`)
+- **A check cuts turns.** A test, a build, or a script that calls the endpoint lets the model find its mistakes earlier. (`cost`)
+- **Look for a check before raising effort.** When a field is renamed, medium effort can miss the client. A test that goes through the client fails on the turn the bug is written. Running a test costs one turn. More effort adds thinking to every turn. (`cost`)
 - **Name the finish line.** "The tests pass" or "every endpoint is migrated" tells a long run when it's done. (`opus-5-5`)
 
 ## What thorough verification looks like
 
-- **High effort is mostly verification.** On `html-js-filter`, xhigh adversarially reviewed its draft, read the installed parser's source, ran many identity cases, a standard XSS suite, and a random-document fuzzer. (`effort`)
-- **Reproduce first; prove the test would have caught the bug.** On `mvcc-lsm-compaction`, low effort edited before running the reproducer and never checked its test against the original bug; xhigh reproduced first, used a never-compacting reference, and checked tests fail on half-finished fixes. (`effort`)
-- **Use an oracle.** `cli-2ph-simplex` passed only when Claude tested its solver against a separate brute-force solver on random problems and timed larger ones. (`effort`)
-- **Red then green, many times.** The layout-shift test went red 20 of 20 runs on main and green 20 of 20 on the PR. (`faster`)
+- **High effort is mostly verification.** On `html-js-filter`, xhigh reviewed its own draft adversarially, read the installed parser's source, ran many clean pages that should pass through unchanged, ran a standard XSS suite, and wrote a random-document fuzzer. (`effort`)
+- **Reproduce the bug first, and prove the test would have caught it.** On `mvcc-lsm-compaction`, low effort edited the code before running the reproducer and never checked its test against the original bug. Xhigh reproduced the crash first, compared against a reference that never compacts, and checked that its tests failed on half-finished fixes. (`effort`)
+- **Test against an oracle.** `cli-2ph-simplex` only passed when Claude checked its solver against a separate brute-force solver on random problems and timed larger ones. (`effort`)
+- **Red, then green, many times.** The layout-shift test failed 20 of 20 runs on main and passed 20 of 20 on the PR. (`faster`)
 
-## Separate the checker from the author
+## Keep the checker separate from the author
 
-- **Self-preferential bias is real.** Claude prefers its own findings when judging them; a separate verifier agent in its own context structurally prevents it. (`workflows`)
-- **One verifier per claim or per rule.** Deep verification spawns a checker per factual claim, optionally auditing its source; rule adherence runs one verifier per rule, then a skeptic. (`workflows`)
+- **Self-preferential bias is real.** Claude favors its own findings when it judges them. A verifier agent with its own context avoids that by design. (`workflows`)
+- **One verifier per claim, or per rule.** Deep verification gives each factual claim its own checker, which can also audit the source. Rule checks run one verifier per rule, then a skeptic agent. (`workflows`)
 - **Check each subagent's evidence before accepting it.** (`opus-5-5`)
-- **Adversarial review until findings degrade to nitpicks.** The `adversarial-review` skill spawns a fresh-eyes subagent and iterates. (`skills`)
-- **Rubrics are references.** They let verifier agents check your taste in a field (e.g. what good API design looks like). (`ctx-eng`)
+- **Review adversarially until only nitpicks are left.** The `adversarial-review` skill starts a fresh subagent to critique the work, fixes what it finds, and repeats. (`skills`)
+- **Rubrics count as references.** A rubric lets verifier agents check your taste in a field, such as what good API design looks like. (`ctx-eng`)
 
 ## Protect wins
 
-- **Benchmarks that only ratchet down.** Any PR raising the instruction count fails CI; a daily job lowers the ceiling. (`faster`)
-- **Tests before optimizations; flags on anything user-visible; staged rollout** (employees → 1% → everyone); automated review plus one human approval. 3,000+ changes shipped without a customer-facing incident. (`faster`)
-- **Guard brittle wins with many tests.** The static composer has jsdom parity tests, 14-viewport 1px alignment tests, a keystroke-through-handoff test, and field shift reporting to a tenth of a pixel. (`faster`)
+- **Benchmarks that only go down.** A PR that raises the instruction count fails CI, and a daily job lowers the ceiling. (`faster`)
+- **Tests before optimizations, flags on anything users can see, staged rollouts.** Rollouts went to employees, then 1% of users, then everyone. Every PR got automated review plus one human approval. The team shipped more than 3,000 changes with no incident reaching customers. (`faster`)
+- **Protect fragile wins with many tests.** The static composer has tests that it matches the real React component, 1px alignment tests at 14 viewport sizes, a test that types through the handoff, and field reports of any shift down to a tenth of a pixel. (`faster`)
 
 ## Reporting honestly
 
-- **Ask it to mark what it couldn't confirm and where it looked.** (`opus-5-5`)
-- **Review prompt that forces evidence.** Only merge-blocking problems, each with file, line, why, and how to show it fails. (`opus-5-5`)
-- **Verification agents read your HTML plan files** for broader context on what was needed. (`html`)
+- **Ask it to mark what it couldn't confirm, and where it looked.** (`opus-5-5`)
+- **Use a review prompt that demands evidence.** Only problems that would block the merge, each with file, line, why it's wrong, and how to show it fails. (`opus-5-5`)
+- **Let the verification agent read your HTML plan files,** so it knows what was intended. (`html`)
 
 ## Key source articles
 `effort` · `skills` · `workflows` · `faster` · `cost` · `opus-5-5`

@@ -1,41 +1,41 @@
 # Measurement and hill climbing
 
-The September 2026 case study of making claude.ai ~3x faster in two weeks, and the general lesson it draws: once Claude can measure something, it can improve it, so the work becomes finding things to measure.
+In September 2026 the team published how it made claude.ai about 3× faster in two weeks. The lesson they draw: once Claude can measure something, it can improve it, so most of the work is finding things to measure.
 
 ## The result
 
-- **Four journeys, thirteen measurements, p75.** Fresh claude.ai load 3.1s → 0.55s; new Claude Code session 0.8s → 0.3s; Cowork cloud session 2.6s → 0.73s; ~3.1× geometric mean. 3,000+ changes, no customer-facing incident or rollback. (`faster`)
-- **Claude picked the journeys.** Via the Datadog MCP it found four journeys covering 95% of activity, estimated each project's impact in milliseconds, and targets came from those estimates; 12 of 13 were hit by day three. (`faster`)
+- **Four user journeys, thirteen measurements, at the 75th percentile.** A fresh claude.ai load went from 3.1s to 0.55s. A new Claude Code session went from 0.8s to 0.3s. A Cowork cloud session went from 2.6s to 0.73s. Across all thirteen, about 3.1× faster (geometric mean). More than 3,000 changes shipped with no incident or rollback reaching customers. (`faster`)
+- **Claude picked the journeys.** Through the Datadog MCP it found four journeys that make up 95% of activity and estimated each project's gain in milliseconds. The targets came from those estimates, and 12 of 13 were met by day three. (`faster`)
 
-## The central lesson
+## The main lesson
 
-- **With Claude, measuring something makes it tractable.** Measurement used to be step zero (add a metric, wait for data); with Claude it's step one of the climb. The highest-leverage work is finding more things to measure. (`faster`)
-- **Anything countable can be climbed.** Even frame times during streaming: deterministic 120Hz stepping in headless Chrome made "did this frame fit 8.33ms" exact; ~60 PRs later long replies blocked the main thread ~200ms instead of ~750ms and held 120fps. (`faster`)
+- **With Claude, measuring something makes it tractable.** Measurement used to come first and slow: add a metric, wait for data. With Claude it's the first step of the climb. So the most useful work is finding more things to measure. (`faster`)
+- **Anything you can count, Claude can drive down.** Even frame times while text streams. Stepping headless Chrome at exactly 120Hz made "did this frame fit in 8.33ms" an exact question. About 60 PRs later, long replies blocked the main thread for about 200ms instead of 750ms and held 120fps. (`faster`)
 
 ## Good benchmarks
 
-- **Deterministic beats wall-clock in the lab.** Valgrind instruction counts under `node --predictable`, React commits per interaction, V8 call counts, style recalcs, DOM mutations. (`faster`)
-- **Prove the proxy tracks what users feel.** Instructions −48% / −31% on two hot paths gave wall-clock −78% / −44%; benches that were flaky or uncorrelated were unshipped "rather than let Claude climb the wrong hill". (`faster`)
-- **Each benchmark is also a ratchet.** A CI ceiling that only goes down, lowered daily. (`faster`)
-- **Build the telemetry standard metrics lack.** CLS scored each shift ~0.008 (well under 0.1), but mapping Layout Instability sources to named regions showed 31% of loads moved something after the page was usable. (`faster`)
+- **In the lab, deterministic counts beat wall-clock time.** Valgrind instruction counts under `node --predictable`, React commits per interaction, V8 call counts, style recalculations, DOM mutations. (`faster`)
+- **Prove the count tracks what users feel.** On two hot paths, cutting instructions by 48% and 31% cut wall-clock time by 78% and 44%. Benchmarks that were flaky or didn't track user latency were removed "rather than let Claude climb the wrong hill". (`faster`)
+- **Every benchmark is also a ratchet.** A CI ceiling that only goes down, lowered by a daily job. (`faster`)
+- **Build the telemetry the standard metrics don't have.** Cumulative Layout Shift scored each shift at about 0.008, far under the 0.1 threshold. Tagging each Layout Instability entry with the page region it came from showed that 31% of page loads moved something after the page was usable. (`faster`)
 
 ## The loop
 
-- **Per thread:** a human opens it with a recording → Claude traces and builds a benchmark → several risk-sized PRs, user-visible changes behind flags → Claude watches the deploy and field data → ratchet down, or flag off and iterate → next slow spot. (`faster`)
-- **Scale horizontally by opening threads.** 150+ at once; single threads produced 50–100 PRs; Claude increasingly opened threads itself from nightly jobs. (`faster`)
-- **Standing instructions set the charter.** Monitor deploys, curate telemetry and dashboards, fix proactively, propose projects, "become as autonomous as possible". (`faster`)
+- **Each thread ran the same way.** A person opens a thread with a screen recording. Claude traces the problem and builds a benchmark. It opens several PRs sized for review, with anything users can see behind a flag. It watches the deploy and the field data. If it got faster, it lowers the ratchet. If not, it turns the flag off and tries again. Then it looks for the next slow spot. (`faster`)
+- **Scale by opening more threads.** More than 150 ran at once, and a single thread could produce 50 to 100 PRs. Over time Claude opened threads itself, from nightly jobs. (`faster`)
+- **Standing instructions set the job.** Watch deploys, keep telemetry and dashboards accurate, fix problems proactively, propose projects, and "become as autonomous as possible". (`faster`)
 
-## What measurement found
+## What measuring found
 
-- **6,900 hooks and 900 store subscriptions** re-rendering on every keystroke in the composer. (`faster`)
+- **6,900 hooks and 900 store subscriptions** re-rendering on every keystroke in the input box. (`faster`)
 - **One `:root:has()` selector** adding 24ms to every DOM change. (`faster`)
-- **A stray `location.reload()`** causing half a million hidden reloads a day. (`faster`)
-- **Em dashes.** Any non-Latin-1 character made V8 store the reply as UTF-16, putting every highlighting regex on its slow path; a 20-line fix copies code blocks into one-byte strings. (`faster`)
-- **A Chrome prerender edge case.** A 10px composer drop on new tabs was Chrome's 56px managed-browser footer disappearing after first paint; Claude measured 0px on all 49 of the reporter's handoffs and pinned the layout. (`faster`)
+- **A leftover `location.reload()`** causing half a million hidden reloads a day. (`faster`)
+- **Em dashes.** Any character outside Latin-1 made V8 store the whole reply as UTF-16, which put every syntax-highlighting regex on its slow path. A 20-line fix copies code blocks into one-byte strings first. (`faster`)
+- **An edge case in Chrome's prerendering.** The input box dropped 10px on new tabs because Chrome's 56px managed-browser footer disappeared after the first paint. Claude measured 0px on all 49 of the reporter's loads that day, found the cause, and pinned the layout. (`faster`)
 
-## Humans steer
+## People steer
 
-- **Ambition, taste, direction.** Push Claude past cautious scope ("please be braver"); a named owner rules on every user-perceptible tradeoff; keep threads narrow and close them at diminishing returns. (`faster`)
+- **Ambition, taste, and direction stay with people.** Push Claude past its cautious default ("please be braver"). A named owner decides every tradeoff users would notice. Keep threads narrow and close them when the gains get small. (`faster`)
 
 ## Key source articles
 `faster`
