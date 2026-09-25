@@ -1,10 +1,10 @@
 # skills
 
-Agent skills I use across Claude Code, Codex, Cursor, and opencode.
+Agent skills I use in Claude Code, Codex, Cursor, and opencode. Each skill lives in its own folder.
 
 ## claude-agents
 
-Answers questions about building with Claude agents from the [claude.dev](https://claude.dev/) posts, with a citation on every claim. It covers:
+I built this one so my agents answer questions about building with Claude from what the Claude Code team wrote on [claude.dev](https://claude.dev/), not from what the model half-remembers. It covers all 10 posts on the blog, published between April 10 and September 25, 2026:
 
 - tool design
 - context engineering
@@ -17,12 +17,12 @@ Answers questions about building with Claude agents from the [claude.dev](https:
 - HTML outputs
 - measurement-driven performance work
 
-I built it so my agents answer from what the Claude Code team actually published, not from whatever the model half-remembers about it. It is built from all 10 posts published between 2026-04-10 and 2026-09-25. Each claim cites its post by a short key, and `references/article-index.md` maps every key to the original URL. When a question falls outside those posts, the skill says so instead of guessing.
+Every claim ends with a short key for its post, like `effort` or `cost`, and `references/article-index.md` maps each key to the post's URL. Ask it about something the posts don't cover, like fine-tuning, and it tells you so instead of guessing.
 
 ```
 claude-agents/
-  SKILL.md                  thesis, 14 core ideas, method, how to answer
-  references/               11 topic files, a glossary, and the article index
+  SKILL.md        thesis, 14 core ideas, method, how to answer
+  references/     11 topic files, a glossary, and the article index
 ```
 
 ### Install
@@ -31,10 +31,10 @@ claude-agents/
 npx skills add vcompagnucci/skills --skill claude-agents
 ```
 
-Or copy `claude-agents/` into `~/.claude/skills/`.
+Or copy the `claude-agents/` folder into `~/.claude/skills/`.
 
-### Notes
+### Before you use it
 
-- Unofficial. I'm not affiliated with Anthropic. The ideas belong to the post authors, mostly Thariq Shihipar and Addy Osmani.
-- The skill paraphrases the posts and quotes only short lines, always with a link to the source. It does not include the full text of any post.
-- Prices, model names, and defaults reflect the posts as of September 2026. For current API details, check the [Claude docs](https://docs.claude.com).
+- It's unofficial, and I'm not affiliated with Anthropic. The ideas belong to the authors, mostly Thariq Shihipar and Addy Osmani.
+- It paraphrases the posts and quotes only short lines, each linked to its source. The full text of the posts isn't in this repo.
+- Prices, model names, and defaults are from September 2026 and will go out of date. For current API details, use the [Claude docs](https://docs.claude.com).
