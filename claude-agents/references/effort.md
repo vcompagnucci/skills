@@ -1,6 +1,6 @@
 # Effort
 
-What the effort setting does and when to spend it. Thariq Shihipar's September 2026 post tests it on his own builds and on Terminal-Bench 3.0. Addy Osmani's cost post puts a price on it.
+What the effort setting does and when to spend it. Thariq Shihipar's September 2026 post tests it on his own builds and on Terminal-Bench 3.0. Addy Osmani's cost post puts a price on it, and the platform, computer-use, and postmortem posts add where it goes wrong.
 
 ## What effort is
 
@@ -18,6 +18,8 @@ What the effort setting does and when to spend it. Thariq Shihipar's September 2
 - **Some fields gain more than others.** Fable 5.1 from low to top effort: Security 64% to 87%, Hardware 34% to 75%, ML 54% to 73%, Science 41% to 61%, Software 43% to 56%, Media 18% to 30%, Operations 12% to 22%. The post's label for the last one: "rulebook-style work stays low". (`effort`)
 - **More effort also means more decisions made for you.** Asked for a fitness app with no details, low effort built a log and a graph, and max added a heat chart. With a detailed spec, every level produced similar apps. (`effort`)
 - **With no user to ask, high effort does the asking's job.** (`effort`)
+- **Effort can be wrong in both directions.** Too high over-thinks: on HLE, Fable 5.1's last step to max adds about half a point for 46% more cost, within noise. Too low stops before it has evidence and answers from the first search result: Fable 5 on FrontierCode Diamond scored 11.5% at low ($5.35 a task) and 30.9% at max ($19.00). "Deliberation only helps while there's still evidence to find." A flat cost-performance curve across effort means the task isn't limited by thinking. (`platform-cost`)
+- **Perceptual work gains little from thinking.** UI tasks are "primarily perceptual rather than deeply logical". On the 4.6 models, medium is the sweet spot for computer use, low uses fewer tokens than no thinking because it makes fewer mistakes, and max adds nothing over high. On Opus 4.7, default to high. (`computer-use`)
 
 ## Choosing a level
 
@@ -29,8 +31,9 @@ What the effort setting does and when to spend it. Thariq Shihipar's September 2
 
 ## Where the posts disagree
 
+- **Lowering the default effort once backfired.** In March 2026 Claude Code moved its default from high to medium because long thinking made the interface look frozen. Users felt it was less intelligent, most kept the default despite notices, and it was reverted in April (xhigh for Opus 4.7, high for others). The post's line: "In general, the longer the model thinks, the better the output." Opus 5.5 later shipped with medium as its default, and it thinks more per level (`postmortem-apr-2026`, 2026-04-23, and `cost`, 2026-09-25).
 - **Low or medium for implementation?** Thariq implements new features at *low* once Claude has interviewed him for a spec, then verifies at high (`effort`). Addy starts well-scoped work at *medium* (`cost`). Both are the authors' own habits.
 - **Effort for code review.** Thariq lists code review among the fields where extra effort helps (`effort`). One of Addy's testers found Opus 5.5 at its *lowest* effort caught more bugs than Opus 5 at high (`opus-5-5`). That compares two models. It doesn't say low beats high.
 
 ## Key source articles
-`effort` · `cost` · `opus-5-5`
+`effort` · `cost` · `platform-cost` · `computer-use` · `postmortem-apr-2026` · `opus-5-5`

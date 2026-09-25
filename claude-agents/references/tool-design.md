@@ -1,32 +1,50 @@
 # Tool design
 
-How the Claude Code team decides which tools an agent gets. They work from evidence. A tool is shaped to what the current model can do, they find that out by reading its outputs, and they expect to retire tools as models improve. Most of this comes from Thariq Shihipar's posts on building Claude Code.
+How Anthropic decides which tools an agent gets and how to write them. Tools are the agent-computer interface (ACI), and Anthropic treats them with the care people give human interfaces: shaped to what the model can do, tested by reading its outputs, kept few, and retired when models outgrow them.
 
-## Shape tools to the model
+## Design tools for agents
 
-- **Give the agent tools that fit its abilities.** Paper, a calculator, or a computer each suit a different kind of solver. You learn what the model can do by watching it, reading its outputs, and experimenting. (`seeing`)
-- **A tool only works if the model likes calling it.** They kept AskUserQuestion because "Claude seemed to like calling this tool" and its outputs worked. (`seeing`)
-- **A dedicated tool beats format instructions.** Asking the user questions took three tries. A questions parameter on ExitPlanTool confused Claude, because it had to produce a plan and questions about that plan at once. A custom markdown format for questions was unreliable: Claude added sentences, dropped options, or dropped the format. What worked was a separate tool that pauses the loop behind a modal, and it can also be called from the Agent SDK and from skills. (`seeing`)
-- **Design the interface instead of writing examples.** With Claude 5 models, examples narrow what the model tries. Clear parameters teach usage instead. The Todo tool's `status` enum (pending, in_progress, completed) plus one rule about keeping a single item in progress is enough. (`ctx-eng`)
-- **Write tool instructions once, in the tool description.** Older models needed the same instruction repeated in the system prompt and paid more attention to the end of the context. The team deleted the repeats. (`ctx-eng`)
+- **Invest as much in the agent-computer interface as in human interfaces.** On SWE-bench the team spent more time on tools than on the prompt. Requiring absolute file paths fixed relative-path mistakes "flawlessly", and string replacement that must match exactly once was the most reliable edit strategy. (`effective-agents`, `swe-bench`)
+- **A tool is a contract with a non-deterministic caller.** The agent may call it, skip it, ask a question, or misuse it, so don't wrap every API endpoint. Tools that are ergonomic for agents also turn out intuitive for humans. (`writing-tools`)
+- **Fewer, consolidated tools beat one per endpoint.** Prefer `search_contacts` to `list_contacts`, and `schedule_event` to three separate calls. Group around intent: one `create_issue_from_thread` beats four tools. "Fewer, well-described tools consistently outperform exhaustive API mirrors." (`writing-tools`, `mcp-production`)
+- **Descriptions are prompts, and they carry more weight than schemas.** Describe the tool as to a new hire and name parameters unambiguously (`user_id`, not `user`). Precise description edits took Claude 3.5 Sonnet to SWE-bench state of the art. Claude appending "2025" to every web search was fixed in the description. (`writing-tools`, `swe-bench`)
+- **Return high-signal context, and make errors steer.** Drop fields like `uuid` and `mime_type`, and resolve IDs to names. A `response_format` enum let a Slack response use about a third of the tokens. Truncation notes and errors should say what to do next, not dump a traceback. (`writing-tools`, `commerce-agents`)
+- **Namespace tools by service.** `asana_search` versus `jira_search`. Prefix versus suffix naming had model-dependent effects in evals. (`writing-tools`)
+- **Design the interface instead of writing examples.** With Claude 5 models, examples narrow what the model tries, while expressive parameters, like a `status` enum, teach usage. (`ctx-eng`)
+- **But schemas don't show usage patterns.** For ambiguous parameters, 1-5 realistic examples in the definition raised accuracy on complex parameters from 72% to 90% (2025). This sits in tension with the Claude 5 advice above. (`advanced-tool-use`, `ctx-eng`)
 
-## Keep the tool set small and stable
+## Improve tools from evidence
 
-- **The bar to add a tool is high.** Claude Code has about 20 tools, and the team keeps asking whether it needs all of them. Each one is another option the model has to weigh. (`seeing`)
-- **Add a capability without adding a tool.** Claude couldn't answer questions about Claude Code itself. Putting the docs in the system prompt would have filled every session with text few users need. A docs link made Claude pull huge chunks to answer in one sentence. The fix was the Claude Code Guide subagent, which searches the docs in its own context and returns only the answer. (`seeing`)
-- **Model state changes as tools, not as tool swaps.** Plan Mode keeps every tool loaded and adds EnterPlanMode and ExitPlanMode as tools. Swapping to a read-only set would break the cache. A side benefit: the model can now enter plan mode by itself when a problem looks hard. (`caching`)
-- **Defer tools instead of removing them.** Dozens of MCP tools ship as name-only stubs with `defer_loading: true`, always in the same order. The full schema loads when tool search picks the tool. (`caching`, `ctx-eng`)
+- **A tool only works if the model likes calling it.** AskUserQuestion took three attempts before a dedicated tool that blocks the loop beat a plan-tool parameter and a custom markdown format. (`seeing`)
+- **Evaluate with realistic multi-step tasks, then let Claude refactor the tools.** Paste eval transcripts into Claude Code. Claude-optimized Slack and Asana tools beat expert human-written ones on held-out tests. Read what agents omit, not only what they say. (`writing-tools`)
+- **A tool-testing agent can fix bad descriptions.** One used a flawed MCP tool dozens of times, rewrote its description, and cut future task time 40%. (`research-system`)
 
-## Let the agent find its own context
+## Keep the tool set small
 
-- **Search tools beat retrieval pipelines.** Early Claude Code used RAG over a vector index. It was fast, but it broke across environments, and Claude was *given* context instead of finding it. A Grep tool replaced it. (`seeing`)
-- **Better models search deeper.** In one year Claude went from barely building its own context to searching through several layers of files. Skills turned that into a pattern: files that point to other files, read only when needed. (`seeing`)
+- **The bar to add a tool is high.** Claude Code has about 20, and each one is another option to weigh. The Claude Code Guide subagent answers questions about Claude Code without adding a tool. (`seeing`)
+- **Too many or overlapping tools is one of the most common failures.** "If a human engineer can't definitively say which tool should be used in a given situation, an AI agent can't be expected to do better." (`effective-context`)
+- **Load tool definitions on demand.** Five MCP servers can mean 58 tools and 55K tokens before work starts. With `defer_loading` and the Tool Search Tool, context fell 85% and MCP eval accuracy rose from 49% to 74% on Opus 4. Use it past about 10 tools or 10K tokens, and keep the 3-5 most used always loaded. (`advanced-tool-use`, `caching`)
+- **Model state changes as tools, not tool swaps.** Plan Mode adds EnterPlanMode and ExitPlanMode instead of swapping to read-only tools, which would break the cache. (`caching`)
 
-## Tools expire
+## Let code do the orchestration
 
-- **A tool that once helped can start to hold the model back.** TodoWrite plus a reminder every 5 turns kept early models on task. Later models took the reminders as an order not to change the plan, and subagents couldn't share one list. The Task tool replaced it, with dependencies, updates shared across subagents, and tasks the model can edit or delete. (`seeing`)
-- **Support a few models with similar abilities.** Revisiting what tools a model needs is easier when every supported model is roughly as capable as the others. (`seeing`)
-- **It's an art, not a science.** It depends on the model, the goal, and the environment. Their advice: "Experiment often, read your outputs, try new things." (`seeing`)
+- **Present MCP servers as code the agent calls.** One file per tool in a folder the agent explores cut usage from 150,000 to 2,000 tokens (98.7%). Filtering a 10,000-row sheet in code shows the model five rows, and PII can pass between systems tokenized, without entering context. The cost is a sandbox to run the code. (`mcp-code-exec`)
+- **Programmatic tool calling suits 3+ dependent calls or large data.** In the travel-budget example, a script over 20 people's expenses cut 200KB to 1KB, and average tokens fell 37%. Skip it when Claude should see the intermediate results. (`advanced-tool-use`)
+- **For huge APIs, expose a thin tool that runs code.** Cloudflare covers about 2,500 endpoints with two tools in roughly 1K tokens. (`mcp-production`)
+- **Scripts beat traditional tools for many jobs.** Code is self-documenting and doesn't sit in context. When Claude kept rewriting the same slide-styling script, they had it save the script as a tool for itself. (`skills-for-agents`)
+
+## MCP
+
+- **MCP collapses the M×N integration problem.** A client connects to thousands of servers, and a vendor builds one server for every assistant. It was modeled on the Language Server Protocol and open-sourced in November 2024. (`what-is-mcp`)
+- **Build remote servers.** Production agents run in the cloud, behind auth, and remote is the only setup that works across web, mobile, and hosted agents. SDK downloads passed 300M a month. (`mcp-production`)
+- **MCP gives access, skills give the procedure.** Pair them (see `skills.md`). (`mcp-production`, `skills-and-mcp`)
+- **Installation friction kept local MCP from non-technical users.** Desktop Extensions bundle a server and its dependencies into one file. (`desktop-extensions`)
+
+## Special tools
+
+- **The "think" tool (2025).** A tool that changes nothing gave Claude a place to reason mid-task, reaching 0.570 versus 0.370 on τ-bench airline with a tuned prompt. A later note says extended thinking now gives similar benefits in most cases. (`think-tool`)
+- **Computer use depends on harness hygiene.** Pre-downscaling screenshots is the single highest-impact fix, while tiling and coordinate grids didn't help. A recorded demonstration beats iterating on text prompts. (`computer-use`)
+- **Target page structure, not pixels, on the web.** The browser tool reads the page structure alongside the screenshot and takes several actions per turn. (`production-apis`)
 
 ## Key source articles
-`seeing` · `caching` · `ctx-eng`
+`writing-tools` · `advanced-tool-use` · `mcp-code-exec` · `seeing` · `swe-bench` · `effective-agents` · `mcp-production` · `computer-use`

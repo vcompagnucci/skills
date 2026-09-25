@@ -1,6 +1,6 @@
 # Cost and model choice
 
-What a Claude Code task costs and which settings change it. Addy Osmani's September 2026 post frames it this way: you buy finished tasks, not tokens. The numbers are Opus 5.5 API list prices and the post's own examples, so they'll go out of date.
+What an agent task costs and how to pick the model. Addy Osmani's September 2026 post frames it this way: you buy finished tasks, not tokens. The model-selection and platform guides add the rest. The numbers are list prices and the posts' own examples, so they'll go out of date.
 
 ## You pay per task
 
@@ -36,10 +36,25 @@ What a Claude Code task costs and which settings change it. Addy Osmani's Septem
 - **Fast mode** runs up to 2.5× faster at 2× the price. The first request after turning it on pays full price for the whole conversation, so turn it on at the start of a session. (`cost`, `opus-5-5`)
 - **The Batch API** costs half. **Typical spend** is about $13 per developer per active day, and 90% of users stay under $30. (`cost`)
 
+## Choosing a model class
+
+- **Start with the most intelligent available model and dial effort.** Cost per task is often lower on smarter models, even at a higher price per token, because they take fewer turns. Starting small also makes it harder to tell model failures from setup failures. The guide documents the opposite approach (start cheapest, move up) as an alternative. (`models-explained`)
+- **Classes differ in how hard a problem they can carry, not in domain.** There's no finance model and science model. Decide on task difficulty, latency, access, and unit economics. Mythos and Fable handle frontier and long-running work, Opus reasoning-heavy enterprise work, Sonnet everyday tasks and high-volume subagents, Haiku the lowest cost and latency. (`models-explained`)
+- **Move up to Fable only when your evals show Opus struggling.** If Opus clears the bar, its speed and price may win. (`models-explained`, `cost`)
+- **The advisor strategy mixes models.** A cheap executor calls a smarter model only to check its plan and work. Sonnet 5 with a Fable 5 advisor landed within 10% of Fable 5 on SWE-bench Pro at 63% of the price. Executors forget the advisor exists, so nudge them every ~20 turns. (`models-explained`, `computer-use`)
+- **Split by mechanical versus reasoning work.** For computer use, Sonnet 4.6 clicks more precisely and Opus reasons better, and an orchestrator with a clicking sub-agent handles advanced flows. (`computer-use`)
+- **Benchmarks saturate at the top, so decide with your own evals.** Use a curated set of production problems with your team's success criteria. `/claude-api hillclimb` searched model, effort, and prompt against a train/test split: going from Opus 4.8 at high effort to Sonnet 5 at low effort plus routing rules raised held-out accuracy from 78.6% to 90.5% at about a fifth of the cost. (`models-explained`, `platform-cost`)
+- **Profile spend first, then apply ranked levers.** `/claude-api cost-optimize` ranks caching, trimming, bounded output, and batching: LegalBench about 67% cheaper, tau2-bench retail about 73%, with no significant score change. (`platform-cost`)
+
+## Where the posts pull in different directions
+
+- **Effort first, or a stronger model first?** The cost post says to raise effort before moving to a bigger model, because effort costs less (`cost`). The model and platform guides say a stronger model at low effort can be cheaper than a weaker model at high effort: Fable 5.1 at low matched Fable 5 at high on CursorBench 3.2 at a third of the cost (`models-explained`, `platform-cost`). The first is about getting unstuck on one task, the second about picking a default.
+- **Multi-agent costs tokens.** Agents use about 4x the tokens of chat and multi-agent systems about 15x, and multi-agent typically costs 3-10x more than one agent for the same task. (`research-system`, `when-multi-agent`)
+
 ## Measure it yourself
 
 - **Check three things in `/usage`.** A low cache share points to a long pause, a model switch, or an MCP change. A lot of output on a small change means effort is too high or the model retried. Total input many times the size of the conversation means the session looped, and it's worth reading where. (`cost`)
 - **Run the same real task on both models three or four times before you decide.** "Your own numbers are the ones to trust." (`cost`)
 
 ## Key source articles
-`cost` · `caching` · `opus-5-5`
+`cost` · `models-explained` · `platform-cost` · `caching` · `opus-5-5`
