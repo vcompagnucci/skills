@@ -17,7 +17,7 @@ Answers questions about building with Claude agents from the [claude.dev](https:
 - HTML outputs
 - measurement-driven performance work
 
-It is built from all 10 posts published between 2026-04-10 and 2026-09-25. Each claim cites its post by a short key, and `references/article-index.md` maps every key to the original URL. When a question falls outside those posts, the skill says so instead of guessing.
+I built it so my agents answer from what the Claude Code team actually published, not from whatever the model half-remembers about it. It is built from all 10 posts published between 2026-04-10 and 2026-09-25. Each claim cites its post by a short key, and `references/article-index.md` maps every key to the original URL. When a question falls outside those posts, the skill says so instead of guessing.
 
 ```
 claude-agents/
