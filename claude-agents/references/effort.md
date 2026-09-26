@@ -27,6 +27,8 @@ What the effort setting does and when to spend it. Thariq Shihipar's September 2
 - **Addy's rule of thumb.** Medium for well-scoped daily work. High when medium stalls. Low for mechanical work like renames and known patterns. Xhigh and max only where you've measured a gain. (`cost`)
 - **What high costs.** About 20K extra thinking tokens is about $0.40 on Opus 5.5, the same as a ten-turn retry. It pays for itself if it saves one retry, and it's wasted if medium would have finished. (`cost`)
 - **The "one layer" sign.** Rename a field in an API handler. At medium, Claude fixes the handler, the tests pass, and the client still sends the old field. At high, it reads the other call sites first. A test that goes through the client catches the same bug at medium, for one turn. So look for a check before raising effort, and move to a bigger model last. (`cost`)
+- **Set it per agent in a team.** In a Managed Agents roster, `model.effort` is per role: a curriculum team runs its standards researcher at high because the work is judgment-heavy, and leaves the lesson writer at the default. (`cb-watch-subagents`)
+- **In a cost pass, effort comes late.** The cost cookbook tunes model and effort only after caching and token trimming. On its insurance eval, Sonnet at medium with one cache breakpoint matched Opus at high with none, at 10/10 and 13× cheaper. (`cb-cost`)
 - **You can change it mid-session.** `/effort high` sets it and `/effort status` shows it. It keeps the cache on an API key or a subscription and clears it on Bedrock, Google Cloud, or a gateway. (`cost`, `effort`)
 
 ## Where the posts disagree
@@ -36,4 +38,4 @@ What the effort setting does and when to spend it. Thariq Shihipar's September 2
 - **Effort for code review.** Thariq lists code review among the fields where extra effort helps (`effort`). One of Addy's testers found Opus 5.5 at its *lowest* effort caught more bugs than Opus 5 at high (`opus-5-5`). That compares two models. It doesn't say low beats high.
 
 ## Key source articles
-`effort` · `cost` · `platform-cost` · `computer-use` · `postmortem-apr-2026` · `opus-5-5`
+`effort` · `cost` · `platform-cost` · `computer-use` · `postmortem-apr-2026` · `opus-5-5` · `cb-watch-subagents`

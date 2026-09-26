@@ -1,17 +1,18 @@
 # Tool design
 
-How Anthropic decides which tools an agent gets and how to write them. Tools are the agent-computer interface (ACI), and Anthropic treats them with the care people give human interfaces: shaped to what the model can do, tested by reading its outputs, kept few, and retired when models outgrow them.
+How Anthropic decides which tools an agent gets and how to write them. Tools are the agent-computer interface (ACI), and Anthropic treats them with the care people give human interfaces: shaped to what the model can do, tested by reading its outputs, kept few, and retired when models outgrow them. Cookbook notebooks add worked examples of tools that write to production systems.
 
 ## Design tools for agents
 
 - **Invest as much in the agent-computer interface as in human interfaces.** On SWE-bench the team spent more time on tools than on the prompt. Requiring absolute file paths fixed relative-path mistakes "flawlessly", and string replacement that must match exactly once was the most reliable edit strategy. (`effective-agents`, `swe-bench`)
 - **A tool is a contract with a non-deterministic caller.** The agent may call it, skip it, ask a question, or misuse it, so don't wrap every API endpoint. Tools that are ergonomic for agents also turn out intuitive for humans. (`writing-tools`)
 - **Fewer, consolidated tools beat one per endpoint.** Prefer `search_contacts` to `list_contacts`, and `schedule_event` to three separate calls. Group around intent: one `create_issue_from_thread` beats four tools. "Fewer, well-described tools consistently outperform exhaustive API mirrors." (`writing-tools`, `mcp-production`)
-- **Descriptions are prompts, and they carry more weight than schemas.** Describe the tool as to a new hire and name parameters unambiguously (`user_id`, not `user`). Precise description edits took Claude 3.5 Sonnet to SWE-bench state of the art. Claude appending "2025" to every web search was fixed in the description. (`writing-tools`, `swe-bench`)
+- **Descriptions are prompts, and they carry more weight than schemas.** Describe the tool as to a new hire and name parameters unambiguously (`user_id`, not `user`). Precise description edits took Claude 3.5 Sonnet to SWE-bench state of the art. Claude appending "2025" to every web search was fixed in the description. An SRE agent built the right PromQL query from the description alone, and descriptions should say what the tool returns. (`writing-tools`, `swe-bench`, `cb-sre-agent`, `cb-threat-intel`, `cb-support-agent`)
 - **Return high-signal context, and make errors steer.** Drop fields like `uuid` and `mime_type`, and resolve IDs to names. A `response_format` enum let a Slack response use about a third of the tokens. Truncation notes and errors should say what to do next, not dump a traceback. (`writing-tools`, `commerce-agents`)
 - **Namespace tools by service.** `asana_search` versus `jira_search`. Prefix versus suffix naming had model-dependent effects in evals. (`writing-tools`)
 - **Design the interface instead of writing examples.** With Claude 5 models, examples narrow what the model tries, while expressive parameters, like a `status` enum, teach usage. (`ctx-eng`)
 - **But schemas don't show usage patterns.** For ambiguous parameters, 1-5 realistic examples in the definition raised accuracy on complex parameters from 72% to 90% (2025). This sits in tension with the Claude 5 advice above. (`advanced-tool-use`, `ctx-eng`)
+- **A deterministic retrieval tool can matter more than the model (research).** On 120 viral-sequence queries, agents without one scored 16.9% to 91.3%, and one model returned 106, then 15, then 5 sequences for the same query, shifting an inferred outbreak origin to 1922. A tool wrapping NCBI's APIs lifted every model above 90% and narrowed the gap between models. The authors hedge that better models may need it less. (`agents-in-biology`)
 
 ## Improve tools from evidence
 
@@ -39,6 +40,14 @@ How Anthropic decides which tools an agent gets and how to write them. Tools are
 - **Build remote servers.** Production agents run in the cloud, behind auth, and remote is the only setup that works across web, mobile, and hosted agents. SDK downloads passed 300M a month. (`mcp-production`)
 - **MCP gives access, skills give the procedure.** Pair them (see `skills.md`). (`mcp-production`, `skills-and-mcp`)
 - **Installation friction kept local MCP from non-technical users.** Desktop Extensions bundle a server and its dependencies into one file. (`desktop-extensions`)
+- **To hold an agent to MCP only, disallow Bash.** An agent scoped to the GitHub MCP server (100+ tools) could still shell out to the `gh` CLI. (`cb-observability`)
+
+## Tools that act on production
+
+- **Give write access through narrow, checked tools, not a shell.** The SRE agent's config editor only writes under `config/`, its shell only runs `docker` commands, and a `PreToolUse` hook rejects a `DB_POOL_SIZE` outside 5-100, checking what changes, not just where. Investigation runs read-only, and remediation waits for a separate authorization. (`cb-sre-agent`)
+- **Pick an MCP toolset or a custom tool by reachability.** Public internet plus a bearer token suits an MCP toolset. A system inside your network needs a custom tool your application runs, which also keeps credentials out: the MongoDB example runs `pymongo` host-side, so the connection string never enters context or the sandbox. (`cb-production`, `cb-mongodb`)
+- **Keep per-user tokens in vaults.** A vault holds one end user's credentials, is referenced by ID on each session, and the agent never sees the token. A single hard-coded token works until the second tenant. (`cb-production`)
+- **Cap the loop and split formatting from analysis.** The threat-intel loop has a `MAX_TURNS` limit against runaway cost, and turns its free-text findings into schema-constrained JSON in a second call with a formatter-only prompt. (`cb-threat-intel`)
 
 ## Special tools
 

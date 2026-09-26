@@ -1,6 +1,6 @@
 # Context engineering
 
-Everything Claude receives besides your prompt: system prompt, tools, CLAUDE.md, skills, memory, retrieved data, and history. Anthropic's frame since September 2025 is that context is a finite attention budget, so the job is curating the smallest set of high-signal tokens at every turn. The July 2026 post adds that Claude 5 models are overconstrained by habits built for weaker models, and most of those habits should go.
+Everything Claude receives besides your prompt: system prompt, tools, CLAUDE.md, skills, memory, retrieved data, and history. Anthropic's frame since September 2025 is that context is a finite attention budget, so the job is curating the smallest set of high-signal tokens at every turn. The July 2026 post adds that Claude 5 models are overconstrained by habits built for weaker models, and most of those habits should go. The cookbooks add worked examples of compaction, tool-result clearing, and memory.
 
 ## Context is a budget
 
@@ -16,7 +16,7 @@ Everything Claude receives besides your prompt: system prompt, tools, CLAUDE.md,
 - **Ritual instructions cost money and accuracy.** Verification rituals, emphasis boosters, mandatory scratchpads, stale examples, and contradictory rules patched older models. On an Opus 4.8 to 5.5 support migration, `prompt-audit` cut another 9% of cost and raised accuracy about 2 points: contradictory refund rules had withheld four owed refunds. (`platform-cost`, `cost`)
 - **Rules → judgment.** The old prompt said "default to writing no comments". The new one says "Write code that reads like the surrounding code: match its comment density, naming, and idiom." (`ctx-eng`)
 - **Explain why instead of shouting.** "NEVER use bullet points" works worse than stating the preference and its reason, which lets the model generalize. Say what to do, not what not to do. (`prompt-engineering`)
-- **Other changes.** Examples → interface design. Everything up front → loaded when needed. Repeated instructions → one tool description. Memory in CLAUDE.md → auto-memory. "Think carefully" lines → deleted. (`ctx-eng`, `opus-5-5`)
+- **Other changes.** Examples → interface design. Everything up front → loaded when needed. Repeated instructions → one tool description. Memory in CLAUDE.md → auto-memory (Claude Code layers the two). "Think carefully" lines → deleted. (`ctx-eng`, `opus-5-5`, `cb-ctx-tools`)
 
 ## Write prompts at the right altitude
 
@@ -36,14 +36,27 @@ Everything Claude receives besides your prompt: system prompt, tools, CLAUDE.md,
 - **Compaction, notes, or sub-agents.** Claude Code's compaction keeps decisions, unresolved bugs, and the five most recent files. Structured notes let Claude play Pokémon across thousands of steps. Sub-agents explore with tens of thousands of tokens and return 1,000-2,000-token summaries. Compaction suits back-and-forth, notes suit milestone work, sub-agents suit parallel research. (`effective-context`)
 - **Let Claude assemble and prune its own context.** Skills load only frontmatter, context editing removes stale tool results, and subagents fork fresh windows. (`harness-patterns`)
 - **Memory can live outside the prompt.** In commerce agents, an async extractor writes typed facts to the database and got 13% higher fact recall than a save tool, which competed for the model's attention. (`commerce-agents`)
+- **Pick the primitive by the problem you have.** Compaction summarizes the whole transcript and is lossy. Clearing replaces only old tool results and is lossless if the tool can be called again. Memory is the only one that survives a new session. Days-long work → memory. Big re-fetchable results → clearing. Dialogue-heavy → compaction. (`cb-ctx-tools`)
+- **The same overflow fails differently by window size.** A research agent reading about 320K tokens of documents kept climbing past 200K on a 1M window, with early facts buried. On a 200K window the same run hit a hard API rejection mid-task (measured). (`cb-ctx-tools`)
+- **Unmanaged tool loops grow linearly.** Five support tickets at 7 tool calls each reached 150K cumulative input tokens by turn 27. SDK compaction at a token threshold cut the run to 79K. Low thresholds (5-20K) suit independent items, high ones (100-150K) suit work that needs its history. Skip it under 50-100K or when you need a full audit trail. (`cb-auto-compaction`)
+- **Write your own compaction prompt in full.** The `instructions` parameter replaces the default summary prompt, it doesn't add to it, so name what must survive, like exact numbers. A cheaper model can do the summarizing. (`cb-ctx-tools`, `cb-auto-compaction`)
+- **Build the summary before you need it.** "Instant compaction" writes session memory in a background thread from a soft threshold, so the swap at the limit is instant, where the demo's synchronous compaction left the user waiting over 40 seconds. When trimming, keep user corrections first, then errors, active work, and completed work. (`cb-session-memory`)
+- **Order and size context editing.** `clear_thinking` goes before `clear_tool_uses` in the edits list, and production triggers sit around 30-40K tokens. (`cb-memory`)
+
+## Memory across sessions
+
+- **Memory is files the model chooses to write.** The memory tool is client-side: Claude calls `view`, `create`, `str_replace` and so on against `/memories`, and your app owns the storage. Its protocol assumes the window can reset at any moment, and its value depends on how well the model takes notes. (`cb-memory`, `cb-ctx-tools`)
+- **In Managed Agents a memory store is a mounted directory.** Up to eight per session, for example one read-write store per customer plus a shared read-only one. The store's description goes into the system prompt, so make it specific. Seed it from data you already have, and every write is a versioned, auditable event. (`cb-user-memory`)
+- **Memory is a prompt-injection vector.** "Memory poisoning": files are read back into context, so sanitize before storing, scope per user or project, log every operation, and tell Claude to ignore instructions found in memory. Store patterns, not raw history, and never secrets or PII. (`cb-memory`)
 
 ## Layer by layer
 
 - **The system prompt is product context.** If you build your own agent, spend your time here. What most of the traffic needs goes in the prompt, and the long tail goes in skills. (`ctx-eng`, `commerce-agents`)
 - **CLAUDE.md is short and mostly gotchas.** For each line, ask whether removing it would cause mistakes, and skip what Claude can read from the code. "Bloated CLAUDE.md files cause Claude to ignore your actual instructions!" It is resent every turn, so the docs suggest under 200 lines. (`cc-best-practices`, `ctx-eng`, `cost`)
+- **CLAUDE.md is an onboarding document, not a data source.** It gives context and points to the source systems. With both CLAUDE.md and detailed CSVs available, the agent prefers the granular files, so a high-level answer needs an explicit instruction. In multi-day runs it can be the plan the agent edits itself as it resolves issues. (`cb-chief-of-staff`, `long-running-science`)
 - **CLAUDE.md is advisory, hooks are deterministic.** Use hooks for what must happen every time, like running a linter after each edit. (`cc-best-practices`)
 - **Name the stops in CLAUDE.md.** When to keep going, when to stop before anything destructive, and the report format ("Blocked on me, Changed, Found"). (`opus-5-5`)
 - **Prefer code as a reference, and send updates as messages.** An HTML mockup beats a description or a screenshot. New information goes in a `<system-reminder>`, not an edited system prompt. (`ctx-eng`, `caching`)
 
 ## Key source articles
-`effective-context` · `ctx-eng` · `cc-best-practices` · `prompt-engineering` · `contextual-retrieval` · `agent-sdk` · `harness-patterns`
+`effective-context` · `ctx-eng` · `cc-best-practices` · `prompt-engineering` · `contextual-retrieval` · `agent-sdk` · `harness-patterns` · `cb-ctx-tools` · `cb-memory`
