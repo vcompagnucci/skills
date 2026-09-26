@@ -1,6 +1,6 @@
 # Skills
 
-What a skill is, how its description routes it, how a repo's instruction file makes skills mandatory, which parts belong in scripts, and how to write skills for long loops. Draws on OpenAI's developer-blog posts on skills in its Agents SDK repos and for GPT-6 Astra, its hosted computer-environment post, customer results from Glean, the Codex guides, and the Codex repo itself (what OpenAI ships: its skill-creator and production skills).
+What a skill is, how its description routes it, how a repo's instruction file makes skills mandatory, which parts belong in scripts, and how to write skills for long loops. Draws on OpenAI's developer-blog posts on skills in its Agents SDK repos and for GPT-6 Astra, its hosted computer-environment post, customer results from Glean, the Codex guides, its Agents SDK announcement, and the Codex repo itself (what OpenAI ships: its skill-creator and production skills).
 
 ## What a skill is
 
@@ -11,7 +11,7 @@ What a skill is, how its description routes it, how a repo's instruction file ma
 - **Package a workflow once it works.** Instructions, references and scripts, so it isn't retaught. The data agent packaged recurring analyses like weekly reports after usage showed the repetition. Alpic turned lessons it kept rediscovering into a framework plus a skill covering ideation through deployment. (`codex-maxxing`, `data-agent`, `chatgpt-apps-lessons`)
 - **Repeated prompting becomes a skill, and a reliable skill becomes a scheduled job.** "Skills define the method and scheduled tasks define the schedule." Keep each skill to one job, start from 2 to 3 concrete use cases, and don't schedule what isn't reliable by hand. (`codex-best-practices`)
 - **Taste can be a skill too.** OpenAI's frontend skill lists defaults, hard rules, named failures to reject, and questions to check the result against. It has the agent write a visual thesis and content plan before any code. (`frontends`)
-- **Skills are a shared convention, not tied to one runtime.** Alongside AGENTS.md and MCP, they let agent tooling move between products and UIs. (`devs-2025`)
+- **Skills are a shared convention, not tied to one runtime.** Alongside AGENTS.md and MCP, they let agent tooling move between products and UIs. OpenAI's April 2026 SDK post lists progressive disclosure via skills among the primitives frontier harnesses are converging on, next to MCP, AGENTS.md, shell and patch-based edits. (`devs-2025`, `agents-sdk-evolution`)
 
 ## The description is routing logic
 
@@ -55,4 +55,4 @@ What a skill is, how its description routes it, how a repo's instruction file ma
 - **How much detail belongs inside a skill.** The February post (2026-02-11) credits embedded templates and worked examples for Glean's gains, and the frontend skill (2026-03-20) is built on hard rules and rejects. The Astra post (2026-09-11) says recipe-style guidance written for earlier models now hinders and skill roots should be routers. All three agree on keeping detail out of always-loaded context. What changed is the model reading it. Codex's shipped skill-creator (repo, 2026-09-26) decides it by risk, not by model. (`skills-shell`, `frontends`, `astra-skills`, `repo-skills`)
 
 ## Key source articles
-`skills-oss` · `skills-shell` · `astra-skills` · `repo-skills` · `computer-env` · `eval-skills` · `frontends` · `repo-prompting` · `codex-best-practices`
+`skills-oss` · `skills-shell` · `astra-skills` · `repo-skills` · `computer-env` · `eval-skills` · `frontends` · `repo-prompting` · `codex-best-practices` · `agents-sdk-evolution`

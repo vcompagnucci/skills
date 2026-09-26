@@ -1,6 +1,6 @@
 # Prompt caching
 
-Why an agent loop depends on caching, and how to assemble prompts that keep hitting it. Draws on OpenAI's engineering posts about the Codex loop and model efficiency, its realtime voice system, a cookbook on support-agent cost (a simulation), and the Codex repo's own rules for model-visible context.
+Why an agent loop depends on caching, and how to assemble prompts that keep hitting it. Draws on OpenAI's engineering posts about the Codex loop and model efficiency, its realtime voice system, the Agents API launch, a cookbook on support-agent cost (a simulation), and the Codex repo's own rules for model-visible context.
 
 ## Why it matters
 
@@ -17,6 +17,7 @@ Why an agent loop depends on caching, and how to assemble prompts that keep hitt
 - **List tools in a deterministic order.** A real Codex bug: tools from external servers came back in inconsistent order and missed the cache. (`agent-loop`, `gpt56-efficiency`)
 - **Keep runtime settings out of tool definitions.** Approval policies are applied at execution time, so changing them doesn't touch the prefix. (`gpt56-efficiency`)
 - **Keep the tool list constant and restrict per request.** Swapping the list per request changes the prefix. (`cost-quality`)
+- **Loading tools on demand can keep the cache.** The Agents API's tool search loads relevant tool definitions as needed, which OpenAI says cuts tokens and cost "while preserving the model's cache". A product claim with no numbers, and the post doesn't say where loaded definitions go in the prompt. (`agents-api`)
 - **Place cache breakpoints deterministically, and send the same prefix to the same engine.** Routing by prefix cuts latency as well as cost. (`gpt56-guide`)
 
 ## What breaks it
@@ -29,5 +30,9 @@ Why an agent loop depends on caching, and how to assemble prompts that keep hitt
 
 - **If cache writes cost extra, caching unique content can raise cost.** A queue where prompts rarely repeat may do better without it. Check the repeat rate before assuming caching saves money. From a cookbook simulation, not production data. (`cost-quality`)
 
+## Where the posts disagree
+
+- **Fixed tool list, or tools loaded on demand?** The cost cookbook (2026-09-14) says keep the tool list constant because swapping it changes the prefix. The Agents API post (2026-09-10) says loading tool definitions as needed preserves the cache. Loading them later in the prompt, rather than swapping the list up front, would reconcile the two, but neither post says so. (`cost-quality`, `agents-api`)
+
 ## Key source articles
-`agent-loop` · `gpt56-efficiency` · `cost-quality` · `gpt-live` · `gpt56-guide` · `repo-agents-md` · `repo-context`
+`agent-loop` · `gpt56-efficiency` · `cost-quality` · `gpt-live` · `gpt56-guide` · `repo-agents-md` · `repo-context` · `agents-api`

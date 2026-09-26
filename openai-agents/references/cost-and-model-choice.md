@@ -1,12 +1,13 @@
 # Cost and model choice
 
-Picking a model and a reasoning effort per step, and cutting cost without losing quality. Draws on OpenAI's builder guide and efficiency post for GPT-5.6, its 2025 practical guide to agents, a support-agent cost cookbook (a simulation), frontend, benchmark, long-run and chain-of-thought monitoring posts, and the model-migration guide shipped in the Codex repo.
+Picking a model and a reasoning effort per step, and cutting cost without losing quality. Draws on OpenAI's builder guide and efficiency post for GPT-5.6, its 2025 practical guide to agents, a support-agent cost cookbook (a simulation), frontend, benchmark, long-run and chain-of-thought monitoring posts, the Agents SDK and API docs on guardrails, the Agents API launch, and the model-migration guide shipped in the Codex repo.
 
 ## Pick the model
 
 - **Prototype with the most capable model everywhere, then swap in smaller ones.** Set a baseline with evals and hit the accuracy target first. Then cut cost and latency where smaller models still pass. This shows where they fail instead of limiting the agent early. (`practical-guide`)
 - **Small models now handle steps that used to need the flagship.** On a search benchmark, the small model at its highest effort matched the older flagship (84.04% vs 84.36%) at about 1/25th of the cost. Use them for high-volume, latency-sensitive or repeated steps, like extraction before the agentic analysis in a legal workflow. (`gpt56-guide`)
 - **Route per step, not per system.** Smallest model for classification and tags, a mid model for routine resolution, the largest for high-risk cases like account access and refund disputes, with deterministic authorization checks and human review kept in place. (`cost-quality`)
+- **Put a cheap model in front of an expensive one.** The Agents SDK docs' example: a fast, cheap model checks input so a smart, slow support agent never does math homework for abusive users. Blocking on the check first means the expensive model never runs. Running it in parallel saves latency, but the expensive model may already have spent tokens and called tools before the check cancels it. The API docs frame the choice as cost against latency. (`sdk-guardrails`, `docs-guardrails-review`)
 - **A newer model can be cheaper per task.** Fewer retries, tool calls or escalations can outweigh a higher rate. (`cost-quality`)
 - **Distill once the task is proven.** Validate it on a larger model, then distill into a smaller, cheaper one. (`devs-2025`)
 
@@ -26,7 +27,7 @@ Picking a model and a reasoning effort per step, and cutting cost without losing
 
 ## Cost comes from architecture
 
-- **Context bloat costs money and triggers needless reasoning.** It also distracts the model. Codex caps tool output and surfaces tools and skills only when needed. (`gpt56-efficiency`)
+- **Context bloat costs money and triggers needless reasoning.** It also distracts the model. Codex caps tool output and surfaces tools and skills only when needed. The Agents API ships the same levers, loading tool definitions on demand and letting the agent filter tool results in code so only relevant ones reach context, as product claims without numbers. (`gpt56-efficiency`, `agents-api`)
 - **Reuse work already done.** Keeping reasoning across turns and compacting instead of truncating made the agent both better and cheaper, with about 6x fewer output tokens on ARC-AGI-3 (numbers in `context-engineering.md`). (`arc-agi-3`, `gpt56-guide`)
 - **Move work that doesn't change the outcome off the user's path.** Classification, lookups, the decision and the reply stay synchronous. QA, tags, summaries, audits and reporting go async or to batch. (`cost-quality`)
 - **Efficiency can also be trained in.** GPT-5.6 was trained on task success and efficiency together, to take a more direct path. OpenAI's claim about its own model. (`gpt56-efficiency`)
@@ -47,4 +48,4 @@ Picking a model and a reasoning effort per step, and cutting cost without losing
 - **Maximum effort for hard work?** The 25-hour run (2026-02-23) used the highest reasoning setting. The frontend post finds low and medium often better for simpler sites. Codex's own code-review skill (repo, 2026-09-26) runs every review sub-agent at the highest effort. Task size and stakes likely decide. (`long-horizon`, `frontends`, `repo-review`)
 
 ## Key source articles
-`cost-quality` · `gpt56-guide` · `gpt56-efficiency` · `repo-prompting` · `practical-guide` · `frontends` · `devs-2025` · `arc-agi-3` · `cot-monitorability`
+`cost-quality` · `gpt56-guide` · `gpt56-efficiency` · `repo-prompting` · `practical-guide` · `frontends` · `devs-2025` · `arc-agi-3` · `cot-monitorability` · `sdk-guardrails` · `agents-api`
