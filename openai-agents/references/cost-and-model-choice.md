@@ -1,6 +1,6 @@
 # Cost and model choice
 
-Picking a model and a reasoning effort per step, and cutting cost without losing quality. Draws on OpenAI's builder guide and efficiency post for GPT-5.6, its 2025 practical guide to agents, a support-agent cost cookbook (a simulation), frontend, benchmark, long-run and chain-of-thought monitoring posts, the Agents SDK and API docs on guardrails, the Agents API launch, and the model-migration guide shipped in the Codex repo.
+Picking a model and a reasoning effort per step, and cutting cost without losing quality. Draws on OpenAI's builder guide and efficiency post for GPT-5.6, its 2025 practical guide to agents, a support-agent cost cookbook (a simulation), a per-run spending controller cookbook, frontend, benchmark, long-run and chain-of-thought monitoring posts, the Agents SDK and API docs on guardrails, the Agents API launch, and the model-migration guide shipped in the Codex repo.
 
 ## Pick the model
 
@@ -9,7 +9,7 @@ Picking a model and a reasoning effort per step, and cutting cost without losing
 - **Route per step, not per system.** Smallest model for classification and tags, a mid model for routine resolution, the largest for high-risk cases like account access and refund disputes, with deterministic authorization checks and human review kept in place. (`cost-quality`)
 - **Put a cheap model in front of an expensive one.** The Agents SDK docs' example: a fast, cheap model checks input so a smart, slow support agent never does math homework for abusive users. Blocking on the check first means the expensive model never runs. Running it in parallel saves latency, but the expensive model may already have spent tokens and called tools before the check cancels it. The API docs frame the choice as cost against latency. (`sdk-guardrails`, `docs-guardrails-review`)
 - **A newer model can be cheaper per task.** Fewer retries, tool calls or escalations can outweigh a higher rate. (`cost-quality`)
-- **Distill once the task is proven.** Validate it on a larger model, then distill into a smaller, cheaper one. (`devs-2025`)
+- **Distill once the task is proven.** Validate it on a larger model, then distill into a smaller, cheaper one. For multi-hop retrieval, a partner cookbook recommends reinforcement fine-tuning from "as little as ~50 golden answers", final answers only with no step-by-step trajectories, a recommendation it doesn't measure. (`devs-2025`, `temporal-agents`)
 
 ## Switch models as a migration
 
@@ -41,10 +41,17 @@ Picking a model and a reasoning effort per step, and cutting cost without losing
 
 - **Big autonomous runs use a lot of tokens.** One 25-hour Codex run at the highest reasoning setting used about 13M tokens for about 30k lines of code. Four engineers building Sora for Android over 28 days used about 5 billion. Treat these as reference points, not targets. (`long-horizon`, `sora-android`)
 
+## Budget each run
+
+- **Give each run its own budget.** An agent may call the model several times for one task, and account or project limits can't tell whether that task can afford its next request. They may not take effect immediately, alerts don't stop requests, and daily cost reports come too late. (`spend-controller`)
+- **Reserve the worst case before each request, then settle to the actual cost.** Price every input token at the highest input rate plus the maximum output, hold it, and return the unused part when usage comes back. In the cookbook's example a ticket gets $0.02, the first reply costs $0.01, the next could cost up to $0.0146, so the run stops before sending it. Prices are made up. Several workers sharing one budget need a shared store that checks and reserves in one atomic step. (`spend-controller`)
+- **When the charge is uncertain, fail closed and keep the money held.** A timed-out request may still run and bill, so the run is blocked for good and its reservation stays unavailable. The same goes for missing or inconsistent usage, an unexpected model, or a cost above the hold. Automatic client retries are off, because a retry spends money nobody reserved. (`spend-controller`)
+- **A token budget is not the whole bill.** Hosted tools like web search charge per call, and storage, other processing tiers, long-context rates and background requests each need their own rule. (`spend-controller`)
+
 ## Where the answer depends on the case
 
 - **Start big or start low: the posts set different knobs.** The practical guide prototypes with the most capable model everywhere to find the ceiling, then swaps smaller models in (`practical-guide`). The frontend post starts reasoning effort low (`frontends`), and the GPT-5.6 guide says to re-test effort defaults because newer models do more at lower effort (`gpt56-guide`).
 - **Maximum effort: the posts describe different tasks.** The 25-hour run used the highest setting (`long-horizon`), as does every sub-agent in Codex's code-review skill (`repo-review`). For simpler sites, the frontend post found low and medium often better (`frontends`).
 
 ## Key source articles
-`cost-quality` · `gpt56-guide` · `gpt56-efficiency` · `repo-prompting` · `practical-guide` · `frontends` · `devs-2025` · `arc-agi-3` · `cot-monitorability` · `sdk-guardrails` · `agents-api`
+`cost-quality` · `gpt56-guide` · `gpt56-efficiency` · `repo-prompting` · `practical-guide` · `frontends` · `devs-2025` · `arc-agi-3` · `cot-monitorability` · `sdk-guardrails` · `agents-api` · `spend-controller` · `temporal-agents`

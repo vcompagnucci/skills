@@ -1,6 +1,6 @@
 # Agents in production
 
-What OpenAI teams, their customers and guest authors learned putting agents into real work: case studies with a build lesson, how humans steer, delegate to and review agents, voice agents, and when an agent should hand back to a person. Most sources are first-person engineering posts, plus two undated Codex guides and the voice and collaboration prompts OpenAI ships in the Codex repo (2026-09-26 snapshot), so the numbers are self-reported and rarely controlled. Guest posts (Dagster, Skyscanner, Alpic, Perplexity) are one team's experience, and customer quotes in launch posts are claims, not measurements.
+What OpenAI teams, their customers and guest authors learned putting agents into real work: case studies with a build lesson, how humans steer, delegate to and review agents, voice agents, and when an agent should hand back to a person. Most sources are first-person engineering posts, plus two undated Codex guides, cookbooks with worked agents, launch posts on computer use, and the voice and collaboration prompts OpenAI ships in the Codex repo (2026-09-26 snapshot), so the numbers are self-reported and rarely controlled. Guest posts (Dagster, Skyscanner, Alpic, Perplexity) are one team's experience, and customer quotes in launch posts are claims, not measurements.
 
 ## Case studies with a build lesson
 
@@ -25,14 +25,16 @@ What OpenAI teams, their customers and guest authors learned putting agents into
 - **Voice gives the takeaway, the screen carries the detail.** The front doesn't read out tables, diffs or code the user can already see, keeps pacing and verbosity requests for the whole task, and never claims running work can't be redirected. The backend is told its input is an unpunctuated transcript and to answer briefly, because verbose output adds latency. (`repo-realtime`)
 - **Shadow-test on real traffic before users hear it.** Read-only live sessions showed that capacity means concurrent sessions kept on schedule, not GPU throughput, and that long sessions and reconnects exposed bugs short load tests missed. Rewriting the media path in Go made the new p95 match the old p50. (`gpt-live`)
 - **Tune for the messy environment first and give users a turn-taking override.** A noisy bar was a test case. Thinking pauses read as end of turn, so a "voice lock" lets the user hold the floor. (`perplexity-voice`)
+- **History should hold what the user heard, not what the model generated.** On an interruption the turn is truncated at the actual playback point, which with telephony or delayed playback has to be tracked, not assumed. (`sdk-realtime`)
+- **Checks on streamed speech fire late, so plan the recovery.** They run on accumulated chunks, and some audio is already buffered when one trips: stop local playback at once, cancel the response, and tell the model which check fired so it answers again. A late check cuts only the response it judged. (`sdk-realtime`)
 
 ## Human intervention and escalation
 
 - **Escalate on two triggers.** Hand control to a human when failure thresholds are exceeded or when an action is high-risk and irreversible. (`practical-guide`)
-- **Route ambiguous cases back to people instead of forcing them through the loop.** Automation in the tax agent is limited to extraction and mapping, engineers own architecture and shipping. (`tax-agents`)
+- **Route ambiguous cases back to people instead of forcing them through the loop.** Automation in the tax agent is limited to extraction and mapping, engineers own architecture and shipping (`tax-agents`). A prior-authorization assistant returns "policy mapping required" before any model call when no rule applies, tested at zero tokens, and derives the review queue in code from per-criterion findings, leaving the decision to an expert (`prior-auth`).
 - **Ask when unclear, default when unanswered, accept interruption.** With no date range, the data agent assumes the last 7 or 30 days to stay non-blocking (`data-agent`). Codex's shipped default mode says the same, "strongly prefer making reasonable assumptions and executing", where an empty answer means continue (`repo-multi-agent`). The bundled prompting guide adds counter-prompts because newer models ask where older ones assumed (`repo-prompting`).
 
 ## Where the answer depends on the case
 
 ## Key source articles
-`sora-android` · `harness-eng` · `tax-agents` · `ai-native-team` · `codex-remote` · `codex-maxxing` · `gpt-live` · `perplexity-voice` · `data-agent` · `repo-realtime`
+`sora-android` · `harness-eng` · `tax-agents` · `codex-remote` · `codex-maxxing` · `gpt-live` · `perplexity-voice` · `data-agent` · `repo-realtime` · `sdk-realtime` · `prior-auth`

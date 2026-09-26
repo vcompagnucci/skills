@@ -1,11 +1,11 @@
 ---
 name: openai-agents
-description: Building your own agent the way OpenAI describes it, as concepts that work on any stack. Covers whether to build one, single vs multi-agent, the harness and long runs, tools and MCP, context and memory, skills, prompt caching, cost and reasoning effort, evals, and security and sandboxing. Cites 82 OpenAI sources: developers.openai.com/blog, openai.com engineering and security posts, the practical guide to building agents, Agents SDK docs, cookbook articles, and the open-source Codex harness (its system prompts, compaction, approvals, memory, and tools).
+description: Building your own agent the way OpenAI describes it, as concepts that work on any stack. Covers whether to build one, single vs multi-agent, the harness and long runs, tools and MCP, context and memory, skills, prompt caching, cost and reasoning effort, evals, and security and sandboxing. Cites 117 OpenAI sources: developers.openai.com/blog, openai.com engineering and security posts, the practical guide to building agents, Agents SDK docs, cookbook articles, and the open-source Codex harness (its system prompts, compaction, approvals, memory, and tools).
 ---
 
 # OpenAI agents
 
-This skill holds what OpenAI has published that helps you build your own agent: 82 sources from the [developer blog](https://developers.openai.com/blog), the [Engineering category](https://openai.com/news/engineering/) of openai.com, 17 agent posts from other openai.com categories (including the Agents API launch), *A practical guide to building agents* (2025), 7 concept pages from the Agents SDK and API docs, 9 [cookbook](https://developers.openai.com/cookbook/topic/agents/) articles, two Codex guides, and the open-source [Codex harness](https://github.com/openai/codex), from April 2025 to September 2026. Keys starting with `repo-` cite the harness's own prompts and tool descriptions: what OpenAI ships, not what it argues. It keeps the concepts and drops OpenAI platform specifics. Citations use short keys like (`harness-eng`), and `references/article-index.md` links each key to its source.
+This skill holds what OpenAI has published that helps you build your own agent: 117 sources from the [developer blog](https://developers.openai.com/blog), the [Engineering category](https://openai.com/news/engineering/) of openai.com, 23 agent posts from other openai.com categories (including the Agents API launch), *A practical guide to building agents* (2025), 16 concept pages and page groups from the Agents SDK and API docs, 29 [cookbook](https://developers.openai.com/cookbook/topic/agents/) articles, two Codex guides, and the open-source [Codex harness](https://github.com/openai/codex), from April 2025 to September 2026. Keys starting with `repo-` cite the harness's own prompts and tool descriptions: what OpenAI ships, not what it argues. It keeps the concepts and drops OpenAI platform specifics. Citations use short keys like (`harness-eng`), and `references/article-index.md` links each key to its source.
 
 ## The one-sentence thesis
 
@@ -22,7 +22,7 @@ The 14 ideas below follow from it.
 5. **Tools: few, distinct, in distribution, with capped output.** Overlap hurts more than count, formats the model was trained on work best, and output is truncated at about 10,000 tokens keeping head and tail. (`practical-guide`, `codex-prompting`, `gpt56-efficiency`)
 6. **A skill's description is its routing logic.** Say exactly when to use it and when not. Scripts do the mechanics and the model does the judgment, and an instruction file makes the right skill mandatory at the right moment. (`skills-shell`, `skills-oss`, `astra-skills`)
 7. **Treat history as append-only so the prefix caches.** The loop resends a growing prompt, and cache hits make sampling "linear rather than quadratic". Changes go in as new messages, tools stay in a fixed order. (`agent-loop`, `gpt56-efficiency`, `repo-agents-md`)
-8. **Pay per verified success, and cost comes from architecture.** A cheaper agent that resolves half its tickets can cost more per success. Right-size model and effort per step, and re-test effort defaults with each new model. (`cost-quality`, `gpt56-guide`)
+8. **Pay per verified success, and cost comes from architecture.** A cheaper agent that resolves half its tickets can cost more per success. Right-size model and effort per step, re-test effort defaults with each new model, and give each run its own budget, reserved before every call. (`cost-quality`, `gpt56-guide`, `spend-controller`)
 9. **Long runs live in files, not in the prompt.** A 25-hour run held together with a spec, a milestone plan with validation commands, a runbook, and a status log, fixing each failed milestone before the next. (`long-horizon`, `exec-plans`) A goal is a completion contract that only evidence can close, and running out of budget is not done. (`codex-goals`)
 10. **Grade the trace, and turn every correction into an eval.** Define done before writing the skill, check the event trace deterministically, and promote repeated expert corrections to eval targets a coding agent climbs. (`eval-skills`, `tax-agents`, `improvement-loop`)
 11. **Stronger models need less scaffolding.** Recipes, "run the tests" reminders, and "ask first" language written for weaker models now slow a stronger one down. Re-audit instructions and skills at every model change. Codex's own shipped prompts show it: the prompts for harness-trained models run about 80 lines against 280 to 330 for general ones,. (`astra-skills`, `data-agent`, `repo-system-prompts`)
@@ -44,8 +44,8 @@ Each idea is developed, with numbers and every source, in the matching reference
 - **`references/evals-and-verification.md`.** In-run checks, evals for skills and agents, corrections becoming evals, review agents, evals measuring harnesses.
 - **`references/safety-and-containment.md`.** Prompt injection, guardrails, sandboxes, network and secrets, approvals, monitoring agents.
 - **`references/agents-in-production.md`.** Case studies with a build lesson, humans working with agents, voice agents, escalation.
-- **`references/glossary.md`.** 129 coined terms, each with its source.
-- **`references/article-index.md`.** All 82 sources with link, key, date, author, and one-line thesis, grouped by theme. Repo entries list the folders they draw on.
+- **`references/glossary.md`.** 135 coined terms, each with its source.
+- **`references/article-index.md`.** All 117 sources with link, key, date, author, and one-line thesis, grouped by theme. Repo entries list the folders they draw on.
 
 ## How to answer
 
@@ -73,4 +73,4 @@ Then, before sending:
 
 ## Scope
 
-Only these 82 sources, up to September 2026, chosen for building an agent. Not covered: OpenAI API and product specifics (endpoints, parameters, Codex settings, pricing), launches, customer stories without a build lesson, OpenAI's infrastructure posts, and videos or talks. For current OpenAI API facts, use their live docs.
+Only these 117 sources, up to September 2026, chosen for building an agent. Not covered: OpenAI API and product specifics (endpoints, parameters, Codex settings, pricing), launches, customer stories without a build lesson, OpenAI's infrastructure posts, and videos or talks. For current OpenAI API facts, use their live docs.
