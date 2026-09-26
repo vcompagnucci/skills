@@ -43,12 +43,9 @@ What OpenAI teams, their customers and guest authors learned putting agents into
 - **Route ambiguous cases back to people instead of forcing them through the loop.** Automation in the tax agent is limited to extraction and mapping, engineers own architecture and shipping. (`tax-agents`)
 - **Ask when unclear, default when unanswered, accept interruption.** With no date range, the data agent assumes the last 7 or 30 days to stay non-blocking (`data-agent`). Codex's shipped default mode says the same, "strongly prefer making reasonable assumptions and executing", where an empty answer means continue (`repo-multi-agent`). The bundled prompting guide adds counter-prompts because newer models ask where older ones assumed (`repo-prompting`).
 
-## Where the posts disagree
+## Where the answer depends on the case
 
-- **Short prompts or careful setup?** The DevDay post (`codex-devday`, 2025-10-10) fired off tasks described in short sentences. The Sora post (`sora-android`, 2025-12-12) found a one-line brief produced a sub-par app and relied on hand-built foundations, examples and co-written plans. The difference is likely task size: isolated tasks versus a whole product.
-- **How much review to keep?** `harness-eng` (2026-02-11) moved to minimal gates and agent-to-agent review at high throughput. `codex-maxxing` (2026-06-22) and `skills-oss` (2026-03-09) keep humans on approvals, irreversible actions and design choices. The undated AI-native team guide (`ai-native-team`) keeps humans owning external-facing and safety-critical work, with final responsibility staying "with the organization".
-
-- **Visual builder or code?** `agentkit` launched a drag-and-drop canvas for versioned multi-agent workflows (2025-10-06), then announced its shutdown (2026-06-03), sending workflows that "should continue as code" to the SDK and prompt-shaped ones to natural-language agents.
+- **Short prompts or careful setup: the posts describe different task sizes.** At DevDay, isolated tasks went out described in short sentences (`codex-devday`). For a whole Android app, a one-line brief produced a sub-par result, and the Sora team relied on hand-built foundations, examples and co-written plans (`sora-android`).
 
 ## Key source articles
-`sora-android` · `harness-eng` · `tax-agents` · `ai-native-team` · `codex-remote` · `codex-maxxing` · `gpt-live` · `perplexity-voice` · `chatgpt-apps-lessons` · `data-agent` · `repo-realtime`
+`sora-android` · `harness-eng` · `tax-agents` · `ai-native-team` · `codex-remote` · `codex-maxxing` · `gpt-live` · `perplexity-voice` · `data-agent` · `repo-realtime`

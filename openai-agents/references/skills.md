@@ -50,9 +50,5 @@ What a skill is, how its description routes it, how a repo's instruction file ma
 - **Recipe-style skills now slow down a model that handles nuance.** Itineraries that helped earlier models hurt now. Shared repo skills also serve teammates on other models, so write for whoever reads them. Ask the new model to audit your skills against these points instead of reviewing by hand. (`astra-skills`)
 - **Better instruction following makes a stray line costly.** The GPT-6 Astra guide in the Codex repo says the model is "more sensitive to instructions contained in skills and other files, such as AGENTS.md", and conflicting guidance can make it pause early. The fixes: say user instructions beat skills, audit the files, and have the model quote the exact skill line that made it pause. (`repo-prompting`)
 
-## Where the posts disagree
-
-- **How much detail belongs inside a skill.** The February post (2026-02-11) credits embedded templates and worked examples for Glean's gains, and the frontend skill (2026-03-20) is built on hard rules and rejects. The Astra post (2026-09-11) says recipe-style guidance written for earlier models now hinders and skill roots should be routers. All three agree on keeping detail out of always-loaded context. What changed is the model reading it. Codex's shipped skill-creator (repo, 2026-09-26) decides it by risk, not by model. (`skills-shell`, `frontends`, `astra-skills`, `repo-skills`)
-
 ## Key source articles
 `skills-oss` · `skills-shell` · `astra-skills` · `repo-skills` · `computer-env` · `eval-skills` · `frontends` · `repo-prompting` · `codex-best-practices` · `agents-sdk-evolution`

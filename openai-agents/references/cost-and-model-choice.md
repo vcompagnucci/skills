@@ -42,10 +42,10 @@ Picking a model and a reasoning effort per step, and cutting cost without losing
 
 - **Big autonomous runs use a lot of tokens.** One 25-hour Codex run at the highest reasoning setting used about 13M tokens for about 30k lines of code. Four engineers building Sora for Android over 28 days used about 5 billion. Treat these as reference points, not targets. (`long-horizon`, `sora-android`)
 
-## Where the posts disagree
+## Where the answer depends on the case
 
-- **Start big, or start low?** The practical guide (2025-04-17) says prototype with the most capable model everywhere and swap down. The frontend post (2026-03-20) says start with low effort, and the GPT-5.6 guide (2026-08-13) says re-test defaults because newer models do more at lower effort. The first is about finding the ceiling. The later ones are about defaults once models got stronger. (`practical-guide`, `frontends`, `gpt56-guide`)
-- **Maximum effort for hard work?** The 25-hour run (2026-02-23) used the highest reasoning setting. The frontend post finds low and medium often better for simpler sites. Codex's own code-review skill (repo, 2026-09-26) runs every review sub-agent at the highest effort. Task size and stakes likely decide. (`long-horizon`, `frontends`, `repo-review`)
+- **Start big or start low: the posts set different knobs.** The practical guide prototypes with the most capable model everywhere to find the ceiling, then swaps smaller models in (`practical-guide`). The frontend post starts reasoning effort low (`frontends`), and the GPT-5.6 guide says to re-test effort defaults because newer models do more at lower effort (`gpt56-guide`).
+- **Maximum effort: the posts describe different tasks.** The 25-hour run used the highest setting (`long-horizon`), as does every sub-agent in Codex's code-review skill (`repo-review`). For simpler sites, the frontend post found low and medium often better (`frontends`).
 
 ## Key source articles
 `cost-quality` · `gpt56-guide` · `gpt56-efficiency` · `repo-prompting` · `practical-guide` · `frontends` · `devs-2025` · `arc-agi-3` · `cot-monitorability` · `sdk-guardrails` · `agents-api`

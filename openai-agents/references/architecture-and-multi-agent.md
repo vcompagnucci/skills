@@ -11,7 +11,7 @@ Whether to build an agent at all, what one is made of, when to split work across
 ## Model, tools, instructions
 
 - **Every agent is built from the same three parts.** A model, tools, and instructions. Tools come in three kinds: data, action, and orchestration, where other agents are themselves tools. (`practical-guide`)
-- **Write instructions from the procedures you already have.** Turn help-center articles and policies into routines, break dense material into small steps, map each step to an action or output (down to the exact wording for the user), and write branches for edge cases like missing information. A strong model can draft them from the documents. (`practical-guide`)
+- **Draft instructions from the policies you already have.** Help-center articles and policies are the raw material, and a strong model can draft the instructions from them (`practical-guide`). Write them as goals, not step-by-step routines (see context-engineering.md).
 - **Use one templated prompt with policy variables instead of many prompts.** It keeps a growing set of use cases maintainable before any split is needed. (`practical-guide`)
 
 ## Single agent first
@@ -38,7 +38,7 @@ Whether to build an agent at all, what one is made of, when to split work across
 
 ## Parallel agents and the human bottleneck
 
-- **Parallel delegation was the main gain at DevDay.** The team often ran 3 to 4 independent tasks at once, and one engineer had seven terminals, each with an agent building a single-file game. Best-of-N made design cheap: a redesigned 404 page shipped from two attempts reviewed in five minutes. (`codex-devday`)
+- **Best-of-N makes design cheap.** At DevDay, a redesigned 404 page shipped from two attempts reviewed in five minutes. (`codex-devday`)
 - **Parallel sessions bring coordination overhead back.** Building Sora for Android, several sessions (playback, search, error handling, tests) felt like leading a team, and the bottleneck moved from writing code to deciding, giving feedback, and integrating. No linear speedup, per Brooks: "Codex didn't get blocked by context switching, but we did." (`sora-android`)
 - **Interactive supervision tops out at three to five sessions.** Past that, engineers forgot which session did what and spent their time nudging stalled agents. "The agents were fast, but we had a system bottleneck: human attention." (`symphony`)
 
@@ -52,13 +52,9 @@ Whether to build an agent at all, what one is made of, when to split work across
 - **Orchestrator mechanics worth copying.** One authoritative state, bounded concurrency, stall detection that kills and retries silent workers, exponential backoff, stopping a run when its ticket leaves an active state, prompts that know whether this is a first run, a continuation, or a retry, one sanitized workspace per agent, restart recovery without a database, and secrets exposed as a tool instead of a token. Implementing the spec in six languages exposed its ambiguities. (`symphony`)
 - **Cheap supervision makes exploration cheap.** Speculative tasks and prototypes are trivial to file and throw away. PMs and designers file features directly and get back a review packet with a video of the feature working, and the agent shepherds CI, rebases, and flaky retries. (`symphony`)
 
-## Where the posts disagree
+## Where the answer depends on the case
 
-- **How many agents one person can run.** `codex-devday` (2025-10-10) presents 3 to 4 parallel tasks, even seven terminals, as the main productivity gain. `sora-android` (2025-12-12) found parallel sessions bring back coordination overhead with no linear speedup. `symphony` (2026-04-27) puts the ceiling at three to five interactive sessions and concludes the answer is to stop supervising sessions and let the tracker drive agents. The first two describe interactive use, the third changes the setup.
-- **Prescribed routines or objectives.** `practical-guide` (2025-04-17) builds instructions as explicit routines from operating procedures with a branch for each edge case. `symphony` (2026-04-27) found rigid state-machine transitions limited its agents and switched to objectives plus tools, and `data-agent` (2026-01-29) found highly prescriptive prompts pushed its agent down wrong paths. The guide targets customer-facing policy work, the later posts internal engineering and analysis.
-- **How readily to spawn sub-agents.** `gpt56-guide` (2026-08-13) treats spawning as steerable and says to prompt for it where it helps. The Codex repo (2026-09-26 snapshot) ships both extremes: the v1 `spawn_agent` description forbids spawning unless the user or instruction files ask, since "requests for depth, thoroughness, research... do not count as permission" (`repo-tools`), while the orchestrator template says to prefer several sub-agents (`repo-multi-agent`). They serve different modes.
-
-- **One agent or specialists.** `practical-guide` (2025-04-17) says maximize one agent and split only when branching or overlapping tools force it. The SDK orchestration docs (`sdk-multi-agent`, undated) advise specialized agents over one general agent, and a partner guide (`governance`, undated) argues a single agent holding every domain can't stay in character. None of the three measures it.
+- **How readily to spawn sub-agents: the sources describe different modes.** Spawning is steerable, and the GPT-5.6 guide says to prompt for it where it helps (`gpt56-guide`). Codex ships both settings: its v1 `spawn_agent` description forbids spawning unless the user or instruction files ask, since "requests for depth, thoroughness, research... do not count as permission" (`repo-tools`), while its orchestrator template prefers several sub-agents (`repo-multi-agent`).
 
 ## Key source articles
 `practical-guide` · `symphony` · `sdk-multi-agent` · `gpt56-guide` · `repo-tools` · `repo-multi-agent` · `repo-realtime` · `codex-devday` · `sora-android` · `responses-year` · `gpt-live` · `devs-2025` · `repair-loops` · `governance`
