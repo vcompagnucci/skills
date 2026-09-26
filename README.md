@@ -42,19 +42,22 @@ Or copy the `claude-agents/` folder into `~/.claude/skills/`.
 
 ## openai-agents
 
-The same idea for OpenAI: my agents answer questions about building an agent from what OpenAI published, as concepts that work on any stack, not OpenAI platform specifics. It cites 45 sources, from April 2025 to September 2026:
+The same idea for OpenAI: my agents answer questions about building an agent from what OpenAI published and shipped, as concepts that work on any stack, not OpenAI platform specifics. It cites 67 sources, from April 2025 to September 2026:
 
 - [developers.openai.com/blog](https://developers.openai.com/blog) (21 of 30 posts)
 - the [Engineering category](https://openai.com/news/engineering/) of openai.com (13 of 20 posts)
-- 7 agent posts from other openai.com categories, including *A practical guide to building agents*
-- 4 essay-like articles from the [OpenAI cookbook](https://developers.openai.com/cookbook/topic/agents/)
+- 14 agent posts from other openai.com categories, including *A practical guide to building agents*
+- 4 essay-like articles from the [OpenAI cookbook](https://developers.openai.com/cookbook/topic/agents/) and 2 Codex guides
+- the open-source [Codex harness](https://github.com/openai/codex): its system prompts for each model, compaction, approvals, memory, goals, review rubric, and tool descriptions (145 files in 13 groups)
+
+The harness shows what OpenAI ships, not only what it argues, and the skill says which of the two a claim comes from.
 
 It uses the same 10 topics as `claude-agents`, so you can compare the two file by file. Posts about OpenAI's own infrastructure, launches, and showcases are left out, and the article index says which.
 
 ```
 openai-agents/
   SKILL.md        thesis, 14 core ideas, how to answer
-  references/     10 topic files, a glossary of 62 terms, and the article index
+  references/     10 topic files, a glossary of 111 terms, and the article index
 ```
 
 ```sh
