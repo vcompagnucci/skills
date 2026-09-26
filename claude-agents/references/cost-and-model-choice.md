@@ -1,43 +1,21 @@
-# Cost and model choice
+# Cost, model, and effort
 
-What an agent task costs and how to pick the model. Addy Osmani's September 2026 post frames it this way: you buy finished tasks, not tokens. The model-selection and platform guides add the rest, the cookbooks add measured cost passes, and the use-case docs add per-task model picks. The numbers are list prices and the posts' own examples, so they'll go out of date.
+What an agent task costs, how to pick the model, and how to set effort. Addy Osmani's September 2026 post frames it this way: you buy finished tasks, not tokens. Thariq Shihipar's effort post measures what each level buys, the model-selection and platform guides add the rest, the cookbooks add measured cost passes, and the use-case docs add per-task model picks. The numbers are list prices and the posts' own examples, so they'll go out of date.
 
 ## You pay per task
 
 - **Same price per token, different price per task.** Every turn resends the conversation, so a model that needs more turns costs more. "The cheapest turn is the one you don't need." Report pass rate and cost per task together before any optimization. (`cost`, `cb-cost`)
 - **Every saving risks a retry.** Lower effort, a smaller model, or less context all save tokens, and "a retry costs more than those savings". (`cost`)
-- **Four things set the cost.** Turns, cache reads, output tokens, and the model. Thinking bills as output, at 5× the input price. On Opus 5.5 an output token costs 100× a cache read, so 60K output tokens ($1.20) cost the same as 6M tokens read from cache. (`cost`)
+- **Four things set the cost.** Turns, cache reads, output tokens (thinking included), and the model. On Opus 5.5 an output token costs 100× a cache read, so 60K output tokens ($1.20) cost the same as 6M tokens read from cache. (`cost`)
 - **The turn math.** A task whose context grows from 20K to 120K over 40 turns sends about 2.8M input tokens, around $1.62 with 90% from cache. The same task in 25 turns costs about $1.02. (`cost`)
 - **Checks and batching cut turns.** A test, a build, or a script lets the model find its mistakes earlier. Gathering everything it needs in one pass means fewer resends. (`cost`)
-
-## Opus 5.5 pricing (September 2026)
-
-- **$4 input, $20 output, $0.20 cache read, per million tokens.** Input and output are 20% cheaper than Opus 5. Cache reads are 60% cheaper. Plan limits go about 25% further. (`cost`)
-- **"40% cheaper" is an estimate for typical work, not a per-token price.** It assumes Opus 5.5 uses fewer tokens per task at its medium default. The price change alone takes the post's example session from $3.50 to $2.40, 31% less. (`cost`)
-- **Well-scoped tasks get the price cut. Open-ended ones may save more,** because the model spends fewer turns on a wrong idea. (`cost`)
-
-## Three models a day
-
-- **Haiku or Sonnet for lookups.** Subagents that search and summarize, logs, test output, "where is this defined". This is work where a mistake is cheap to spot. A misread search result sends the main model after the wrong file, and you pay for the detour. (`cost`)
-- **Opus 5.5 as the daily driver.** Supervised feature work, debugging, and review with follow-up edits. Mechanical edits across many files stay on Opus 5.5 at low effort. (`cost`)
-- **Fable 5.1 when the result matters more than the price.** Long runs you won't supervise, problems with no existing pattern, large changes that coordinate many subagents. If Opus 5.5 on xhigh hits the same problem twice, switch, and switch back once it's solved. Fable 5.1 costs $10 input and $50 output, but its cache reads cost $0.25, only 1.25× Opus 5.5's, so the gap is smallest on long runs that mostly read from cache. (`cost`)
-- **Raise effort before changing models.** Effort costs less than a bigger model. The sign you need it is a fix that stops at one layer (see `effort.md`). (`cost`)
-- **Setting a subagent's model.** Put `model: haiku` in its definition, or set `CLAUDE_CODE_SUBAGENT_MODEL` for all of them. A subagent with no setting inherits the main model and its price. (`cost`)
-- **Agent teams use about 7× the tokens** of a normal session in plan mode. Keep them small and shut teammates down when they finish. (`cost`)
-
-## Switching models: the position changed
-
-- **April: don't switch mid-session.** Each model has its own cache. Hand the work to a subagent instead. (`caching`, 2026-04-30)
-- **September: switch at a natural break when the task is worth it.** Accept one cache write on the new model and make it smaller with `/compact` or a fresh session that starts from a short written plan. `/model` also changes the default for new sessions, so switch back afterwards. This is the later position. (`cost`, 2026-09-25)
-- **Opusplan goes against the "edits stay on Opus" advice.** With it, Opus plans and Sonnet makes the edits. The post says to "measure it on your own tasks before you make it a default". (`cost`)
+- **List prices, September 2026.** Opus 5.5 costs $4 input, $20 output, and $0.20 cache read per million tokens. Fable 5.1 costs $10 and $50, but its cache reads cost $0.25, only 1.25× Opus 5.5's, so the gap is smallest on long runs that mostly read from cache. (`cost`)
 
 ## The rest of the bill
 
-- **Fast mode** runs up to 2.5× faster at 2× the price. The first request after turning it on pays full price for the whole conversation, so turn it on at the start of a session. (`cost`, `opus-5-5`)
 - **Images bill by pixel area,** about one token per 28×28 patch whatever they contain. Downscale to what the task needs, and send big tables through the Files API and code execution so only the answer reaches context. (`cb-cost`)
 - **Cap unattended sessions.** A Managed Agents budget caps list-price spend across every thread, subagents included. Hitting it pauses the session with files and state intact. It's checked between requests, so one request can overshoot, and it can only be set at creation. (`cb-spend-cap`)
-- **The Batch API** costs half and stacks with caching, in exchange for single-shot requests within 24 hours. (`cost`, `cb-cost`)
-- **Typical spend** is about $13 per developer per active day, and 90% of users stay under $30. (`cost`)
+- **The Batch API** costs half, in exchange for single-shot requests within 24 hours. (`cost`, `cb-cost`)
 
 ## Choosing a model class
 
@@ -48,11 +26,21 @@ What an agent task costs and how to pick the model. Addy Osmani's September 2026
 - **Planning big and executing small pays on coverage work.** A frontier coordinator that never reads raw pages, with cheap workers reading in parallel, billed 84-98% of team input tokens at the worker rate (measured). The gap narrows on discovery tasks, where frontier search intuition matters, and splitting into more, narrower briefs raised the bill: each worker has a setup cost. (`cb-plan-big`)
 - **Compare arms at the same rigor.** A solo frontier agent left to its judgment read one source per fact and came in cheap, but that's a lower-rigor product. Both arms also built their list from model memory and misranked one item: verification covered the facts, not the question's premise. (`cb-plan-big`)
 - **Split by mechanical versus reasoning work.** For computer use, Sonnet 4.6 clicks more precisely and Opus reasons better, and an orchestrator with a clicking sub-agent handles advanced flows. (`computer-use`)
-- **Benchmarks saturate at the top, so decide with your own evals.** Use a curated set of production problems with your team's success criteria. `/claude-api hillclimb` searched model, effort, and prompt against a train/test split: going from Opus 4.8 at high effort to Sonnet 5 at low effort plus routing rules raised held-out accuracy from 78.6% to 90.5% at about a fifth of the cost. (`models-explained`, `platform-cost`)
-- **Profile spend first, then apply ranked levers.** `/claude-api cost-optimize` ranks caching, trimming, bounded output, and batching: LegalBench about 67% cheaper, tau2-bench retail about 73%, with no significant score change. (`platform-cost`)
-- **Change the model last.** The cost cookbook's order: caching, input trimming, loop efficiency, output, Batch API, then model and effort, because only the model caps intelligence. On a ten-claim insurance eval, Sonnet at medium plus one system-prompt breakpoint was 13× cheaper than Opus at high with no caching ($0.29 a task), still 10/10. Tool search, context editing, and compaction didn't help there: the workload was too small. (`cb-cost`)
+- **Benchmarks saturate at the top, so decide with your own evals.** Use a curated set of production problems with your team's success criteria. A search over model, effort, and prompt against a train/test split (`/claude-api hillclimb`) went from Opus 4.8 at high effort to Sonnet 5 at low effort plus routing rules, raising held-out accuracy from 78.6% to 90.5% at about a fifth of the cost. (`models-explained`, `platform-cost`)
+- **Profile spend, then pull levers in order, model last.** The cost cookbook's order: caching, input trimming, loop efficiency, output, Batch API, then model and effort, because only the model caps intelligence. A ranked pass of caching, trimming, bounded output, and batching made LegalBench about 67% cheaper and tau2-bench retail about 73%, with no significant score change. On a ten-claim insurance eval, Sonnet at medium plus one system-prompt breakpoint was 13× cheaper than Opus at high with no caching ($0.29 a task), still 10/10. Tool search, context editing, and compaction didn't help there: the workload was too small. (`cb-cost`, `platform-cost`)
 - **"Cheap and slightly wrong is still not an optimization."** Haiku subagents plus one Sonnet decider cut cost about 90% but missed a case, because condensing the manual into a rule card dropped a nested exception. (`cb-cost`)
 - **Use-case docs pick by task (undated, older models).** Haiku 4.5 is the default for routing and volume moderation: 1B posts a month cost about $36,100 on Haiku 4.5 against $180,500 on Opus 5. Legal summaries default to Opus 5 for accuracy ($438.75 against $87.75 for 1,000 leases). Support uses Opus for long reasoning and Haiku once RAG and tools make latency bind. (`uc-routing`, `uc-moderation`, `uc-legal`, `uc-support`)
+
+## Effort
+
+- **Effort sets how much compute to spend, and thinking bills as output.** Compare being asked to do something in 12 hours with being asked in 1. At higher effort Claude acts more on its own judgment and verifies more. At lower effort it thinks less and makes fewer, shorter tool calls. Thinking bills as output, at 5× the input price, which is why effort moves the bill so much. (`effort`, `cost`)
+- **The same level means different things on different models.** At each level Opus 5.5 thinks more than Opus 5, most of all at xhigh and max, and it defaults to medium where Opus 5 defaulted to high. Don't carry a level over from an older model. (`cost`)
+- **More effort buys care on tasks with hidden edge cases.** On `html-js-filter`, an HTML sanitizer, Fable 5.1 went from 1/5 at low to 5/5 at xhigh. At low it wrote a filter in one pass and tested it on one page, in about 2 minutes. At high it reviewed its own draft adversarially, read the parser's source, ran an XSS suite, and wrote a fuzzer, in about 33 minutes. (`effort`)
+- **It doesn't fix a wrong approach.** Across 370 Fable 5.1 attempts, going from low to max raised passes from 140 to 214 and cut "a bug its tests missed" from 40 to 14. "Picked the wrong reading" went up, from 25 to 47. More effort also makes more decisions for you: with a detailed spec, every level built similar apps. (`effort`)
+- **Effort can be wrong in both directions.** Too high over-thinks: on HLE, Fable 5.1's last step to max adds about half a point for 46% more cost, within noise. Too low stops before it has evidence: Fable 5 on FrontierCode Diamond scored 11.5% at low ($5.35 a task) and 30.9% at max ($19.00). "Deliberation only helps while there's still evidence to find." A flat cost-performance curve across effort means the task isn't limited by thinking. (`platform-cost`)
+- **Perceptual work gains little from thinking.** UI tasks are "primarily perceptual rather than deeply logical". On the 4.6 models, medium is the sweet spot for computer use, low uses fewer tokens than no thinking because it makes fewer mistakes, and max adds nothing over high. (`computer-use`)
+- **Set it per agent role.** In a Managed Agents roster, `model.effort` is per role: a curriculum team runs its standards researcher at high because the work is judgment-heavy, and leaves the lesson writer at the default. (`cb-watch-subagents`)
+- **Look for a check before raising effort.** Rename a field in an API handler. At medium, Claude fixes the handler, the tests pass, and the client still sends the old field. At high, it reads the other call sites first. A test that goes through the client catches the same bug at medium, for one turn. High typically costs about 20K extra thinking tokens ($0.40 on Opus 5.5, the same as a ten-turn retry): worth it if it saves one retry, wasted if medium would have finished. Move to a bigger model last. (`cost`)
 
 ## Where the posts pull in different directions
 
@@ -61,8 +49,8 @@ What an agent task costs and how to pick the model. Addy Osmani's September 2026
 
 ## Measure it yourself
 
-- **Check three things in `/usage`.** A low cache share points to a long pause, a model switch, or an MCP change. A lot of output on a small change means effort is too high or the model retried. Total input many times the size of the conversation means the session looped, and it's worth reading where. (`cost`)
+- **Read three signals in your usage data.** A low cache share points to a long pause, a model switch, or an MCP change. A lot of output on a small change means effort is too high or the model retried. Total input many times the size of the conversation means the agent looped, and it's worth reading where. (`cost`)
 - **Run the same real task on both models three or four times before you decide.** "Your own numbers are the ones to trust." (`cost`)
 
 ## Key source articles
-`cost` · `models-explained` · `platform-cost` · `caching` · `opus-5-5` · `cb-cost` · `cb-plan-big`
+`cost` · `effort` · `models-explained` · `platform-cost` · `cb-cost` · `cb-plan-big` · `computer-use` · `cb-watch-subagents`

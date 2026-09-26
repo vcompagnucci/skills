@@ -25,7 +25,6 @@ How Anthropic decides which tools an agent gets and how to write them. Tools are
 - **The bar to add a tool is high.** Claude Code has about 20, and each one is another option to weigh. The Claude Code Guide subagent answers questions about Claude Code without adding a tool. (`seeing`)
 - **Too many or overlapping tools is one of the most common failures.** "If a human engineer can't definitively say which tool should be used in a given situation, an AI agent can't be expected to do better." (`effective-context`)
 - **Load tool definitions on demand.** Five MCP servers can mean 58 tools and 55K tokens before work starts. With `defer_loading` and the Tool Search Tool, context fell 85% and MCP eval accuracy rose from 49% to 74% on Opus 4. Use it past about 10 tools or 10K tokens, and keep the 3-5 most used always loaded. (`advanced-tool-use`, `caching`)
-- **Model state changes as tools, not tool swaps.** Plan Mode adds EnterPlanMode and ExitPlanMode instead of swapping to read-only tools, which would break the cache. (`caching`)
 
 ## Let code do the orchestration
 
@@ -36,17 +35,13 @@ How Anthropic decides which tools an agent gets and how to write them. Tools are
 
 ## MCP
 
-- **MCP collapses the M×N integration problem.** A client connects to thousands of servers, and a vendor builds one server for every assistant. It was modeled on the Language Server Protocol and open-sourced in November 2024. (`what-is-mcp`)
-- **Build remote servers.** Production agents run in the cloud, behind auth, and remote is the only setup that works across web, mobile, and hosted agents. SDK downloads passed 300M a month. (`mcp-production`)
-- **MCP gives access, skills give the procedure.** Pair them (see `skills.md`). (`mcp-production`, `skills-and-mcp`)
-- **Installation friction kept local MCP from non-technical users.** Desktop Extensions bundle a server and its dependencies into one file. (`desktop-extensions`)
-- **To hold an agent to MCP only, disallow Bash.** An agent scoped to the GitHub MCP server (100+ tools) could still shell out to the `gh` CLI. (`cb-observability`)
+- **MCP collapses the M×N integration problem.** A client connects to thousands of servers, and a vendor builds one server for every assistant. (`what-is-mcp`)
+- **Build remote servers.** Production agents run in the cloud, behind auth, and remote is the only setup that works across web, mobile, and hosted agents. (`mcp-production`)
 
 ## Tools that act on production
 
 - **Give write access through narrow, checked tools, not a shell.** The SRE agent's config editor only writes under `config/`, its shell only runs `docker` commands, and a `PreToolUse` hook rejects a `DB_POOL_SIZE` outside 5-100, checking what changes, not just where. Investigation runs read-only, and remediation waits for a separate authorization. (`cb-sre-agent`)
-- **Pick an MCP toolset or a custom tool by reachability.** Public internet plus a bearer token suits an MCP toolset. A system inside your network needs a custom tool your application runs, which also keeps credentials out: the MongoDB example runs `pymongo` host-side, so the connection string never enters context or the sandbox. (`cb-production`, `cb-mongodb`)
-- **Keep per-user tokens in vaults.** A vault holds one end user's credentials, is referenced by ID on each session, and the agent never sees the token. A single hard-coded token works until the second tenant. (`cb-production`)
+- **Pick an MCP toolset or a custom tool by reachability.** Public internet plus a bearer token suits an MCP toolset. A system inside your network needs a custom tool your application runs, as in the MongoDB example, which runs `pymongo` host-side. (`cb-production`, `cb-mongodb`)
 - **Cap the loop and split formatting from analysis.** The threat-intel loop has a `MAX_TURNS` limit against runaway cost, and turns its free-text findings into schema-constrained JSON in a second call with a formatter-only prompt. (`cb-threat-intel`)
 
 ## Special tools
