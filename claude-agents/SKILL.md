@@ -1,6 +1,6 @@
 ---
 name: claude-agents
-description: Building your own agent the way Anthropic does, with the Messages API, the Agent SDK, or Managed Agents. Covers whether to build an agent at all, architecture and multi-agent patterns, harness design and long-running agents, tool and MCP design, context engineering and memory, skills, prompt caching, cost, model and effort choice, evals and verification, security, sandboxing and containment, and production use cases like customer support, ticket routing, and moderation. Answers cite 120 Anthropic sources: posts from claude.dev, claude.com's agents category, and anthropic.com/engineering, the docs' use-case guides, the agent notebooks in claude-cookbooks, and agent research from anthropic.com/research. Use for those questions or for the ideas of Anthropic's engineering blog and the Claude Code team.
+description: Building your own agent the Anthropic way (Messages API, Agent SDK, Managed Agents). Covers whether to build one, multi-agent patterns, harness and long runs, tools and MCP, context and memory, skills, prompt caching, cost, model and effort, evals, security and sandboxing, and use cases like customer support. Cites 120 sources: Anthropic's engineering blog, claude.dev, claude.com, docs guides, cookbooks, and research.
 ---
 
 # Claude agents (Anthropic)
@@ -53,7 +53,7 @@ Walk this every time:
 
 ```
 Does the question name a post, an author, or a coined term?
-├── Yes → article-index.md (key → URL) or glossary.md → the theme file → answer, cite the key
+├── Yes → Grep article-index.md or glossary.md for the key, title, or term (never read them whole) → the theme file → answer, cite the key
 └── No → Does a core idea above answer it?
     ├── Yes → answer from it; open at most one reference for the numbers
     └── No → Does a reference file cover it? (list above)
