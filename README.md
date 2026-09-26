@@ -4,23 +4,25 @@ Agent skills I use in Claude Code, Codex, Cursor, and opencode. Each skill lives
 
 ## claude-agents
 
-I built this one so my agents answer questions about building agents from what Anthropic actually published, not from what the model half-remembers. It covers 139 sources from six places, up to September 2026:
+I built this one so my agents answer questions about building an agent from what Anthropic actually published, not from what the model half-remembers. It's scoped to building your own agent (Messages API, Agent SDK, or Managed Agents), and cites 120 sources from six places, up to September 2026:
 
-- [claude.dev](https://claude.dev/), the Claude Code team's blog (all 10 posts)
-- the [agents category](https://claude.com/blog-category/agents) of the claude.com blog (all 38 posts)
-- the [Anthropic engineering blog](https://www.anthropic.com/engineering) (all 25 posts)
+- [claude.dev](https://claude.dev/), the Claude Code team's blog (8 posts)
+- the [agents category](https://claude.com/blog-category/agents) of the claude.com blog (26 posts)
+- the [Anthropic engineering blog](https://www.anthropic.com/engineering) (24 posts)
 - the [use-case guides](https://platform.claude.com/docs/en/about-claude/use-case-guides/overview) in the docs: customer support, ticket routing, moderation, legal, commerce (6 pages)
-- the agent notebooks in [claude-cookbooks](https://github.com/anthropics/claude-cookbooks): every one the repo tags as agent patterns, Agent SDK, Managed Agents, or skills (44)
-- the posts on [anthropic.com/research](https://www.anthropic.com/research) about agents working on their own, like Project Vend and agentic misalignment (16 of 164)
+- the agent notebooks in [claude-cookbooks](https://github.com/anthropics/claude-cookbooks) (43)
+- posts on [anthropic.com/research](https://www.anthropic.com/research) about agents working on their own, like Project Vend and agentic misalignment (13)
 
-It's organized in 12 topics: architecture and multi-agent systems, harness design, tool and MCP design, context engineering, skills, prompt caching, cost and model choice, effort, steering long runs, evals and verification, safety and containment, and agents in production, including the docs' playbooks for support and ticket routing.
+What's left out on purpose: tips for using Claude Code day to day, HTML as an output format, and enterprise adoption stories. The article index lists what was cut and why.
 
-Every claim ends with a short key for its post, like `effort` or `agent-evals`, and `references/article-index.md` links each key to the post. Where the posts disagree or a position changed over time, it shows both with dates. Ask it about something the posts don't cover, like fine-tuning, and it tells you so instead of guessing.
+It's organized in 10 topics: architecture and multi-agent systems, harness design and long runs, tool and MCP design, context engineering, skills, prompt caching, cost, model and effort, evals and verification, security and containment, and agents in production, including the docs' playbooks for support and ticket routing.
+
+Every claim ends with a short key for its source, like `cost` or `agent-evals`, and `references/article-index.md` links each key to the source. Where the sources disagree or a position changed over time, it shows both with dates. Ask it about something they don't cover, like fine-tuning, and it tells you so instead of guessing.
 
 ```
 claude-agents/
   SKILL.md        thesis, 14 core ideas, how to answer
-  references/     12 topic files, a glossary of 189 terms, and the article index
+  references/     10 topic files, a glossary of 170 terms, and the article index
 ```
 
 ### Install
