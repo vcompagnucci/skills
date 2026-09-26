@@ -1,6 +1,6 @@
 # Skills
 
-What a skill is, how its description routes it, how a repo's instruction file makes skills mandatory, and which parts belong in scripts. Draws on OpenAI's developer-blog posts on skills in its Agents SDK repos and for GPT-6 Astra, its hosted computer-environment post, and customer results from Glean.
+What a skill is, how its description routes it, how a repo's instruction file makes skills mandatory, which parts belong in scripts, and how to write skills for long loops. Draws on OpenAI's developer-blog posts on skills in its Agents SDK repos and for GPT-6 Astra, its hosted computer-environment post, customer results from Glean, the Codex guides, and the Codex repo itself (what OpenAI ships: its skill-creator and production skills).
 
 ## What a skill is
 
@@ -9,13 +9,14 @@ What a skill is, how its description routes it, how a repo's instruction file ma
 - **Move templates and worked examples out of the system prompt into skills.** They load only when the skill fires and cost nothing otherwise. Glean reported some of its biggest quality and latency gains from this. (`skills-shell`)
 - **Skills close the gap between one tool call and a multi-tool workflow.** A Glean Salesforce skill raised eval accuracy from 73% to 85% and cut time to first token 18.1%, through careful routing, negative examples and embedded templates. Customer-reported. (`skills-shell`)
 - **Package a workflow once it works.** Instructions, references and scripts, so it isn't retaught. The data agent packaged recurring analyses like weekly reports after usage showed the repetition. Alpic turned lessons it kept rediscovering into a framework plus a skill covering ideation through deployment. (`codex-maxxing`, `data-agent`, `chatgpt-apps-lessons`)
+- **Repeated prompting becomes a skill, and a reliable skill becomes a scheduled job.** "Skills define the method and scheduled tasks define the schedule." Keep each skill to one job, start from 2 to 3 concrete use cases, and don't schedule what isn't reliable by hand. (`codex-best-practices`)
 - **Taste can be a skill too.** OpenAI's frontend skill lists defaults, hard rules, named failures to reject, and questions to check the result against. It has the agent write a visual thesis and content plan before any code. (`frontends`)
 - **Skills are a shared convention, not tied to one runtime.** Alongside AGENTS.md and MCP, they let agent tooling move between products and UIs. (`devs-2025`)
 
 ## The description is routing logic
 
 - **The model decides from name and description alone.** Write it like routing logic: when to use, when not to, outputs and success criteria. "Your skill's description is effectively the model's decision boundary." Vague or overloaded descriptions make triggering unreliable. (`skills-shell`, `eval-skills`)
-- **Minimal, and exact about when.** Bad: "Use when working with databases, queries, models, or persistence", which fires on anything database. Good: "Use when adding or changing a migration, or reviewing its rollout." (`astra-skills`)
+- **Minimal, and exact about when.** Bad: "Use when working with databases, queries, models, or persistence", which fires on anything database. Good: "Use when adding or changing a migration, or reviewing its rollout." Codex's skill-creator asks for "concise and discriminating", with exclusions only when they prevent misrouting, and the Codex guide says to use the trigger phrases users actually say. (`astra-skills`, `repo-skills`, `codex-best-practices`)
 - **Fix the metadata before adding code.** In the SDK repos, "Run the mandatory verification stack" became "...when changes affect runtime code, tests, or build/test behavior", which says when it applies and that it isn't optional. (`skills-oss`)
 - **Adding skills can lower correct triggering at first.** Glean saw routing drop about 20% in targeted evals, then recover after adding "don't call this skill when..." cases and edge cases. This matters most when skills look alike. (`skills-shell`)
 - **Too many skills with long descriptions crowd each other out.** Every name and description loads into context. Past a budget the harness truncates descriptions, so the model sees less of each and picks worse. Descriptions also start to contradict or over-trigger. (`astra-skills`)
@@ -23,24 +24,35 @@ What a skill is, how its description routes it, how a repo's instruction file ma
 
 ## Repo-local and mandatory skills
 
-- **Each skill needs a narrow contract, a clear trigger and a concrete output.** The SDK repos run skills for the verification stack, docs audits against code, running examples, release review, implementation strategy before API changes and PR drafts at handoff. Several are report-first: they rank findings and ask before editing. (`skills-oss`)
+- **Each skill needs a narrow contract, a clear trigger and a concrete output.** The SDK repos run skills for the verification stack, docs audits against code, running examples, release review, implementation strategy before API changes and PR drafts at handoff. Several are report-first: they rank findings and ask before editing. Codex's own code-review skill fans out one sub-agent per narrow review skill (breaking changes, change size, model-visible context) and must return every issue from every sub-agent. (`skills-oss`, `repo-review`)
 - **The instruction file makes skills mandatory with short if/then rules, highest value first.** "Before editing runtime or API changes, call implementation-strategy." "If SDK code changed, run verification and don't mark done until it passes." The condition keeps docs-only work light. "The skill encodes the repository's definition of 'verified', and AGENTS.md makes that definition enforceable." (`skills-oss`)
 - **The result was a before-and-after, not a controlled test.** With repo instructions, repo-local skills and the same workflows in CI, the two SDK repos merged 457 PRs in three months against 316 in the three months before. (`skills-oss`)
 - **Gate skills need a default and evidence.** Release review starts from "safe to release", blocks only on concrete evidence in the diff, and every block comes with an unblock checklist. (`skills-oss`)
+- **A skill never widens scope or permissions.** "Approval to complete a task does not expand its scope or execution permissions." Don't make a sensitive skill explicit-only. Keep it discoverable and ask for authorization right before the mutation. (`repo-skills`)
+- **Bundled references go stale, so fetch live first and say when you didn't.** Codex's model-migration skill must fetch the current official page before its bundled copy, extract only the section needed, and disclose when it fell back to a possibly outdated snapshot. (`repo-prompting`)
 
 ## Scripts for mechanics, the model for judgment
 
 - **If the model rediscovers the same shell recipe every time, make it a script.** Scripts run fixed-order commands, collect logs and write rerun files. The model reads source to infer intent, compares the logs with it and judges compatibility risk. (`skills-oss`)
 - **Check output against intent, not exit codes.** A runner saves each example's output, then the model reads each example's source, infers the intended flow and compares. It's more accurate than fixed assertions for code that calls real APIs. Automating it first required a non-interactive mode (auto-answered prompts, a skip list, rerun files). (`skills-oss`)
 
+## Skills for long loops
+
+- **Spell out the only states that end the loop.** Codex's production `babysit-pr` skill stops only when the PR is merged or closed or user help is needed, and lists states that must not stop it: "green + mergeable + review-clean" is a milestone, and a push "is not a terminal outcome". It forbids ending the turn while a watcher it started is still running, or asking whether to keep polling. (`repo-skills`)
+- **Classify a failure before acting, with a retry budget.** Branch-caused failures get fixed and pushed. Flaky or external ones get a rerun, at most 3 per state, then a report. Never edit tests, CI config or pins just to get green. (`repo-skills`)
+- **Set a write policy for anything other people can see.** The skill can read anything, prefixes its comments, never replies to other humans without the user confirming the exact text, and must never make it "hard to tell whether you or the user did something". It re-fetches state before acting instead of trusting its watcher's output. (`repo-skills`)
+
 ## Keep them lean as models improve
 
-- **Make a multi-workflow skill's root a minimal router.** Reading a skill spends context, pushes toward compaction and injects guidance that may not apply. Point to supporting docs and scripts instead. (`astra-skills`)
+- **Include only what changes the model's decisions.** Codex's skill-creator: "Assume Codex is already capable." Cut generic advice, repeated instructions and speculative edge cases, and fix a real failure with "a narrow correction" instead of a new universal rule. (`repo-skills`)
+- **Match specificity to risk.** Give outcomes and criteria for open-ended work, examples or scripts for work with a preferred shape, and fixed sequences and absolute language only where correctness, safety, permissions or a fragile workflow demand them. (`repo-skills`)
+- **Make a multi-workflow skill's root a minimal router.** Reading a skill spends context, pushes toward compaction and injects guidance that may not apply. Point to supporting docs and scripts instead. Codex's skill-creator describes three stages: name and description at selection, body on use, references and scripts only when needed (a deploy skill reads the AWS reference once the user picks AWS). A size limit "is not a target". (`astra-skills`, `repo-skills`)
 - **Recipe-style skills now slow down a model that handles nuance.** Itineraries that helped earlier models hurt now. Shared repo skills also serve teammates on other models, so write for whoever reads them. Ask the new model to audit your skills against these points instead of reviewing by hand. (`astra-skills`)
+- **Better instruction following makes a stray line costly.** The GPT-6 Astra guide in the Codex repo says the model is "more sensitive to instructions contained in skills and other files, such as AGENTS.md", and conflicting guidance can make it pause early. The fixes: say user instructions beat skills, audit the files, and have the model quote the exact skill line that made it pause. (`repo-prompting`)
 
 ## Where the posts disagree
 
-- **How much detail belongs inside a skill.** The February post (2026-02-11) credits embedded templates and worked examples for Glean's gains, and the frontend skill (2026-03-20) is built on hard rules and rejects. The Astra post (2026-09-11) says recipe-style guidance written for earlier models now hinders and skill roots should be routers. All three agree on keeping detail out of always-loaded context. What changed is the model reading it. (`skills-shell`, `frontends`, `astra-skills`)
+- **How much detail belongs inside a skill.** The February post (2026-02-11) credits embedded templates and worked examples for Glean's gains, and the frontend skill (2026-03-20) is built on hard rules and rejects. The Astra post (2026-09-11) says recipe-style guidance written for earlier models now hinders and skill roots should be routers. All three agree on keeping detail out of always-loaded context. What changed is the model reading it. Codex's shipped skill-creator (repo, 2026-09-26) decides it by risk, not by model. (`skills-shell`, `frontends`, `astra-skills`, `repo-skills`)
 
 ## Key source articles
-`skills-oss` · `skills-shell` · `astra-skills` · `computer-env` · `eval-skills` · `frontends`
+`skills-oss` · `skills-shell` · `astra-skills` · `repo-skills` · `computer-env` · `eval-skills` · `frontends` · `repo-prompting` · `codex-best-practices`

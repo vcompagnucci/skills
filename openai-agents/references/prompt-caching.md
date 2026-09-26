@@ -1,6 +1,6 @@
 # Prompt caching
 
-Why an agent loop depends on caching, and how to assemble prompts that keep hitting it. Draws on OpenAI's engineering posts about the Codex loop and model efficiency, its realtime voice system, and a cookbook on support-agent cost (a simulation).
+Why an agent loop depends on caching, and how to assemble prompts that keep hitting it. Draws on OpenAI's engineering posts about the Codex loop and model efficiency, its realtime voice system, a cookbook on support-agent cost (a simulation), and the Codex repo's own rules for model-visible context.
 
 ## Why it matters
 
@@ -12,8 +12,8 @@ Why an agent loop depends on caching, and how to assemble prompts that keep hitt
 ## Assembly order
 
 - **Stable first, variable last.** Instructions, policy, tool definitions and output schema first, customer data at the end. (`cost-quality`)
-- **Treat model-visible history as append-only.** New messages, tool results and environment updates go at the end, never inserted earlier. OpenAI credits this for Codex's high cache hit rates. (`gpt56-efficiency`)
-- **Record config changes as a new message.** When the sandbox or approval mode changes, Codex appends a new permissions message. When the working directory changes, it appends a new environment message. It never edits the old one. (`agent-loop`)
+- **Treat model-visible history as append-only.** New messages, tool results and environment updates go at the end, never inserted earlier. OpenAI credits this for Codex's high cache hit rates. The Codex repo enforces it at code review: its AGENTS.md says "No history rewrite - the context must be built up incrementally" and to avoid context changes "that cause cache misses", and a shipped review skill checks both. (`gpt56-efficiency`, `repo-agents-md`, `repo-review`)
+- **Record config changes as a new message.** When the sandbox or approval mode changes, Codex appends a new permissions message. When the working directory changes, it appends a new environment message. It never edits the old one. World-state sections are sent as diffs and re-emitted only when they change. (`agent-loop`, `repo-context`)
 - **List tools in a deterministic order.** A real Codex bug: tools from external servers came back in inconsistent order and missed the cache. (`agent-loop`, `gpt56-efficiency`)
 - **Keep runtime settings out of tool definitions.** Approval policies are applied at execution time, so changing them doesn't touch the prefix. (`gpt56-efficiency`)
 - **Keep the tool list constant and restrict per request.** Swapping the list per request changes the prefix. (`cost-quality`)
@@ -21,7 +21,7 @@ Why an agent loop depends on caching, and how to assemble prompts that keep hitt
 
 ## What breaks it
 
-- **Anything that changes the prefix.** Changing tools mid-conversation, switching models, or editing the sandbox, approval mode or working directory in place. Honoring a tool server's "tools changed" notification mid-conversation is expensive for the same reason. (`agent-loop`)
+- **Anything that changes the prefix.** Changing tools mid-conversation, switching models, or editing the sandbox, approval mode or working directory in place. Honoring a tool server's "tools changed" notification mid-conversation is expensive for the same reason. Codex's model-upgrade guide lists cache behavior among what each call site must keep, and cache topology as a gate before a migration ships. (`agent-loop`, `repo-prompting`)
 - **Compaction rewrites past context, so it invalidates the cache.** GPT-Live prepares a replacement instance with the compacted context while the old one keeps talking, then cuts traffic over, instead of stalling the live conversation. (`gpt-live`)
 - **A cold start is a miss you can pay early.** GPT-Live prefills the delegated model with the conversation at session start and keeps it warm with stable session affinity plus caching, so the first real call doesn't wait. (`gpt-live`)
 
@@ -30,4 +30,4 @@ Why an agent loop depends on caching, and how to assemble prompts that keep hitt
 - **If cache writes cost extra, caching unique content can raise cost.** A queue where prompts rarely repeat may do better without it. Check the repeat rate before assuming caching saves money. From a cookbook simulation, not production data. (`cost-quality`)
 
 ## Key source articles
-`agent-loop` · `gpt56-efficiency` · `cost-quality` · `gpt-live` · `gpt56-guide`
+`agent-loop` · `gpt56-efficiency` · `cost-quality` · `gpt-live` · `gpt56-guide` · `repo-agents-md` · `repo-context`

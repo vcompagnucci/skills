@@ -1,6 +1,6 @@
 # Tool design
 
-Which tools an agent gets and how to shape them: what earns a tool its place, how to name and describe it, how many to expose, how to keep its output from flooding context, MCP, and giving agents the instruments humans already use. Drawn from developer blog posts (several by guest customers such as Alpic, Skyscanner, and Perplexity), cookbook guides, engineering posts, and the 2025 agent guide. Most of the evidence is practitioner experience, and the few measured results are marked.
+Which tools an agent gets and how to shape them: what earns a tool its place, how to name and describe it, how many to expose, how to keep its output from flooding context, MCP, and giving agents the instruments humans already use. Drawn from developer blog posts (several by guest customers such as Alpic, Skyscanner, and Perplexity), cookbook guides, engineering posts, the 2025 agent guide, and the tool specs shipped in the Codex repo (a 2026-09-26 snapshot). Most of the evidence is practitioner experience, and the few measured results are marked.
 
 ## Decide which tools to give
 
@@ -10,6 +10,7 @@ Which tools an agent gets and how to shape them: what earns a tool its place, ho
 - **Prefer small composable actions over one pipeline tool.** Search, score, and send as three tools rather than one "run the full recruiting pipeline". Do your part, hand control back, and let the model pick the next tool. (`great-chatgpt-app`)
 - **Tool calls against a live source can replace a retrieval pipeline.** One builder gave the model 16 tools over a music marketplace API plus web search and found it simpler than building RAG. A single builder's experience. (`responses-year`)
 - **Test the tool against the no-tool baseline.** Keep a small set of positive, negative, and edge cases and track how often the tool-assisted answer beats the model's answer without it. (`great-chatgpt-app`)
+- **Add a tool only when it removes a real manual loop.** Codex's guide connects external systems when context lives outside the repo, changes often, or must repeat across users, and says start with one or two. Its team guide wires in logs, deploys, and git history so an agent can trace an endpoint error to the code behind it, with scoped access tested on simulated incidents first. (`codex-best-practices`, `ai-native-team`)
 
 ## Name and describe tools for the model
 
@@ -17,10 +18,12 @@ Which tools an agent gets and how to shape them: what earns a tool its place, ho
 - **Make names precise and outputs look different.** "semantic_search" beats "search". Say when, why, and how to use each tool with good and bad examples, and make semantic search results look unlike grep output so the model doesn't fall back on old habits. (`codex-prompting`)
 - **Replace filter UIs with enumerated parameter values.** Give the model the allowed values so it maps "sunny" to a weather value instead of guessing which options exist. (`chatgpt-apps-lessons`)
 - **Mark boundaries on the tool itself.** Hints for read-only, destructive, and open-world tools, and tools the model must never call marked private. (`chatgpt-apps-lessons`)
+- **Put the usage policy in the description.** Codex's tool texts say when a tool may be used and what it must not do. The web tool says browse if there's a ">10%" chance a fact changed ("if you're on the fence, you MUST browse"), and `spawn_agent` says a request for thoroughness is not permission to delegate. (`repo-tools`)
+- **Enforce the limits in the handler too.** Codex's ask-the-user tool takes 1 to 3 questions ("Prefer 1") with 2 to 3 exclusive options, the recommended one first, and the client adds "Other". The handler rejects a question with no options, and default mode forbids using the tool to ask permission. (`repo-tools`, `repo-multi-agent`)
 
 ## Keep tools in distribution
 
-- **Use the formats the model was trained on.** The patch format and shell tool the coding model learned work best. A wrapper tool does well when its name, arguments, and output mirror the command underneath. A dedicated git tool plus a rule to use only it fully stopped raw terminal git calls. (`codex-prompting`)
+- **Use the formats the model was trained on.** The patch format and shell tool the coding model learned work best. A wrapper tool does well when its name, arguments, and output mirror the command underneath. A dedicated git tool plus a rule to use only it fully stopped raw terminal git calls. Codex ships its patch tool as freeform text constrained by a grammar: "do not wrap the patch in JSON". (`codex-prompting`, `repo-tools`)
 - **Return structured fields, not instructions mixed into text.** Perplexity's voice tools return JSON with separate fields for user-facing text and behavior flags like "repeat verbatim", which made tool use more stable than spoken text with inline directions. (`perplexity-voice`)
 
 ## Keep the tool set small
@@ -28,11 +31,12 @@ Which tools an agent gets and how to shape them: what earns a tool its place, ho
 - **Overlap matters more than count.** Some systems handle 15 or more distinct tools while others fail with fewer than 10 overlapping ones. Improve names and descriptions before splitting into more agents. (`practical-guide`)
 - **Fewer, consolidated tools worked better for the data agent.** Exposing its full overlapping tool set confused it, so the team restricted and merged tools. Perplexity likewise narrowed to under ten core tools, with system-prompt instructions on when and how to call each. (`data-agent`, `perplexity-voice`)
 - **Give each task only the tools it needs, with small schemas.** A deliberately wasteful support agent exposed every tool on every request. Trimming tools and payloads was part of the first round that took quality from 0.51 to 0.98, in a simulation, not a benchmark. (`cost-quality`)
-- **Load tools on demand.** The Codex harness uses deferred discovery, so integrations, custom tools, skills, and plugins surface only when needed instead of sitting in context. (`gpt56-efficiency`)
+- **Load tools on demand.** The Codex harness uses deferred discovery, so integrations, custom tools, skills, and plugins surface only when needed instead of sitting in context. In the repo, tool search runs BM25 over deferred tool metadata and exposes matches for the next model call. Installing a tool is allowed only after search fails, and only for the exact tool the user named. (`gpt56-efficiency`, `repo-tools`)
 
 ## Keep tool output from flooding context
 
-- **Cap output and keep the head and tail.** Truncate at about 10,000 tokens, estimating tokens as bytes divided by four, with half the budget for the start, half for the end, and a marker between. The shell does the same per command, and the harness default is 10,000 unless the model asks for a different limit. (`codex-prompting`, `computer-env`, `gpt56-efficiency`)
+- **Cap output and keep the head and tail.** Truncate at about 10,000 tokens, estimating tokens as bytes divided by four, with half the budget for the start, half for the end, and a marker between. The shell does the same per command, and the harness default is 10,000 unless the model asks for a different limit. Codex's shell tool returns output or a session id to poll, and reports the original token count so the model knows how much was cut. Connector tool descriptions are capped too, at 400 tokens each and labeled untrusted. (`codex-prompting`, `computer-env`, `gpt56-efficiency`, `repo-tools`, `repo-context`)
+- **Give the agent tools over its own context.** Codex exposes one tool that returns the tokens left in the window and another that starts a fresh window without touching environment state. (`repo-tools`)
 - **Return only decision-critical fields.** Tool outputs "can dominate input tokens". Don't accept blob parameters or the whole conversation, request only needed fields and say why for sensitive ones, and don't return internals or secrets "just in case". (`cost-quality`, `great-chatgpt-app`)
 - **Let code move the data and the model make the judgment.** When an agent pulls 100 filings and filters them by date, code should run the independent calls in parallel and process results outside the context window, leaving the model only what needs judgment. (`gpt56-guide`)
 - **Batch independent calls.** Decide every file you need first, read them in one parallel batch, and list the calls together followed by their outputs. The shell runs several commands at once in separate sessions and streams their output. (`codex-prompting`, `computer-env`)
@@ -51,8 +55,8 @@ Which tools an agent gets and how to shape them: what earns a tool its place, ho
 ## Where the posts disagree
 
 - **How much a tool should return.** `great-chatgpt-app` (2025-11-24) and `cost-quality` (2026-09-14) say return only the fields the decision needs. `chatgpt-apps-lessons` (2026-02-04) says send as much as possible in the first response, because each call takes seconds and lazy loading backfires. Its own fix narrows the gap: front-load, but route UI-only data to a channel the model never sees.
-- **Load tools on demand or keep the list fixed.** `gpt56-efficiency` (2026-07-29) defers tool discovery until needed. `agent-loop` (2026-01-23) says changing tools mid-conversation breaks the prompt cache, and `cost-quality` (2026-09-14) keeps the full tool list constant and restricts per request. The posts don't say how deferred discovery avoids the cache break.
+- **Load tools on demand or keep the list fixed.** `gpt56-efficiency` (2026-07-29) defers tool discovery until needed. `agent-loop` (2026-01-23) says changing tools mid-conversation breaks the prompt cache, and `cost-quality` (2026-09-14) keeps the full tool list constant and restricts per request. The posts don't say how deferred discovery avoids the cache break. Neither does the Codex repo (2026-09-26 snapshot): its AGENTS.md bans context changes that cause cache misses (`repo-agents-md`) while its tool search adds tools for the next call (`repo-tools`).
 - **What MCP is for.** `devs-2025` (2025-12-30) counts MCP among the conventions that reduce coupling. `app-server` (2026-02-04) found it the wrong shape for exposing a whole agent session to a UI. They describe different jobs: exposing tools versus exposing an agent.
 
 ## Key source articles
-`great-chatgpt-app` · `codex-prompting` · `chatgpt-apps-lessons` · `perplexity-voice` · `private-mcp` · `skyscanner-mcp` · `gpt56-efficiency` · `practical-guide`
+`great-chatgpt-app` · `codex-prompting` · `repo-tools` · `chatgpt-apps-lessons` · `perplexity-voice` · `private-mcp` · `skyscanner-mcp` · `gpt56-efficiency` · `practical-guide`
