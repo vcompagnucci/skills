@@ -12,7 +12,7 @@ What a skill is, how its description routes it, how a repo's instruction file ma
 - **Package a workflow once it works.** Instructions, references and scripts, so it isn't retaught. The data agent packaged recurring analyses like weekly reports after usage showed the repetition. Alpic turned lessons it kept rediscovering into a framework plus a skill covering ideation through deployment. (`codex-maxxing`, `data-agent`, `chatgpt-apps-lessons`)
 - **Repeated prompting becomes a skill, and a reliable skill becomes a scheduled job.** "Skills define the method and scheduled tasks define the schedule." Keep each skill to one job, start from 2 to 3 concrete use cases, and don't schedule what isn't reliable by hand. (`codex-best-practices`)
 - **Taste can be a skill too.** OpenAI's frontend skill lists defaults, hard rules, named failures to reject, and questions to check the result against. It has the agent write a visual thesis and content plan before any code. (`frontends`)
-- **Skills are a shared convention, not tied to one runtime.** Alongside AGENTS.md and MCP, they let agent tooling move between products and UIs. OpenAI's April 2026 SDK post lists progressive disclosure via skills among the primitives frontier harnesses are converging on, next to MCP, AGENTS.md, shell and patch-based edits. (`devs-2025`, `agents-sdk-evolution`)
+- **Skills are a shared convention, not tied to one runtime.** Alongside AGENTS.md and MCP, they let agent tooling move between products and UIs. OpenAI's April 2026 SDK post lists progressive disclosure via skills among the building blocks frontier harnesses are converging on, next to MCP, AGENTS.md, shell and patch-based edits. (`devs-2025`, `agents-sdk-evolution`)
 
 ## The description is routing logic
 

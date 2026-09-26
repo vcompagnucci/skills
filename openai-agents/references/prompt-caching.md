@@ -5,13 +5,13 @@ Why an agent loop depends on caching, and how to assemble prompts that keep hitt
 ## Why it matters
 
 - **The loop is quadratic in bytes, and caching makes sampling linear.** Each iteration resends the whole growing prompt, so Codex builds every new prompt as an exact prefix extension of the last. "When we get cache hits, sampling the model is linear rather than quadratic." (`agent-loop`)
-- **Caching repeated prefixes is a basic primitive for long-running agents.** The system prompt, tools and schemas repeat on every call. (`devs-2025`)
+- **Caching repeated prefixes is a basic building block for long-running agents.** The system prompt, tools and schemas repeat on every call. (`devs-2025`)
 - **Carrying reasoning forward helps the cache too.** OpenAI measured 40 to 80% better cache utilization in internal benchmarks when reasoning state was preserved between turns. (`responses-api`)
 
 ## Assembly order
 
 - **Stable first, variable last.** Instructions, policy, tool definitions and output schema first, customer data at the end. (`cost-quality`)
-- **Treat model-visible history as append-only.** New messages, tool results and environment updates go at the end, never inserted earlier. OpenAI credits this for Codex's high cache hit rates. The Codex repo enforces it at code review: its AGENTS.md says "No history rewrite - the context must be built up incrementally" and to avoid context changes "that cause cache misses", and a shipped review skill checks both. (`gpt56-efficiency`, `repo-agents-md`, `repo-review`)
+- **Treat model-visible history as append-only.** New messages, tool results and environment updates go at the end, never inserted earlier. OpenAI credits this for Codex's high cache hit rates. The Codex repo enforces it at code review. Its AGENTS.md says "No history rewrite - the context must be built up incrementally" and to avoid context changes "that cause cache misses", and a shipped review skill checks both. (`gpt56-efficiency`, `repo-agents-md`, `repo-review`)
 - **Record config changes as a new message.** When the sandbox or approval mode changes, Codex appends a new permissions message. When the working directory changes, it appends a new environment message. It never edits the old one. World-state sections are sent as diffs and re-emitted only when they change. (`agent-loop`, `repo-context`)
 - **List tools in a deterministic order.** A real Codex bug: tools from external servers came back in inconsistent order and missed the cache. (`agent-loop`, `gpt56-efficiency`)
 - **Keep runtime settings out of tool definitions.** Approval policies are applied at execution time, so changing them doesn't touch the prefix. (`gpt56-efficiency`)

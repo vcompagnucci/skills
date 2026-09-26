@@ -1,6 +1,8 @@
 # Glossary
 
-Every term the 125 sources coin or use in their own sense, in alphabetical order. OpenAI product names that aren't concepts are left out.- **Ad-hoc notes.** User-requested memory edits dropped as small files for consolidation to apply. (`repo-memory`)
+Every term the 125 sources coin or use in their own sense, in alphabetical order. OpenAI product names that aren't concepts are left out.
+
+- **Ad-hoc notes.** User-requested memory edits dropped as small files for consolidation to apply. (`repo-memory`)
 - **Agent legibility.** Optimizing the repo so an agent can reason about the whole domain from it. (`harness-eng`)
 - **Agent loop / harness.** The core logic orchestrating user, model, and tool calls. (`agent-loop`)
 - **Agentic loop.** A structured loop for reasoning and acting, where the model investigates, consults tools, and reports back, keeping private notes between steps. (`responses-api`)
@@ -20,7 +22,7 @@ Every term the 125 sources coin or use in their own sense, in alphabetical order
 - **Compaction item.** A model-produced, token-efficient representation of prior conversation state carried into the next window. (`computer-env`)
 - **Compaction.** Replacing the conversation input with a smaller representative set of items once a token threshold is exceeded. (`agent-loop`)
 - **Compatibility gates.** Checks run before a migration ships: endpoint support, cache topology, context and cost, parsers, state replay, mixed-model routing. (`repo-prompting`)
-- **Completion audit / blocked audit.** The required requirement-by-requirement checks before the agent may mark a goal complete or blocked. (`repo-goals`)
+- **Completion audit / blocked audit.** The requirement-by-requirement checks the agent must pass before it may mark a goal complete or blocked. (`repo-goals`)
 - **Context asymmetry.** Each party has partial knowledge and none sees the whole system. (`chatgpt-apps-lessons`)
 - **Context checkpoint compaction.** Summarizing the thread into a handoff for a fresh model instance. (`repo-context`)
 - **Context package.** The structured output of the context-builder stage, input to the reasoning stage. (`responses-year`)
@@ -56,13 +58,13 @@ Every term the 125 sources coin or use in their own sense, in alphabetical order
 - **Harness engineering.** Designing environments, feedback loops, and control systems so agents do reliable work. (`harness-eng`)
 - **Harness.** The execution system around the model: state, streaming, tools, sandbox and approval policy, carrying work across turns. In the improvement-loop sense, the full contract around the model: instructions, tools, routing, output requirements, validation. (`codex-platform`, `improvement-loop`)
 - **Hill to climb.** A reviewed, measured finding packaged as an eval target for the coding agent. (`tax-agents`)
-- **Human-supervised agent review.** Repeated investigator-agent audits of each flagged task, judged finally by a researcher. (`coding-evals-noise`)
+- **Human-supervised agent review.** Repeated investigator-agent audits of each flagged task, with a researcher making the final call. (`coding-evals-noise`)
 - **In distribution.** Tool schemas and outputs formatted like data the model likely saw in training. (`perplexity-voice`)
 - **Independent forward-testing.** Validating a skill by having a fresh sub-agent use it on a realistic request without hints. (`repo-skills`)
 - **Independent web index.** A crawler-built list of public URLs, built without user data, used to decide what can be fetched automatically. (`link-safety`)
 - **Input filter.** A function that rewrites what the receiving agent sees at a handoff. (`sdk-handoffs`)
 - **Intervention / process / outcome-property evaluations.** The three archetypes: detect why behavior changed after a controlled change, detect which valid solution path was taken, predict a measurable output property such as reward hacking. (`cot-monitorability`)
-- **Item / Turn / Thread.** Atomic typed I/O unit with a lifecycle / one unit of agent work from user input / durable session of turns. (`app-server`)
+- **Item / Turn / Thread.** An item is an atomic typed I/O unit with a lifecycle, a turn is one unit of agent work from user input, and a thread is a durable session of turns. (`app-server`)
 - **Items.** Polymorphic output units that record each thing the model said or did, in order. (`responses-api`)
 - **Iterative repair loop.** A closed loop where an agent produces output, validates it, and uses the feedback to improve the next pass. (`repair-loops`)
 - **Know / do / show.** The three ways an app adds value: new context, real actions, better presentation. (`great-chatgpt-app`)
@@ -92,7 +94,7 @@ Every term the 125 sources coin or use in their own sense, in alphabetical order
 - **Pre-flight.** The guardrail stage that runs before the input checks and the model call (PII, moderation). (`governance`)
 - **Programmatic tool calling.** The model writes code that calls tools and filters or aggregates their outputs outside its context window. (`gpt56-guide`)
 - **Progressive disclosure.** A skill root that routes to supporting material so the model reads only what the moment needs. (`astra-skills`, `repo-skills`)
-- **Proof gap.** A missing fact that could change the judgment about a finding; while one remains the finding cannot be confirmed. (`security-scanners`)
+- **Proof gap.** A missing fact that could change the judgment about a finding. While one remains, the finding can't be confirmed. (`security-scanners`)
 - **Queue vs Steer.** A follow-up that waits for the current turn vs one injected into the turn in progress. (`codex-remote`)
 - **Quick memory pass.** The bounded lookup (summary, then handbook grep, then 1-2 files) before main work. (`repo-memory`)
 - **Rapid response loop.** Continuous cycle of automated attack discovery, adversarial training, and system fixes. (`atlas-injection`)

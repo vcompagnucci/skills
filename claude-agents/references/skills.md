@@ -1,6 +1,6 @@
 # Skills
 
-How Anthropic builds, structures, and improves skills, from the hundreds it runs internally and from what customers built. The shift behind them: Anthropic stopped building a separate agent per domain and now gives one general agent its expertise as skills. Cookbook notebooks add the API mechanics.
+How Anthropic builds, structures, and improves skills, from the hundreds it runs internally and from what customers built. The shift behind them is that Anthropic stopped building a separate agent per domain and now gives one general agent its expertise as skills. Cookbook notebooks add the API mechanics.
 
 ## Why skills exist
 
@@ -29,7 +29,7 @@ How Anthropic builds, structures, and improves skills, from the hundreds it runs
 - **Don't state the obvious.** Push Claude off its defaults, like the frontend design skill steering away from Inter and purple gradients. Name the defaults concretely, and ask for variation across runs, since even a full aesthetics prompt keeps converging on the same font (Space Grotesk). (`skills`, `cb-frontend`)
 - **The gotchas section carries the most information.** Build it from real failures. (`skills`)
 - **Write principles and their why, not rules.** "Construct the skill as though you're instructing a smart person, not like you're programming a computer." Don't railroad a reusable skill. (`warp`, `skills`)
-- **Keep SKILL.md a menu that points to files.** The docx skill routes by decision tree to workflows and reads its long references only when that path is chosen. Put success criteria in the skill so Claude can check itself. (`create-skills`)
+- **Keep SKILL.md a menu that points to files.** The docx skill routes by decision tree to workflows and reads its long references only when it takes that path. Put success criteria in the skill so Claude can check itself. (`create-skills`)
 - **Put deterministic or expensive work in code.** The PDF skill's script extracts form fields without loading the script or the PDF into context. (`agent-skills`)
 - **Ask document skills for small, focused files.** Generation is slow (about 2 minutes for a formatted Excel file, 40-60 seconds for a simple PDF), and 2-3 sheets per workbook is the reliable unit. Build big dashboards as several files and combine them in code. (`cb-skills-intro`, `cb-skills-finance`)
 - **Test triggering and execution separately.** An NDA-review skill should stay dormant for "review this employment agreement". (`create-skills`)
@@ -37,7 +37,7 @@ How Anthropic builds, structures, and improves skills, from the hundreds it runs
 ## Skills that improve themselves
 
 - **Feedback dies with the session unless you capture it.** Warp pairs a base skill with an improver skill that runs on a schedule, compares suggestions to how people responded, and opens a small PR to the base skill. A human approves, and the next run inherits it. (`warp`)
-- **Capture feedback where people already work, and assume some of it is wrong.** A little detailed feedback from a senior engineer beats many thumbs. Skills aren't memory: they are stable and changed on purpose. (`warp`)
+- **Capture feedback where people already work, and assume some of it is wrong.** A little detailed feedback from a senior engineer beats many thumbs. Skills aren't memory. They are stable, and people change them on purpose. (`warp`)
 - **Build skills by doing the work with Claude.** A 617-line investigation skill was written turn by turn during a real incident, and a lessons log the agent appends to feeds the next run. (`ci-first-responder`)
 - **Serve skills fresh.** When data models change several times a day, a stale skill gives "last Tuesday's wrong answer with full confidence". Claude Tag re-reads the skills folder every conversation. (`slack-analytics`)
 
