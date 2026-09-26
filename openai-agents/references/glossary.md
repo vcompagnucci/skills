@@ -1,7 +1,6 @@
 # Glossary
 
-Every term the 82 sources coin or use in their own sense, in alphabetical order. OpenAI product names that aren't concepts are left out.
-- **Ad-hoc notes.** User-requested memory edits dropped as small files for consolidation to apply. (`repo-memory`)
+Every term the 125 sources coin or use in their own sense, in alphabetical order. OpenAI product names that aren't concepts are left out.- **Ad-hoc notes.** User-requested memory edits dropped as small files for consolidation to apply. (`repo-memory`)
 - **Agent legibility.** Optimizing the repo so an agent can reason about the whole domain from it. (`harness-eng`)
 - **Agent loop / harness.** The core logic orchestrating user, model, and tool calls. (`agent-loop`)
 - **Agentic loop.** A structured loop for reasoning and acting, where the model investigates, consults tools, and reports back, keeping private notes between steps. (`responses-api`)

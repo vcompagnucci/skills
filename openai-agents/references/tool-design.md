@@ -27,7 +27,7 @@ Which tools an agent gets and how to shape them: what earns a tool its place, ho
 
 ## Keep tools in distribution
 
-- **Use the formats the model was trained on.** The patch format and shell tool the coding model learned work best. A wrapper tool does well when its name, arguments, and output mirror the command underneath. A dedicated git tool plus a rule to use only it fully stopped raw terminal git calls. Codex ships its patch tool as freeform text constrained by a grammar: "do not wrap the patch in JSON". (`codex-prompting`, `repo-tools`)
+- **Use the formats the model was trained on.** The patch format and shell tool the coding model learned work best. A wrapper tool does well when its name, arguments, and output mirror the command underneath. A dedicated git tool plus a rule to use only it fully stopped raw terminal git calls. Codex ships its patch tool as freeform text constrained by a grammar: "do not wrap the patch in JSON". The GPT-5.1 guide measured the switch: the built-in freeform patch tool "decreased apply_patch failure rates by 35%". (`codex-prompting`, `repo-tools`, `gpt51-prompting`)
 - **Return structured fields, not instructions mixed into text.** Perplexity's voice tools return JSON with separate fields for user-facing text and behavior flags like "repeat verbatim", which made tool use more stable than spoken text with inline directions. (`perplexity-voice`)
 
 ## Keep the tool set small
@@ -62,4 +62,4 @@ Which tools an agent gets and how to shape them: what earns a tool its place, ho
 - **Not every capability needs a server.** Runme registers tools in the browser, because a server just for a tool endpoint would add infrastructure and move where data is handled. Early tunnel customers also had plain REST APIs, which is why the narrow path grew beyond MCP. (`repetitive-work`, `private-mcp`)
 
 ## Key source articles
-`great-chatgpt-app` · `codex-prompting` · `repo-tools` · `chatgpt-apps-lessons` · `perplexity-voice` · `private-mcp` · `gpt56-efficiency` · `practical-guide` · `sdk-context` · `claude-sdk-migration` · `sdk-tools` · `sdk-mcp` · `sdk-running` · `temporal-agents` · `api-slack-bot` · `agentic-commerce` · `cua` · `new-tools-agents` · `cua-daytona` · `chatgpt-agent`
+`great-chatgpt-app` · `codex-prompting` · `repo-tools` · `chatgpt-apps-lessons` · `perplexity-voice` · `private-mcp` · `gpt56-efficiency` · `practical-guide` · `sdk-context` · `claude-sdk-migration` · `sdk-tools` · `sdk-mcp` · `sdk-running` · `temporal-agents` · `api-slack-bot` · `agentic-commerce` · `cua` · `new-tools-agents` · `cua-daytona` · `chatgpt-agent` · `gpt51-prompting`

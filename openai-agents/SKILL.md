@@ -1,11 +1,11 @@
 ---
 name: openai-agents
-description: Building your own agent the way OpenAI describes it, as concepts that work on any stack. Covers whether to build one, single vs multi-agent, the harness and long runs, tools and MCP, context and memory, skills, prompt caching, cost and reasoning effort, evals, and security and sandboxing. Cites 117 OpenAI sources: developers.openai.com/blog, openai.com engineering and security posts, the practical guide to building agents, Agents SDK docs, cookbook articles, and the open-source Codex harness (its system prompts, compaction, approvals, memory, and tools).
+description: Building your own agent the way OpenAI describes it, as concepts that work on any stack. Covers whether to build one, single vs multi-agent, the harness and long runs, tools and MCP, context and memory, skills, prompt caching, cost and reasoning effort, evals, and security and sandboxing. Cites 125 OpenAI sources: developers.openai.com/blog, openai.com engineering and security posts, the practical guide to building agents, Agents SDK docs, cookbook articles, and the open-source Codex harness (its system prompts, compaction, approvals, memory, and tools).
 ---
 
 # OpenAI agents
 
-This skill holds what OpenAI has published that helps you build your own agent: 117 sources from the [developer blog](https://developers.openai.com/blog), the [Engineering category](https://openai.com/news/engineering/) of openai.com, 23 agent posts from other openai.com categories (including the Agents API launch), *A practical guide to building agents* (2025), 16 concept pages and page groups from the Agents SDK and API docs, 29 [cookbook](https://developers.openai.com/cookbook/topic/agents/) articles, two Codex guides, and the open-source [Codex harness](https://github.com/openai/codex), from April 2025 to September 2026. Keys starting with `repo-` cite the harness's own prompts and tool descriptions: what OpenAI ships, not what it argues. It keeps the concepts and drops OpenAI platform specifics. Citations use short keys like (`harness-eng`), and `references/article-index.md` links each key to its source.
+This skill holds what OpenAI has published that helps you build your own agent: 125 sources from the [developer blog](https://developers.openai.com/blog), the [Engineering category](https://openai.com/news/engineering/) of openai.com, 23 agent posts from other openai.com categories (including the Agents API launch), *A practical guide to building agents* (2025), 16 concept pages and page groups from the Agents SDK and API docs, 35 [cookbook](https://developers.openai.com/cookbook/topic/agents/) articles, two Codex guides, two sample repos, and the open-source [Codex harness](https://github.com/openai/codex), from April 2025 to September 2026. Keys starting with `repo-` cite the harness's own prompts and tool descriptions: what OpenAI ships, not what it argues. It keeps the concepts and drops OpenAI platform specifics. Citations use short keys like (`harness-eng`), and `references/article-index.md` links each key to its source.
 
 ## The one-sentence thesis
 
@@ -45,7 +45,7 @@ Each idea is developed, with numbers and every source, in the matching reference
 - **`references/safety-and-containment.md`.** Prompt injection, guardrails, sandboxes, network and secrets, approvals, monitoring agents.
 - **`references/agents-in-production.md`.** Case studies with a build lesson, humans working with agents, voice agents, escalation.
 - **`references/glossary.md`.** 135 coined terms, each with its source.
-- **`references/article-index.md`.** All 117 sources with link, key, date, author, and one-line thesis, grouped by theme. Repo entries list the folders they draw on.
+- **`references/article-index.md`.** All 125 sources with link, key, date, author, and one-line thesis, grouped by theme. Repo entries list the folders they draw on.
 
 ## How to answer
 
@@ -73,4 +73,4 @@ Then, before sending:
 
 ## Scope
 
-Only these 117 sources, up to September 2026, chosen for building an agent. Not covered: OpenAI API and product specifics (endpoints, parameters, Codex settings, pricing), launches, customer stories without a build lesson, OpenAI's infrastructure posts, and videos or talks. For current OpenAI API facts, use their live docs.
+Only these 125 sources, up to September 2026, chosen for building an agent. Not covered: OpenAI API and product specifics (endpoints, parameters, Codex settings, pricing), launches, customer stories without a build lesson, OpenAI's infrastructure posts, and videos or talks. For current OpenAI API facts, use their live docs.
