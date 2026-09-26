@@ -5,7 +5,7 @@ description: Building your own agent the way OpenAI describes it, as concepts th
 
 # OpenAI agents
 
-This skill holds what OpenAI has published that helps you build your own agent: 45 sources from the [developer blog](https://developers.openai.com/blog), the [Engineering category](https://openai.com/news/engineering/) of openai.com, a few agent posts from other openai.com categories, *A practical guide to building agents* (2025), and four essay-like [cookbook](https://developers.openai.com/cookbook/topic/agents/) articles, from April 2025 to September 2026. It keeps the concepts and drops OpenAI platform specifics. Citations use short keys like (`harness-eng`), and `references/article-index.md` links each key to its source.
+This skill holds what OpenAI has published that helps you build your own agent: 45 sources from the [developer blog](https://developers.openai.com/blog), the [Engineering category](https://openai.com/news/engineering/) of openai.com, 7 agent posts from other openai.com categories, *A practical guide to building agents* (2025), and four essay-like [cookbook](https://developers.openai.com/cookbook/topic/agents/) articles, from April 2025 to September 2026. It keeps the concepts and drops OpenAI platform specifics. Citations use short keys like (`harness-eng`), and `references/article-index.md` links each key to its source.
 
 ## The one-sentence thesis
 
@@ -64,11 +64,11 @@ Does the question name a post, an author, or a coined term?
 Then, before sending:
 
 - **Does it clash with the user's own decisions, their project's CLAUDE.md or AGENTS.md, or their notes?** Theirs win. Show both positions. This skill reports what OpenAI says. It doesn't decide for them.
-- **Is the position contested or did it change?** State it as the authors' position, unsoftened, with the dates. The known ones: a stateless vs a stateful loop, prescribed routines vs objectives, short prompts vs careful setup, starting with the biggest model vs low effort, loading tools on demand vs a fixed list, minimal review gates vs humans on approvals, and "ask first" boundaries vs overeager agents.
+- **Is the position contested or did it change?** State each side as its authors' position, unsoftened, with the dates and the case each side says it fits. Don't close with your own rule of thumb: a verdict the posts never gave reads as OpenAI's. The known ones: a stateless vs a stateful loop, prescribed routines vs objectives, short prompts vs careful setup, starting with the biggest model vs low effort, loading tools on demand vs a fixed list, minimal review gates vs humans on approvals, and "ask first" boundaries vs overeager agents.
 - **Every bullet or paragraph ends with its key(s).** Use the key printed on the reference bullet you took it from. Give the full URL when the user wants to read the source. An uncited claim can't be checked and blurs into the model's own opinion.
 - **Use their numbers instead of paraphrasing.** They're what the corpus adds over the model's defaults.
-- **Say when a source is thin.** Guest posts are one team's experience, the cost cookbook is a simulation, and several posts are about OpenAI's own products with lessons attached. The index says which.
-- **Never answer from outside the corpus in their voice.** If the user wants Anthropic's view too, use the `claude-agents` skill for that side and keep the two apart.
+- **Say when a source is thin.** Guest posts (Dagster, Skyscanner, Alpic, Perplexity) are one team's experience and the cost cookbook (`cost-quality`) is a simulation. The reference bullets mark both, so carry the caveat into the answer.
+- **Never answer from outside the corpus in their voice.** Generic advice attributed to OpenAI is the one failure the user can't detect. If the user wants Anthropic's view too, use the `claude-agents` skill for that side and keep the two apart.
 
 ## Scope
 
