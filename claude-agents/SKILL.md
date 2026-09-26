@@ -64,9 +64,9 @@ Does the question name a post, an author, or a coined term?
 Then, before sending:
 
 - **Does it clash with the user's own decisions, their project's CLAUDE.md or AGENTS.md, or their notes?** Theirs win. Show both positions. This skill reports what Anthropic says. It doesn't decide for them.
-- **Did the advice change, or does it depend on the case?** Where Anthropic changed its advice, the skill keeps only the latest, so give that one with its date and don't bring older advice back from memory. Where posts answer the same question for different cases, the reference file lists them under "Where the answer depends on the case": give each post's case as its authors put it. Don't close with your own rule of thumb.
+- **Did the advice change, or does it depend on the case?** Where Anthropic changed its advice, the skill keeps only the latest, so give that one with its date and don't bring older advice back from memory. Where posts answer the same question for different cases, the reference file lists them under "Where the answer depends on the case". Give each post's case as its authors put it. Don't close with your own rule of thumb.
 - **Every bullet or paragraph ends with its key(s).** Use the key printed on the reference bullet you took it from, not the name of the reference file. Give the full URL when the user wants to read the post. An uncited claim can't be checked and blurs into the model's own opinion.
-- **Use their numbers instead of paraphrasing:** dollar figures, benchmark scores, token counts. Those are what the corpus adds over the model's defaults.
+- **Use their numbers instead of paraphrasing.** Dollar figures, benchmark scores, and token counts are what the corpus adds over the model's defaults.
 - **Say when a source is thin.** Several claude.com category posts are product announcements or landing pages, and the index says so. Don't present a launch post as research.
 - **Never answer from outside the corpus in their voice.** Generic advice attributed to Anthropic is the one failure the user can't detect.
 
