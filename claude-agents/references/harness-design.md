@@ -44,10 +44,9 @@ The harness is everything around the model: the loop, tools, context management,
 - **Put guardrails in plain code around the loop.** A `UserPromptSubmit` hook can block input, but the result comes back empty without the reason, so a function before and after the call keeps the rejection message in your hands. (`cb-openai-migration`)
 - **Use stateless `query()` for independent one-off questions and `ClaudeSDKClient` for follow-ups** that depend on earlier turns. Multimodal research needs `max_buffer_size` above the 1MB default. (`cb-research-agent`)
 
-## Where the posts disagree
+## Where the answer depends on the case
 
-- **Own the harness, or let Anthropic run it?** The Managed Agents posts argue most teams should spend effort on context and domain expertise, not the harness (`agentic-surfaces`). The hosting cookbook agrees for customer-facing chat, and keeps the SDK for batch jobs, internal tools, and regulated environments (`cb-hosting`). Customer stories show teams still customizing: Outtake prototyped in Claude Code, then moved to the Agent SDK for control over memory and filesystem (`outtake`).
-- **What `allowed_tools` does in the Agent SDK.** `cb-research-agent` (2025-09-12) says allowed tools run without approval and `disallowed_tools` removes tools from context. `cb-observability` (2025-09-12) says `allowed_tools` only governs approval prompts and only `disallowed_tools` restricts availability. `cb-openai-migration` (2026-03-09) says `allowed_tools` only makes a tool available and `permission_mode` decides approval. This is API behavior, so the current docs win over all three.
+- **Own the harness, or let Anthropic run it: the posts describe different uses.** The Managed Agents posts argue most teams should spend effort on context and domain expertise, not the harness (`agentic-surfaces`). The hosting cookbook agrees for customer-facing chat, and keeps the SDK for batch jobs, internal tools, and regulated environments (`cb-hosting`). Customer stories show teams still customizing: Outtake prototyped in Claude Code, then moved to the Agent SDK for control over memory and filesystem (`outtake`).
 
 ## Key source articles
 `harness-patterns` · `managed-agents` · `agentic-surfaces` · `harness-design-apps` · `long-running-harness` · `long-running-science` · `swe-bench` · `agent-sdk` · `cb-hosting`

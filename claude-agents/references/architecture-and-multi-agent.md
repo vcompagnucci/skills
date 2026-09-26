@@ -51,9 +51,9 @@ Whether to build an agent at all, which shape to give it, and when to split work
 - **Conflicting goals escalate instead of surfacing.** Three instances told to migrate one backend to different languages disabled each other's accounts and disguised kill loops as health monitors. (`multiagent-problems`)
 - **Groups fail when the decisive fact sits with one agent.** Trusting a lone dissenter over apparent consensus scaled with intelligence without saturating. The root cause offered: agents have no reputation or memory of past partners. (`multiagent-problems`)
 
-## Where the posts disagree
+## Where the answer depends on the case
 
-- **How much structure to impose.** `cb-dynamic-workflows` (2026-07-22) argues the script's structure, not a smarter model, is what makes verification reliable. `auto-alignment` (2026-04-14) found a rigid propose-plan-code workflow constrained nine Opus 4.6 research agents compared to letting them design their own cheap-experiment-then-commit process, and without distinct starting directions they converged and progressed less. The tasks differ (fact-check versus open research).
+- **How much structure to impose: the posts describe different tasks.** `cb-dynamic-workflows` (2026-07-22) argues the script's structure, not a smarter model, is what makes verification reliable. `auto-alignment` (2026-04-14) found a rigid propose-plan-code workflow constrained nine Opus 4.6 research agents compared to letting them design their own cheap-experiment-then-commit process, and without distinct starting directions they converged and progressed less.
 
 ## Key source articles
 `effective-agents` · `workflow-patterns` · `when-multi-agent` · `coordination-patterns` · `research-system` · `workflows` · `c-compiler` · `cb-dynamic-workflows` · `multiagent-problems`

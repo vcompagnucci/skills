@@ -11,7 +11,6 @@ How Anthropic decides which tools an agent gets and how to write them. Tools are
 - **Return high-signal context, and make errors steer.** Drop fields like `uuid` and `mime_type`, and resolve IDs to names. A `response_format` enum let a Slack response use about a third of the tokens. Truncation notes and errors should say what to do next, not dump a traceback. (`writing-tools`, `commerce-agents`)
 - **Namespace tools by service.** `asana_search` versus `jira_search`. Prefix versus suffix naming had model-dependent effects in evals. (`writing-tools`)
 - **Design the interface instead of writing examples.** With Claude 5 models, examples narrow what the model tries, while expressive parameters, like a `status` enum, teach usage. (`ctx-eng`)
-- **But schemas don't show usage patterns.** For ambiguous parameters, 1-5 realistic examples in the definition raised accuracy on complex parameters from 72% to 90% (2025). This sits in tension with the Claude 5 advice above. (`advanced-tool-use`, `ctx-eng`)
 - **A deterministic retrieval tool can matter more than the model (research).** On 120 viral-sequence queries, agents without one scored 16.9% to 91.3%, and one model returned 106, then 15, then 5 sequences for the same query, shifting an inferred outbreak origin to 1922. A tool wrapping NCBI's APIs lifted every model above 90% and narrowed the gap between models. The authors hedge that better models may need it less. (`agents-in-biology`)
 
 ## Improve tools from evidence
