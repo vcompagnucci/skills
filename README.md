@@ -39,3 +39,26 @@ Or copy the `claude-agents/` folder into `~/.claude/skills/`.
 - It paraphrases the posts and quotes only short lines, each linked to its source. The full text of the posts isn't in this repo.
 - Some of the claude.com posts are product announcements with only a few real positions, and most cookbooks are code walkthroughs. The index says which, and cookbook keys start with `cb-` so you can tell a worked example from a measurement.
 - Prices, model names, and defaults are from September 2026 and will go out of date. For current API details, use the [Claude docs](https://docs.claude.com).
+
+## openai-agents
+
+The same idea for OpenAI: my agents answer questions about building an agent from what OpenAI published, as concepts that work on any stack, not OpenAI platform specifics. It cites 45 sources, from April 2025 to September 2026:
+
+- [developers.openai.com/blog](https://developers.openai.com/blog) (21 of 30 posts)
+- the [Engineering category](https://openai.com/news/engineering/) of openai.com (13 of 20 posts)
+- 7 agent posts from other openai.com categories, including *A practical guide to building agents*
+- 4 essay-like articles from the [OpenAI cookbook](https://developers.openai.com/cookbook/topic/agents/)
+
+It uses the same 10 topics as `claude-agents`, so you can compare the two file by file. Posts about OpenAI's own infrastructure, launches, and showcases are left out, and the article index says which.
+
+```
+openai-agents/
+  SKILL.md        thesis, 14 core ideas, how to answer
+  references/     10 topic files, a glossary of 62 terms, and the article index
+```
+
+```sh
+npx skills add vcompagnucci/skills --skill openai-agents
+```
+
+Same caveats as above: it's unofficial, it paraphrases with short quotes linked to each source, and some sources are guest posts or simulations, which the index marks.
