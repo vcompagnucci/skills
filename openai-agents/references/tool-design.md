@@ -4,7 +4,6 @@ Which tools an agent gets and how to shape them: what earns a tool its place, ho
 
 ## Decide which tools to give
 
-- **Inside an agent your product is a capability, not a destination.** Users don't arrive at a home page. The model decides when to bring your tool into a conversation as one of several it orchestrates. (`great-chatgpt-app`)
 - **Every tool should pass a know, do, or show test.** It adds context the model lacks (live, private, permissioned data), takes a real action for the user, or presents information better than text. If it does none of these, it adds nothing. (`great-chatgpt-app`)
 - **If you can't summarize the tool surface in one sentence, the model can't either.** List the jobs to be done, ask what the user can't do without you, and turn those gaps into a handful of named operations. (`great-chatgpt-app`)
 - **Prefer small composable actions over one pipeline tool.** Search, score, and send as three tools rather than one "run the full recruiting pipeline". Do your part, hand control back, and let the model pick the next tool. (`great-chatgpt-app`)

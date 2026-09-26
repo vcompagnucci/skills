@@ -30,7 +30,6 @@ Picking a model and a reasoning effort per step, and cutting cost without losing
 - **Context bloat costs money and triggers needless reasoning.** It also distracts the model. Codex caps tool output and surfaces tools and skills only when needed. The Agents API ships the same levers, loading tool definitions on demand and letting the agent filter tool results in code so only relevant ones reach context, as product claims without numbers. (`gpt56-efficiency`, `agents-api`)
 - **Reuse work already done.** Keeping reasoning across turns and compacting instead of truncating made the agent both better and cheaper, with about 6x fewer output tokens on ARC-AGI-3 (numbers in `context-engineering.md`). (`arc-agi-3`, `gpt56-guide`)
 - **Move work that doesn't change the outcome off the user's path.** Classification, lookups, the decision and the reply stay synchronous. QA, tags, summaries, audits and reporting go async or to batch. (`cost-quality`)
-- **Efficiency can also be trained in.** GPT-5.6 was trained on task success and efficiency together, to take a more direct path. OpenAI's claim about its own model. (`gpt56-efficiency`)
 
 ## Cut cost without cutting quality
 

@@ -50,7 +50,6 @@ Whether to build an agent at all, what one is made of, when to split work across
 - **When an agent misses, fix the system, not the output.** Without mid-run steering, the team added guardrails and skills (end-to-end tests, driving the app through browser devtools, QA smoke tests) and wrote down what good looks like. Ambiguous, judgment-heavy work still goes to interactive sessions. (`symphony`)
 - **Write the implicit team process down as a versioned workflow file.** Check out, mark in progress, link the PR, move to review, attach a video: humans did it but never documented it. The orchestrator itself is only a spec, and the first version was a single agent in tmux polling the tracker. (`symphony`)
 - **Orchestrator mechanics worth copying.** One authoritative state, bounded concurrency, stall detection that kills and retries silent workers, exponential backoff, stopping a run when its ticket leaves an active state, prompts that know whether this is a first run, a continuation, or a retry, one sanitized workspace per agent, restart recovery without a database, and secrets exposed as a tool instead of a token. Implementing the spec in six languages exposed its ambiguities. (`symphony`)
-- **Cheap supervision makes exploration cheap.** Speculative tasks and prototypes are trivial to file and throw away. PMs and designers file features directly and get back a review packet with a video of the feature working, and the agent shepherds CI, rebases, and flaky retries. (`symphony`)
 
 ## Where the answer depends on the case
 
