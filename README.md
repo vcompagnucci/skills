@@ -42,12 +42,12 @@ Or copy the `claude-agents/` folder into `~/.claude/skills/`.
 
 ## openai-agents
 
-The same idea for OpenAI: my agents answer questions about building an agent from what OpenAI published and shipped, as concepts that work on any stack, not OpenAI platform specifics. It cites 82 sources, from April 2025 to September 2026:
+The same idea for OpenAI: my agents answer questions about building an agent from what OpenAI published and shipped, as concepts that work on any stack, not OpenAI platform specifics. It cites 117 sources, from April 2025 to September 2026:
 
 - [developers.openai.com/blog](https://developers.openai.com/blog) (21 of 30 posts)
 - the [Engineering category](https://openai.com/news/engineering/) of openai.com (13 of 20 posts)
-- 17 agent posts from other openai.com categories, including *A practical guide to building agents* and the Agents API launch
-- 9 articles from the [OpenAI cookbook](https://developers.openai.com/cookbook/topic/agents/), 7 concept pages from the Agents SDK and API docs, and 2 Codex guides
+- 23 agent posts from other openai.com categories, including *A practical guide to building agents*, the Agents API launch, and the computer-using agent
+- 29 articles from the [OpenAI cookbook](https://developers.openai.com/cookbook/topic/agents/), 16 concept pages and page groups from the Agents SDK and API docs, and 2 Codex guides
 - the open-source [Codex harness](https://github.com/openai/codex): its system prompts for each model, compaction, approvals, memory, goals, review rubric, and tool descriptions (145 files in 13 groups)
 
 The harness shows what OpenAI ships, not only what it argues, and the skill says which of the two a claim comes from.
@@ -57,7 +57,7 @@ It uses the same 10 topics as `claude-agents`, so you can compare the two file b
 ```
 openai-agents/
   SKILL.md        thesis, 14 core ideas, how to answer
-  references/     10 topic files, a glossary of 129 terms, and the article index
+  references/     10 topic files, a glossary of 135 terms, and the article index
 ```
 
 ```sh
