@@ -1,6 +1,7 @@
 # Glossary
 
-Every term the 120 sources coin or use in their own sense, in alphabetical order.
+Every term the 121 sources coin or use in their own sense, in alphabetical order.
+
 - **Ablation.** Removing individual system-prompt lines to measure each line's impact. (`postmortem-apr-2026`)
 - **Adversarial sampling.** Picking eval cases because today's model fails them, which measures that model's failure fingerprint instead of what matters. (`eval-hillclimb`)
 - **Adversarial verification.** A separate agent checks each agent's output against a rubric. (`workflows`)
