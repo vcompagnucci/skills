@@ -14,5 +14,6 @@ npx skills@latest add vcompagnucci/skills
 
 - **[claude-agents](./claude-agents/SKILL.md).** Building an agent the Anthropic way, from 121 sources: the engineering blog, claude.dev, claude.com, the docs' use-case guides, cookbooks, and research.
 - **[openai-agents](./openai-agents/SKILL.md).** The same for OpenAI, from 125 sources. It includes the open-source Codex harness, so you can check what OpenAI ships against what it argues.
+- **[support-evals](./support-evals/SKILL.md).** Evals for a customer-support agent, from the first tickets to production. It builds on Hamel Husain and Shreya Shankar's eval method, adds what Anthropic, OpenAI and support teams learned, and keeps the most recent answer wherever they disagree.
 
-Both use the same 10 topics, so you can compare them file by file. Neither is official. A job checks their sources every two weeks and opens a pull request when something new shows up.
+The two agent skills use the same 10 topics, so you can compare them file by file. Neither is official. A job checks their sources every two weeks and opens a pull request when something new shows up.
