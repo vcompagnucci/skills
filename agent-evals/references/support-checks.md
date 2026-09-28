@@ -41,6 +41,5 @@ Six things a support agent needs that generic eval methods skip. Apply them at w
 - Policy judges read the actual policy or procedure text and fail any answer that contradicts it (quoting 14 days when the window is 30).
 - Every tool call passes a policy check before it executes, in code.
 - No unrequested extra action, however helpful: an agent told to "make the customer feel better" hands out discounts nobody authorized.
-- Search the help center again when the conversation changes topic, instead of answering from the first retrieval.
 - The agent explains what's missing in a KYC case and re-requests documents. It never decides risk, and never gives investment advice.
 - Mandatory text (a disclosure, a legal notice) is rendered by the platform, not written by the model. An instruction followed 99 times in 100 is a compliance failure.
