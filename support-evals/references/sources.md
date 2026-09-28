@@ -1,0 +1,18 @@
+# Sources and licenses
+
+Checked on 2026-09-28. Where two sources disagreed on the same question, the most recent position was kept and the older one removed.
+
+## Adapted with attribution (Apache-2.0)
+
+- [ai-evals-course/evals-skills](https://github.com/ai-evals-course/evals-skills) at commit `80d5f7b` (2026-09-24), by Hamel Husain and Shreya Shankar: error discovery, code evaluators, judge prompts, judge validation, synthetic data, RAG evaluation, eval audits. Licensed under the Apache License 2.0. This skill adapts and condenses its method; it is not the original.
+
+## Ideas and numbers, in our own words
+
+- [Evals FAQ](https://hamel.dev/blog/posts/evals-faq/) by Hamel Husain and Shreya Shankar, updated 2026-09-18.
+- [cartwheel-homeworks](https://github.com/ai-evals-course/cartwheel-homeworks), commit `752bee3` (2026-09-27). No license: no text copied.
+- Anthropic: [Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) (2026-01-09), [Automating eval design and hillclimbing](https://claude.dev/blog/automating-eval-design-and-hillclimbing/) (2026-09-28), and the docs guide on [customer support agents](https://platform.claude.com/docs/en/about-claude/use-case-guides/customer-support-chat).
+- OpenAI: [Realtime eval guide](https://developers.openai.com/cookbook/examples/realtime_eval_guide) (2026-01-25), [voice agent evaluation](https://developers.openai.com/cookbook/examples/audio/voice_agent_evaluation) (2026-09-10), [cost and quality](https://developers.openai.com/cookbook/examples/agent_optimization/optimizing_agents_for_cost_and_quality) (2026-09-14).
+- Salesforce: [Measure system outcomes, not conversations](https://engineering.salesforce.com/how-to-evaluate-production-ai-agents-measure-system-outcomes-not-conversations/) (2026-08-17), [deterministic rendering](https://engineering.salesforce.com/how-agentforce-achieves-100-deterministic-rendering-for-ai-agent-ux/) (2026-09-03), [CRMArena-Pro](https://arxiv.org/abs/2505.18878) (2025-05-24).
+- Sierra: [Simulations](https://sierra.ai/blog/simulations-the-secret-behind-every-great-agent) (2025-08-19), [τ²-bench](https://sierra.ai/blog/benchmarking-agents-in-collaborative-real-world-scenarios) (2025-06-10), [Who monitors the monitors?](https://sierra.ai/blog/agent-monitoring) (2026-05-07), [Release governance](https://sierra.ai/blog/release-governance-guardrails-for-agents-at-scale) (2026-08-20).
+- Lorikeet: [Defence in depth](https://www.lorikeetcx.ai/blog/defence-in-depth-how-to-actually-manage-ai-accuracy-in-production) (2026-02-19), [Pockets of determinism](https://www.lorikeetcx.ai/blog/ai-architecture-for-complex-cx) (2026-04-15), [Auto QA](https://www.lorikeetcx.ai/blog/auto-qa-what-it-takes-to-qa-every-ticket) (2026-06-09), [What AI resolves in fintech](https://www.lorikeetcx.ai/blog/what-ai-resolves-in-fintech) (2026-08-19), [KYC automation](https://www.lorikeetcx.ai/blog/kyc-automation-with-ai-agents) (2026-08-21).
+- [Monzo Ops Agent](https://monzo.com/blog/engineering-the-future-of-customer-operations-the-monzo-ops-agent) (2026-06-04), [Block's Autohealing Moneybot](https://engineering.block.xyz/blog/autohealing-moneybot) (2026-08-28), [Nubank](https://building.nu.com/building-ai-agents-for-131-million-customers/) (2026-03-23), [Parahelp prompt design](https://parahelp.com/blog/prompt-design) (2025-08-27), [Parlant](https://parlant.io/docs/production/agentic-design) (2025-08-22).
