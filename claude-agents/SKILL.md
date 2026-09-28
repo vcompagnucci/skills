@@ -1,11 +1,11 @@
 ---
 name: claude-agents
-description: Building your own agent the Anthropic way (Messages API, Agent SDK, Managed Agents). Covers whether to build one, multi-agent patterns, harness and long runs, tools and MCP, context and memory, skills, prompt caching, cost, model and effort, evals, security and sandboxing, and use cases like customer support. Cites 120 sources: Anthropic's engineering blog, claude.dev, claude.com, docs guides, cookbooks, and research.
+description: Building your own agent the Anthropic way (Messages API, Agent SDK, Managed Agents). Covers whether to build one, multi-agent patterns, harness and long runs, tools and MCP, context and memory, skills, prompt caching, cost, model and effort, evals, security and sandboxing, and use cases like customer support. Cites 121 sources: Anthropic's engineering blog, claude.dev, claude.com, docs guides, cookbooks, and research.
 ---
 
 # Claude agents (Anthropic)
 
-This skill holds what Anthropic has published that helps you build your own agent: 120 sources from six places. Posts on the Claude Code team's blog at [claude.dev](https://claude.dev/), in the agents category of the [claude.com blog](https://claude.com/blog-category/agents), and on the [Anthropic engineering blog](https://www.anthropic.com/engineering), plus the docs' use-case guides, the agent notebooks in [claude-cookbooks](https://github.com/anthropics/claude-cookbooks), and agent posts on [anthropic.com/research](https://www.anthropic.com/research), from 2024 to September 2026. Citations use short keys like (`cost`). Keys starting with `uc-` are docs guides and `cb-` are cookbooks, which are worked examples, not measurements. Each entry in `references/article-index.md` links its key to the source.
+This skill holds what Anthropic has published that helps you build your own agent: 121 sources from six places. Posts on the Claude Code team's blog at [claude.dev](https://claude.dev/), in the agents category of the [claude.com blog](https://claude.com/blog-category/agents), and on the [Anthropic engineering blog](https://www.anthropic.com/engineering), plus the docs' use-case guides, the agent notebooks in [claude-cookbooks](https://github.com/anthropics/claude-cookbooks), and agent posts on [anthropic.com/research](https://www.anthropic.com/research), from 2024 to September 2026. Citations use short keys like (`cost`). Keys starting with `uc-` are docs guides and `cb-` are cookbooks, which are worked examples, not measurements. Each entry in `references/article-index.md` links its key to the source.
 
 ## The one-sentence thesis
 
@@ -44,8 +44,8 @@ Each idea is developed, with numbers and every source, in the matching reference
 - **`references/evals-and-verification.md`.** In-run checks, separate graders, building evals, infrastructure noise, eval awareness, postmortems.
 - **`references/safety-and-containment.md`.** Blast radius, sandboxes, credentials, approvals, auto mode, injection surfaces, agentic misalignment and sabotage research.
 - **`references/agents-in-production.md`.** Where to start, deployment patterns (Slack, on-call), and the docs' use-case playbooks: customer support, ticket routing, moderation, legal, commerce.
-- **`references/glossary.md`.** 170 coined terms, each with its source.
-- **`references/article-index.md`.** All 120 sources with link, key, date, author, and one-line thesis, grouped by theme.
+- **`references/glossary.md`.** 172 coined terms, each with its source.
+- **`references/article-index.md`.** All 121 sources with link, key, date, author, and one-line thesis, grouped by theme.
 
 ## How to answer
 
@@ -72,4 +72,4 @@ Then, before sending:
 
 ## Scope
 
-Only these 120 sources, up to September 2026, chosen for building an agent. Not covered: using Claude Code day to day, output formats for people, enterprise adoption stories, the rest of the claude.com blog and the docs, research outside agents, model cards, and courses or talks. Prices, model names, and defaults go out of date fast. For current API facts, the `claude-api` skill and the live docs win over this one.
+Only these 121 sources, up to September 2026, chosen for building an agent. Not covered: using Claude Code day to day, output formats for people, enterprise adoption stories, the rest of the claude.com blog and the docs, research outside agents, model cards, and courses or talks. Prices, model names, and defaults go out of date fast. For current API facts, the `claude-api` skill and the live docs win over this one.

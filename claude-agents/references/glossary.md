@@ -1,8 +1,8 @@
 # Glossary
 
 Every term the 120 sources coin or use in their own sense, in alphabetical order.
-
 - **Ablation.** Removing individual system-prompt lines to measure each line's impact. (`postmortem-apr-2026`)
+- **Adversarial sampling.** Picking eval cases because today's model fails them, which measures that model's failure fingerprint instead of what matters. (`eval-hillclimb`)
 - **Adversarial verification.** A separate agent checks each agent's output against a rubric. (`workflows`)
 - **Advisor strategy.** A faster, cheaper worker model calls a more intelligent model to check its plan and evaluate its work, and gets coaching only when needed. (`models-explained`, `cb-advisor`)
 - **Affordances (of agents).** The distinct ways agents perceive the actions a tool makes possible, unlike traditional software. (`writing-tools`)
@@ -87,6 +87,7 @@ Every term the 120 sources coin or use in their own sense, in alphabetical order
 - **Handoff tax.** The state loss, tokens, and latency paid each time an orchestrator delegates to a subagent. (`commerce-agents`)
 - **Hand-off vs delegation.** Hand-off transfers ownership of the conversation to a domain agent. Delegation keeps the orchestrator and bounces the domain agent in and out. (`commerce-agents`)
 - **Headroom.** The band between guaranteed resource allocation and the hard kill limit. (`infra-noise`)
+- **Hillclimbing.** Improving an app against an eval one change at a time, keeping a change only if a held-out split improves too. (`eval-hillclimb`)
 - **Infinite exploration.** An unscoped "investigate" that reads hundreds of files and fills the context. (`cc-best-practices`)
 - **Infrastructure noise.** Score variance from runtime configuration (resources, time limits, cluster health, latency) rather than model capability. (`infra-noise`)
 - **Initializer agent.** The first session, prompted to set up the environment future sessions need. (`long-running-harness`)

@@ -1,8 +1,8 @@
 # Article index
 
-The 120 sources the skill cites, grouped by main theme. The skill is scoped to building your own agent, so it keeps only sources with a lesson for that:
+The 121 sources the skill cites, grouped by main theme. The skill is scoped to building your own agent, so it keeps only sources with a lesson for that:
 
-- 8 of the 10 posts on claude.dev (2026-04-10 to 2026-09-25)
+- 9 of the 11 posts on claude.dev (2026-04-10 to 2026-09-28)
 - 26 of the 38 posts in claude.com's agents category (2025-09-29 to 2026-09-08)
 - 24 of the 25 posts on anthropic.com/engineering (2024-09-19 to 2026-05-25)
 - the 6 use-case guides in the docs (undated, keys `uc-*`)
@@ -118,6 +118,7 @@ Several category posts are product announcements with only a few real positions,
 
 ## Evals and verification (`references/evals-and-verification.md`)
 
+- **[Automating eval design and hillclimbing with Claude](https://claude.dev/blog/automating-eval-design-and-hillclimbing/)** (`eval-hillclimb`, 2026-09-28, Lance Martin). Build evals whose tasks mirror production and a grader you validate first, then hillclimb one attributable change at a time against a held-out split, reverting anything that raises train but not test.
 - **[A postmortem of three recent issues](https://www.anthropic.com/engineering/a-postmortem-of-three-recent-issues)** (`postmortem-sep-2025`, 2025-09-17, Sam McAllister). An infrastructure postmortem, not an agent-building post. Three overlapping serving bugs degraded Claude in August-September 2025, and noisy evaluations missed them, so quality evals must run continuously on production alongside user reports.
 - **[Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents)** (`agent-evals`, 2026-01-09, Mikaela Grace, Jeremy Hadfield, Rodrigo Olivares, and Jiri De Jonghe). Start agent evals early with a small set of real failures, grade outcomes rather than paths, and never trust a score until someone has read the transcripts.
 - **[Designing AI resistant technical evaluations](https://www.anthropic.com/engineering/AI-resistant-technical-evaluations)** (`hiring-evals`, 2026-01-21, Tristan Hume). Each Claude generation has defeated Anthropic's performance-engineering take-home, and the only design that still separates humans from the model is one that simulates novel, out-of-distribution work rather than real work.
