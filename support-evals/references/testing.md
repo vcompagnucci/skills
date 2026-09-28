@@ -43,7 +43,7 @@ Did this case pass all 5 baseline runs?
 └── No → capability case: report the score, never block
 ```
 
-- **CI holds** core journeys, every past production bug, and known edge cases, with code checks wherever possible, plus an untouched holdout and a rolling set of recent production failures.
+- **CI holds** core journeys, every past production bug, and known edge cases, with a code check for every case whose outcome is objective, plus an untouched holdout and a rolling set of recent production failures.
 - **Cadence.** Cheap checks on every change, expensive judges nightly and before each release. Retire or harden cases that always pass: they cost time and catch nothing.
 - **Quality gates come before cost.** Policy compliance, action correctness, security, and escalation accuracy must pass before cost or latency is compared.
 - **Release one versioned bundle.** Prompt, model, tools, and the help-center snapshot ship together and roll back together. Promote by re-pinning, with the required simulations passed, a named approver from compliance or CX, and a gradual rollout.

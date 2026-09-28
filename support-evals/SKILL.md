@@ -54,4 +54,4 @@ Open one reference at a time. Each is under 60 lines.
 
 ## Scope
 
-This skill covers evaluation only. It doesn't cover how to build the agent, write its tone, or secure it, except where a check needs it. Company-specific material (the behavior spec, policies, the failure taxonomy from real tickets) belongs in a private file next to this skill, not in it. Sources and licenses: `references/sources.md`.
+This skill covers evaluation only. It doesn't cover how to build the agent, write its tone, or secure it, except where a check needs it. Company-specific material (the behavior spec, policies, the failure taxonomy from real tickets) belongs in a private skill outside this repo, never in this one. Sources and licenses: `references/sources.md`.
