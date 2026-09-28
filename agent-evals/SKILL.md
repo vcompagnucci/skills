@@ -1,13 +1,15 @@
 ---
-name: support-evals
-description: Build and run evals for a customer-support agent, from reading the first tickets to monitoring production. Use when designing test cases, writing or validating an LLM judge, grading tool calls and account changes, testing escalation, multi-turn, or bilingual conversations, gating a release, or measuring a live agent. Merges Hamel Husain and Shreya Shankar's eval method with Anthropic's, OpenAI's, and support vendors' lessons, conflicts resolved.
+name: agent-evals
+description: Build and run evals for an AI agent, from reading the first conversations to monitoring production, with extra checks for customer-support agents. Use when designing test cases, reviewing traces for failure modes, writing or validating an LLM judge, grading tool calls and resulting state, testing escalation, multi-turn, or bilingual conversations, evaluating retrieval, gating a release, auditing an existing eval setup, or measuring a live agent. Merges Hamel Husain and Shreya Shankar's eval method with Anthropic's, OpenAI's, and support teams' lessons, conflicts resolved.
 ---
 
-# Support evals
+# Agent evals
 
-A process for evaluating a customer-support agent that reads tickets, answers from a help center, and takes actions on customer accounts. It merges the eval method of Hamel Husain and Shreya Shankar with what Anthropic, OpenAI, and support teams (Sierra, Lorikeet, Salesforce, Monzo, Block) published up to September 2026. Where they disagreed, the most recent position won and the older one was deleted, so don't bring it back from memory.
+A process for evaluating an AI agent that talks to people, looks things up, and takes actions. Examples lean on customer support, where the method was tested hardest. It merges the eval method of Hamel Husain and Shreya Shankar with what Anthropic, OpenAI, and support teams (Sierra, Lorikeet, Salesforce, Monzo, Block) published up to September 2026. Where they disagreed, the most recent position won and the older one was deleted, so don't bring it back from memory.
 
 ## Where are you?
+
+Inheriting an eval setup, or unsure it can be trusted? → references/audit.md first.
 
 ```
 Do you have real conversations or tickets to read?
@@ -19,11 +21,13 @@ Do you have real conversations or tickets to read?
         └── Yes → Is the agent live?
             ├── No → references/testing.md (simulation, CI, release gates)
             └── Yes → references/production.md
-Whatever the stage, before a check touches handoffs, language, sensitive data,
+Customer-facing agent? Before a check touches handoffs, language, sensitive data,
 tools and account state, multi-turn, or policy → references/support-checks.md
 ```
 
-Open one reference at a time. Each is under 60 lines.
+Tools the stages point to: references/review-app.md (the app a human reviews traces in), references/judge-prompt.md (judge template), references/retrieval.md (search and knowledge-base evals).
+
+Open one reference at a time. **Never compute a formula from memory** (corrected failure rate, bootstrap interval, pass@k, pass^k): copy it from production.md or testing.md and run its check value first. Sources count the positive class in opposite directions, so a remembered formula silently gives the wrong rate.
 
 ## Rules that hold at every stage
 
@@ -31,13 +35,14 @@ Open one reference at a time. Each is under 60 lines.
 2. **Failure modes are observed in real traces, not brainstormed.** Brainstormed categories produce evaluators for problems the agent doesn't have and miss the ones it does.
 3. **Use the cheapest grader that fits.** Code for anything objective (account state, tool arguments, schema, forbidden text). An LLM judge only where interpretation is needed, and a judge never overrides a failed code check. Code is free to run and never drifts.
 4. **Grade against ground truth from data or policy, never against the model's own answer.** "Your refund is on its way" fails if the tool only opened a review case.
-5. **Gate on the outcome, diagnose with the path.** A case passes when the account and ledger ended exactly as intended and every step compliance requires happened (identity verified, customer confirmed, no forbidden or unrequested action). Tool order and other path details explain failures but never gate, because many valid paths reach the same state.
+5. **Gate on the outcome, diagnose with the path.** A case passes when the system state ended exactly as intended (for a support agent, the account and ledger) and every step compliance requires happened (identity verified, customer confirmed, no forbidden or unrequested action). Tool order and other path details explain failures but never gate, because many valid paths reach the same state.
 6. **Run every case more than once.** Agents are nondeterministic. Gate on pass^k (every run passes), never pass@k. At 75% per run, 3 of 3 passes only about 42% of the time.
 7. **Keep a held-out set you never tune against.** If train scores rise while held-out stays flat, you are fitting the eval, not improving the agent.
 8. **Fix the cause in the right place.** Behavior the prompt never asked for goes into the prompt. A policy, safety, or authorization rule goes into tool code with a test. Appending "never do X" to the prompt after an incident degrades the prompt and doesn't stop X.
 9. **Every production failure becomes a permanent test.** Reproduce it, fix it, and keep the case in CI so it can't come back.
 10. **Read transcripts before believing any number.** Broken tasks, flaky infrastructure, and miscalibrated judges all look like model failures in a score.
 11. **Evals decay.** Re-run error analysis every 2 to 4 weeks on 100+ fresh traces and after every incident, and re-validate a judge after any change to its prompt or model.
+12. **Before any paid batch, show the model, the number of agent runs, and the number of judge calls, and wait for approval.** Baselines and judge sweeps multiply fast.
 
 ## Numbers to use
 
@@ -54,4 +59,4 @@ Open one reference at a time. Each is under 60 lines.
 
 ## Scope
 
-This skill covers evaluation only. It doesn't cover how to build the agent, write its tone, or secure it, except where a check needs it. Company-specific material (the behavior spec, policies, the failure taxonomy from real tickets) belongs in a private skill outside this repo, never in this one. Sources and licenses: `references/sources.md`.
+This skill covers evaluation only. It doesn't cover how to build the agent, write its tone, or secure it, except where a check needs it. Company-specific material (the behavior spec, policies, the failure taxonomy from real conversations) belongs in a private skill, never in this one. Sources and licenses: `references/sources.md`.
