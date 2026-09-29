@@ -8,6 +8,7 @@ Six things a support agent needs that generic eval methods skip. Apply them at w
 - Grade escalation in both directions, escalating when it should and not when it shouldn't. A voice support bot scored 98% offline on "escalates when asked" and escalated almost everything in production, because the set had no should-not cases.
 - Run escalation triggers outside the agent's own loop, so a confused agent can't talk itself out of escalating.
 - Show the reviewer the escalation rules next to the trace, so labels follow the policy and not the reviewer's instinct.
+- Grade the timing too. Escalating before a reasonable attempt fails, and so does continuing for several turns after it's clear the agent can't help. Write the expected escalation turn into the case, from the escalation policy.
 
 ## Two languages
 
@@ -29,6 +30,7 @@ Six things a support agent needs that generic eval methods skip. Apply them at w
 - **The agent never states a customer fact without a tool result behind it,** and claims success only after the tool confirms it.
 - **Check arguments that change meaning:** currency (ARS vs USDT), network, amount, the account the action lands on.
 - **Separate refused from ran-and-reported.** A test must tell "the tool blocked it" apart from "the tool ran and the agent said it didn't".
+- **Include requests the system can't serve:** data it doesn't hold, features that don't exist. The only pass is saying it can't, with what to do instead. An empty tool result stated as a fact ("you have no pending withdrawals") fails when the tool couldn't have known.
 
 ## Multi-turn
 

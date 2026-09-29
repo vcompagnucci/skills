@@ -18,7 +18,9 @@ Must runs be comparable across versions? (CI, regression)
     (capability tests, cases where the customer must act in the app, exploration)
 ```
 
-Check adaptive users against real tickets for realism. Vary language, patience, how much they withhold, and whether they start logged in.
+**Replay real prefixes first.** For a multi-turn case, take the first N-1 turns of a real ticket and let the agent write only turn N. It tests the hard turn with real wording and no simulator drift. Use a simulated customer only when the agent's earlier turns must be allowed to vary. Prefixes are production data, so the retention rules in support-checks.md apply.
+
+**Calibrate the simulator before trusting it.** Run the frozen judges on simulated conversations and on a random sample of real ones for the same intents. If the real pass rate falls below the simulated rate's 95% interval, the simulated customer is too easy. Make it write in fragments, leave out context, repeat itself, and give it the goals real customers bring: a refund, a human, distrust of the bot. Vary language, patience, how much they withhold, and whether they start logged in.
 
 ## Runs and metrics
 
@@ -39,6 +41,8 @@ Check adaptive users against real tickets for realism. Vary language, patience, 
 
 Change one thing at a time and keep it only if the held-out set improves too. First check that the eval's run-to-run noise is smaller than the smallest gain you'd act on, or add cases and repetitions. Prompts, skills, and tool descriptions are cheap to change and revert. Harness code isn't. Never paste failing transcripts into the prompt. When the score stalls for 2 or 3 rounds, stop editing and sort every remaining failure by cause. That finds broken cases and graders.
 
+**Read passing runs too.** When a case or grader is new, and after each improvement round, read a sample of passes with the grader's reasoning. Look for shortcuts: extra articles cited to satisfy a citation check, an action claimed that the trace doesn't show, the answer read from the environment, a proxy met without finishing the task. A pass earned by a shortcut is a grader bug.
+
 ## Release gates
 
 ```
@@ -50,6 +54,8 @@ Did this case pass all 5 baseline runs?
 - **CI holds** core journeys, every past production bug, and known edge cases, with a code check for every case whose outcome is objective, plus an untouched holdout and a rolling set of recent production failures.
 - **Cadence.** Cheap checks on every change, expensive judges nightly and before each release. A capability case that starts passing every run graduates to regression. Never retire a regression case, because it's what stops an old bug from coming back.
 - **Case record:** id, failure mode, input (role, user, opening message, scripted follow-ups), initial state, `checks` (code), `judges` (frozen judge and expected verdict), `assertions` (plain-language intent, never scored). Add `kind` and the baseline pass rate after the 5 baseline runs.
-- **Quality gates come before cost.** Policy compliance, action correctness, security, and escalation accuracy must pass before you compare cost or latency.
+- **Prove every case is solvable.** Before a case enters CI, run a reference solution (a scripted run or a person using the same tools) in the reset sandbox and confirm it reaches the expected state. Store it in the case record as `reference`. If it can't reach the state, the case is broken, not the agent.
+- **Quality gates come before cost.** Policy compliance, action correctness, security, and escalation accuracy must pass before you compare cost or latency. Among passed cases only, report step, tool-call, and latency ratios against an ideal run (observed divided by the fewest calls a correct run needs). Use them to compare versions that already pass. They never fail a case, because rule 5 keeps the path out of the gate.
+- **A ship decision on a rate needs the interval, not the point.** Ship only if the upper bound of the 95% Wilson interval is below the requirement. Size the sample first: at 3% observed against a 5% limit, 200 samples can't prove it and about 800 can. Halving the margin takes four times the samples.
 - **Release one versioned bundle.** Prompt, model, tools, and the help-center snapshot ship together and roll back together. Promote by re-pinning, with the required simulations passed, a named approver from compliance or CX, and a gradual rollout.
 - **Production bugs.** Reproduce with 10 runs (20 if seen once), fix, verify with the same number of runs, then add the case and a paraphrased variant to CI. One green run proves nothing for a nondeterministic bug.

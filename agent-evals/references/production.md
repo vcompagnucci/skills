@@ -6,6 +6,7 @@
 - Judge the random sample and the risk groups in one pass but store them apart, and give every score a stable id so reruns don't double count. An empty window reports "no data", never a rate.
 - **Fix the alert threshold before looking at results.** Alert when the lower bound of the interval crosses it, not the point estimate. A crossing starts a new round of error analysis and adds CI cases.
 - **Pick risk groups from trace evidence** (a tool wrote something, the agent looked up a policy), not from what the reply says.
+- **Make the out-of-scope bucket a risk group.** Review a sample of the conversations the agent labeled out of scope, unsupported, or refused, every round. Every judge scores these as polite, correct refusals, so unmet demand never shows up in a rate.
 - **Reject a monitoring period whose traces came from a different model** than the one you validated the judge on.
 - **Measure resolution, don't assume it.** Count customers who come back on the same issue within 7 days. A conversation that ends without a handoff isn't resolved. One team that believed it resolved 40% found 20% on full review, the rest were abandonments.
 - **Evaluate the monitors too.** A monitor judge (for frustration, for policy breaks) needs the same validation as any judge, with its rationale shown on every flag.

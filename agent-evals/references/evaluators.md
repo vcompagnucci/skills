@@ -8,7 +8,7 @@ One evaluator per failure mode. Build it, then prove it agrees with a human befo
 Can code check it from the trace? (state, arguments, schema, forbidden text, citation ids)
 ├── Yes → code evaluator
 └── No → Is it a comparison between two agent versions?
-    ├── Yes → pairwise judge, blind and in random order
+    ├── Yes → pairwise judge, blind, run in both orders
     └── No → binary LLM judge for this one mode
 ```
 
@@ -39,6 +39,9 @@ Can code check it from the trace? (state, arguments, schema, forbidden text, cit
 - **Accept by the cost of a miss.** 90% on both is the starting target and 80% the floor. For modes that move money or break compliance, the failure catch rate decides alone. A judge that misses a wrong withdrawal is useless however well it agrees on passes.
 - **Read every disagreement** and decide which of three it is. The judge is wrong, the label is wrong, or the definition is unclear. Fix the right one.
 - **Test the grader before the agent.** Run it twice on the same output and check the verdict holds. Check for timeouts and cut-off answers, which look like model failures.
+- **Break the agent on purpose.** In a copy of the agent, make one behavior worse (remove the instruction behind it) and run all judges on the same cases. The matching judge's fail rate must rise and the others must stay flat. Labels show the judge agrees with a human on past traces. This shows it reacts to the failure it names.
+- **Backtest when you have history.** Run the frozen judge on traces from two past versions whose real result you know (an A/B test, a release that raised complaints). It must rank them the same way. A judge that can't recover a known win or loss won't catch the next one.
+- **Pairwise judges run in both orders.** A win counts only when both orders agree, and a flip counts as a tie. Let judges and labelers answer tie. Keep compared answers similar in length, or check the winner isn't just the longer one.
 - **A judge is its prompt, model snapshot, input formatter, and verdict parser, frozen together.** Change any of the four and it's a new judge, so re-validate it on test before use. CI and monitoring call the frozen judge exactly as you validated it, and never an unvalidated one.
 
 ## Guardrails are different
