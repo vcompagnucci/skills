@@ -1,6 +1,6 @@
 # Cost and model choice
 
-Picking a model and a reasoning effort per step, and cutting cost without losing quality. Draws on OpenAI's builder guide and efficiency post for GPT-5.6, its 2025 practical guide to agents, a support-agent cost cookbook (a simulation), a per-run spending controller cookbook, frontend, benchmark, long-run and chain-of-thought monitoring posts, the Agents SDK and API docs on guardrails, the Agents API launch, the GPT-5, 5.1 and 5.2 prompting guides (2025, kept only where still standing), a partner cookbook on eval-driven design, and the model-migration guide shipped in the Codex repo.
+Picking a model and a reasoning effort per step, and cutting cost without losing quality. Draws on OpenAI's builder guide and efficiency post for GPT-5.6, its 2025 practical guide to agents, a support-agent cost cookbook (a simulation), a per-run spending controller cookbook, frontend, benchmark, long-run and chain-of-thought monitoring posts, the Agents SDK and API docs on guardrails, the Agents API launch, the GPT-5, 5.1 and 5.2 prompting guides (2025, kept only where still standing), a partner cookbook on eval-driven design, and the model-migration guide and 2026-09-29 model catalog shipped in the Codex repo.
 
 ## Pick the model
 
@@ -51,7 +51,7 @@ Picking a model and a reasoning effort per step, and cutting cost without losing
 ## Where the answer depends on the case
 
 - **Start big or start low: the posts set different knobs.** The practical guide prototypes with the most capable model everywhere to find the ceiling, then swaps smaller models in (`practical-guide`). The frontend post starts reasoning effort low (`frontends`), and the GPT-5.6 guide says to re-test effort defaults because newer models do more at lower effort (`gpt56-guide`).
-- **Maximum effort: the posts describe different tasks.** The 25-hour run used the highest setting (`long-horizon`), as does every sub-agent in Codex's code-review skill (`repo-review`). For simpler sites, the frontend post found low and medium often better (`frontends`).
+- **Maximum effort: the posts describe different tasks.** The 25-hour run used the highest setting (`long-horizon`), as does every sub-agent in Codex's code-review skill (`repo-review`). For simpler sites, the frontend post found low and medium often better (`frontends`). Codex's default model since 2026-09-29 splits effort by role, starting the main loop at low and running the sub-agents it spawns at extra-high, per its `models.json` entry (`repo-update-0929`).
 
 ## Key source articles
-`cost-quality` · `gpt56-guide` · `gpt56-efficiency` · `repo-prompting` · `practical-guide` · `frontends` · `devs-2025` · `arc-agi-3` · `cot-monitorability` · `sdk-guardrails` · `agents-api` · `spend-controller` · `temporal-agents` · `gpt52-prompting` · `gpt5-prompting` · `gpt51-prompting` · `eval-driven-design`
+`cost-quality` · `gpt56-guide` · `gpt56-efficiency` · `repo-prompting` · `practical-guide` · `frontends` · `devs-2025` · `arc-agi-3` · `cot-monitorability` · `sdk-guardrails` · `agents-api` · `spend-controller` · `temporal-agents` · `gpt52-prompting` · `gpt5-prompting` · `gpt51-prompting` · `eval-driven-design` · `repo-update-0929`

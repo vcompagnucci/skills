@@ -1,7 +1,6 @@
 # Glossary
 
-Every term the 125 sources coin or use in their own sense, in alphabetical order. OpenAI product names that aren't concepts are left out.
-
+Every term the 130 sources coin or use in their own sense, in alphabetical order. OpenAI product names that aren't concepts are left out.
 - **Ad-hoc notes.** User-requested memory edits dropped as small files for consolidation to apply. (`repo-memory`)
 - **Agent legibility.** Optimizing the repo so an agent can reason about the whole domain from it. (`harness-eng`)
 - **Agent loop / harness.** The core logic orchestrating user, model, and tool calls. (`agent-loop`)
@@ -12,6 +11,7 @@ Every term the 125 sources coin or use in their own sense, in alphabetical order
 - **Ambition vs. precision.** The rule that creativity scales with how little prior context constrains the task. (`repo-system-prompts`)
 - **Approval interruption.** A paused run holding a pending tool call until someone approves or rejects it. (`docs-guardrails-review`)
 - **Auto-review mode.** A subagent that auto-approves low-risk boundary-crossing requests so the user isn't interrupted. (`codex-safely`)
+- **Auto-review.** The separate safety system that checks each planned side effect against instructions, user rules and safety requirements before it runs. (`dots-safety`)
 - **Backend executor behind an intermediary.** How the working agent is framed during voice: it never talks to the user directly. (`repo-realtime`)
 - **Blended cost per verified resolution.** All model, tool, infra, retry, human-review, escalation and rework costs divided by verified issues resolved. (`cost-quality`)
 - **Blocked stop condition.** When to stop and report that no defensible path remains, and what would unlock progress. (`codex-goals`)

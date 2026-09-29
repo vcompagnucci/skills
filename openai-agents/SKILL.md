@@ -1,11 +1,11 @@
 ---
 name: openai-agents
-description: Building your own agent the way OpenAI describes it, as concepts that work on any stack. Covers whether to build one, single vs multi-agent, the harness and long runs, tools and MCP, context and memory, skills, prompt caching, cost and reasoning effort, evals, and security and sandboxing. Cites 125 OpenAI sources: developers.openai.com/blog, openai.com engineering and security posts, the practical guide to building agents, Agents SDK docs, cookbook articles, and the open-source Codex harness (its system prompts, compaction, approvals, memory, and tools).
+description: Building your own agent the way OpenAI describes it, as concepts that work on any stack. Covers whether to build one, single vs multi-agent, the harness and long runs, tools and MCP, context and memory, skills, prompt caching, cost and reasoning effort, evals, and security and sandboxing. Cites 130 OpenAI sources: developers.openai.com/blog, openai.com engineering and security posts, the practical guide to building agents, Agents SDK docs, cookbook articles, and the open-source Codex harness (its system prompts, compaction, approvals, memory, and tools).
 ---
 
 # OpenAI agents
 
-This skill holds what OpenAI has published that helps you build your own agent: 125 sources from the [developer blog](https://developers.openai.com/blog), the [Engineering category](https://openai.com/news/engineering/) of openai.com, 23 agent posts from other openai.com categories (including the Agents API launch), *A practical guide to building agents* (2025), 16 concept pages and page groups from the Agents SDK and API docs, 35 [cookbook](https://developers.openai.com/cookbook/topic/agents/) articles, two Codex guides, two sample repos, and the open-source [Codex harness](https://github.com/openai/codex), from April 2025 to September 2026. Keys starting with `repo-` cite the harness's own prompts and tool descriptions: what OpenAI ships, not what it argues. It keeps the concepts and drops OpenAI platform specifics. Citations use short keys like (`harness-eng`), and `references/article-index.md` links each key to its source.
+This skill holds what OpenAI has published that helps you build your own agent: 130 sources from the [developer blog](https://developers.openai.com/blog), the [Engineering category](https://openai.com/news/engineering/) of openai.com, 24 agent posts from other openai.com categories (including the Agents API launch and the GPT-6.1 Sol system card), *A practical guide to building agents* (2025), 18 concept pages and page groups from the Agents SDK and API docs, 35 [cookbook](https://developers.openai.com/cookbook/topic/agents/) articles, two Codex guides, two sample repos, and the open-source [Codex harness](https://github.com/openai/codex), from April 2025 to DevDay, September 29, 2026. Keys starting with `repo-` cite the harness's own prompts and tool descriptions: what OpenAI ships, not what it argues. It keeps the concepts and drops OpenAI platform specifics. Citations use short keys like (`harness-eng`), and `references/article-index.md` links each key to its source.
 
 ## The one-sentence thesis
 
@@ -26,7 +26,7 @@ The 14 ideas below follow from it.
 9. **Long runs live in files, not in the prompt.** A 25-hour run held together with a spec, a milestone plan with validation commands, a runbook, and a status log, fixing each failed milestone before the next. (`long-horizon`, `exec-plans`) A goal is a completion contract that only evidence can close, and running out of budget is not done. (`codex-goals`)
 10. **Grade the trace, and turn every correction into an eval.** Define done before writing the skill, check the event trace deterministically, and promote repeated expert corrections to eval targets a coding agent climbs. (`eval-skills`, `tax-agents`, `improvement-loop`)
 11. **Stronger models need less scaffolding.** Recipes, "run the tests" reminders, and "ask first" language written for weaker models now slow a stronger one down. Re-audit instructions and skills at every model change. Codex's own shipped prompts show it: the prompts for harness-trained models run about 80 lines against 280 to 330 for general ones. (`astra-skills`, `data-agent`, `repo-system-prompts`)
-12. **Constrain what a fooled agent can do.** Injection now looks like social engineering, so cap the damage with OS-level sandboxing, no open-ended network, and checks on every source-to-sink path, not with input filters alone. Codex ships a separate reviewer model that decides approvals from a fixed risk table. (`injection-design`, `windows-sandbox`, `codex-safely`, `repo-approvals`)
+12. **Constrain what a fooled agent can do.** Injection now looks like social engineering, so cap the damage with OS-level sandboxing, no open-ended network, and checks on every source-to-sink path, not with input filters alone. Codex ships a separate reviewer model that decides approvals from a fixed risk table. (`injection-design`, `windows-sandbox`, `codex-safely`, `repo-approvals`) Other agents are untrusted too: GPT-6.1 Sol contacted apparent peer agents in 38% of test runs and took an unauthorized action in 3%, so the control sits on the action, not on the conversation. (`gpt61-sol-card`)
 13. **Monitor real sessions, because misbehavior shows up there.** A strong model reading full transcripts caught every case employees escalated and many they missed. The usual failure is overeagerness, not hidden motives, and reading the reasoning catches far more than reading actions alone. (`agent-monitoring`, `cot-monitorability`)
 14. **Human attention is the bottleneck.** "Humans steer. Agents execute." Interactive supervision tops out at three to five sessions, so let the task tracker drive agents and fix the system when one misses. (`harness-eng`, `symphony`)
 
@@ -44,8 +44,8 @@ Each idea is developed, with numbers and every source, in the matching reference
 - **`references/evals-and-verification.md`.** In-run checks, evals for skills and agents, corrections becoming evals, review agents, evals measuring harnesses.
 - **`references/safety-and-containment.md`.** Prompt injection, guardrails, sandboxes, network and secrets, approvals, monitoring agents.
 - **`references/agents-in-production.md`.** Case studies with a build lesson, humans working with agents, voice agents, escalation.
-- **`references/glossary.md`.** 135 coined terms, each with its source.
-- **`references/article-index.md`.** All 125 sources with link, key, date, author, and one-line thesis, grouped by theme. Repo entries list the folders they draw on.
+- **`references/glossary.md`.** 136 coined terms, each with its source.
+- **`references/article-index.md`.** All 130 sources with link, key, date, author, and one-line thesis, grouped by theme. Repo entries list the folders they draw on.
 
 ## How to answer
 
@@ -73,4 +73,4 @@ Then, before sending:
 
 ## Scope
 
-Only these 125 sources, up to September 2026, chosen for building an agent. Not covered: OpenAI API and product specifics (endpoints, parameters, Codex settings, pricing), launches, customer stories without a build lesson, OpenAI's infrastructure posts, and videos or talks. For current OpenAI API facts, use their live docs.
+Only these 130 sources, up to September 2026, chosen for building an agent. Not covered: OpenAI API and product specifics (endpoints, parameters, Codex settings, pricing), launches, customer stories without a build lesson, OpenAI's infrastructure posts, and videos or talks. For current OpenAI API facts, use their live docs.
