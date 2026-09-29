@@ -5,11 +5,11 @@ description: Build and run evals for an AI agent, from reading the first convers
 
 # Agent evals
 
-A process for evaluating an AI agent that talks to people, looks things up, and takes actions. Examples lean on customer support, where the method was tested hardest. It merges the eval method of Hamel Husain and Shreya Shankar with what Anthropic, OpenAI, and support teams (Sierra, Lorikeet, Salesforce, Monzo, Block) published up to September 2026. Where they disagreed, the most recent position won and the older one was deleted, so don't bring it back from memory.
+A process for evaluating an AI agent that talks to people, looks things up, and takes actions. Examples lean on customer support, where these teams tested the method hardest. It merges the eval method of Hamel Husain and Shreya Shankar with what Anthropic, OpenAI, and support teams (Sierra, Lorikeet, Salesforce, Monzo, Block) published up to September 2026. Where they disagreed, the most recent position won and the older one is gone, so don't bring it back from memory.
 
 ## Where are you?
 
-Inheriting an eval setup, or unsure it can be trusted? → references/audit.md first.
+Inheriting an eval setup, or unsure you can trust it? → references/audit.md first.
 
 ```
 Do you have real conversations or tickets to read?
@@ -25,14 +25,17 @@ Customer-facing agent? Before a check touches handoffs, language, sensitive data
 tools and account state, multi-turn, or policy → references/support-checks.md
 ```
 
-Tools the stages point to: references/review-app.md (the app a human reviews traces in), references/judge-prompt.md (judge template), references/retrieval.md (search and knowledge-base evals).
+The stages point to three tools:
+- references/review-app.md, the app a human reviews traces in
+- references/judge-prompt.md, the judge template
+- references/retrieval.md, search and knowledge-base evals
 
-Open one reference at a time. **Never compute a formula from memory** (corrected failure rate, bootstrap interval, pass@k, pass^k): copy it from production.md or testing.md and run its check value first. Sources count the positive class in opposite directions, so a remembered formula silently gives the wrong rate.
+Open one reference at a time. **Never compute a formula from memory** (corrected failure rate, bootstrap interval, pass@k, pass^k). Copy it from production.md or testing.md and run its check value first. Sources count the positive class in opposite directions, so a remembered formula silently gives the wrong rate.
 
 ## Rules that hold at every stage
 
 1. **A domain expert decides what counts as a failure, never a model or an annotator.** Everything downstream (judges, CI, monitoring) inherits that definition, and a wrong one is invisible later.
-2. **Failure modes are observed in real traces, not brainstormed.** Brainstormed categories produce evaluators for problems the agent doesn't have and miss the ones it does.
+2. **Failure modes come from real traces, never from brainstorming.** Brainstormed categories produce evaluators for problems the agent doesn't have and miss the ones it does.
 3. **Use the cheapest grader that fits.** Code for anything objective (account state, tool arguments, schema, forbidden text). An LLM judge only where interpretation is needed, and a judge never overrides a failed code check. Code is free to run and never drifts.
 4. **Grade against ground truth from data or policy, never against the model's own answer.** "Your refund is on its way" fails if the tool only opened a review case.
 5. **Gate on the outcome, diagnose with the path.** A case passes when the system state ended exactly as intended (for a support agent, the account and ledger) and every step compliance requires happened (identity verified, customer confirmed, no forbidden or unrequested action). Tool order and other path details explain failures but never gate, because many valid paths reach the same state.
@@ -51,7 +54,7 @@ Open one reference at a time. **Never compute a formula from memory** (corrected
 | First look after a significant change | 20 to 50 outputs, one expert, about 30 minutes |
 | Traces a human reads before any agent suggests failure modes | at least 30 |
 | When error analysis is done | saturation, around 100 traces |
-| Human labels per judge | about 100, balanced; floor 30 Pass and 30 Fail |
+| Human labels per judge | about 100, balanced, never under 30 Pass and 30 Fail |
 | CI suite size | start at 20 to 50 cases, grow past 100 |
 | Runs per CI case | 5 |
 | Runs to reproduce and verify a production bug fix | 10, or 20 if it was seen once |
