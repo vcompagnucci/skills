@@ -12,6 +12,11 @@ A process for evaluating an AI agent that talks to people, looks things up, and 
 Inheriting an eval setup, or unsure you can trust it? → references/audit.md first.
 
 ```
+Is there an agent yet?
+├── No → references/discover.md, "Before reading anything" and "Where cases come from" only:
+│   use old tickets to write the spec and the cases. Error analysis reads the
+│   agent's answers, so it starts once the agent runs on those cases.
+└── Yes ↓
 Do you have real conversations or tickets to read?
 ├── No → references/discover.md (sourcing cases, synthetic data)
 └── Yes → Have you read them and named the failure modes?
