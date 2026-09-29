@@ -22,6 +22,8 @@ Enforce the JSON with the provider's structured output, not only the prompt: a p
 
 ## If dev agreement stalls
 
+These count toward the two revisions allowed against dev (evaluators.md). A new model or a split mode makes a new judge: validate it from scratch.
+
 - Both TPR and TNR low: try a stronger judge model.
 - One low: read only the disagreements behind that one.
 - Both flat below target: split the mode into narrower judges.
