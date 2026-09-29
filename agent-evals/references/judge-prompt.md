@@ -1,6 +1,6 @@
 # Judge prompt
 
-Fill this in for one failure mode. Keep the structure; change the content.
+Fill this in for one failure mode. Keep the structure and change the content.
 
     You are evaluating one reply from <company>'s agent for a single failure mode.
 
@@ -18,11 +18,11 @@ Fill this in for one failure mode. Keep the structure; change the content.
     Example 2. <clear pass>
     Example 3. <borderline, e.g. a hedged claim that is still a claim>
 
-Enforce the JSON with the provider's structured output, not only the prompt: a parser that guesses at free text is part of the judge and changes its measured agreement.
+Enforce the JSON with the provider's structured output as well as the prompt. A parser that guesses at free text is part of the judge and changes its measured agreement.
 
 ## If dev agreement stalls
 
-These count toward the two revisions allowed against dev (evaluators.md). A new model or a split mode makes a new judge: validate it from scratch.
+These count toward the two revisions allowed against dev (evaluators.md). A new model or a split mode makes a new judge, which you validate from scratch.
 
 - Both TPR and TNR low: try a stronger judge model.
 - One low: read only the disagreements behind that one.

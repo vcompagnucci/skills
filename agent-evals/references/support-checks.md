@@ -5,13 +5,13 @@ Six things a support agent needs that generic eval methods skip. Apply them at w
 ## Handoffs to a human
 
 - Keep the trace open past the handoff. Log the reason, the context passed to the human, the wait, and how it ended.
-- Grade escalation in both directions: escalated when it should, and didn't when it shouldn't. A voice support bot scored 98% offline on "escalates when asked" and escalated almost everything in production, because the set had no should-not cases.
+- Grade escalation in both directions, escalating when it should and not when it shouldn't. A voice support bot scored 98% offline on "escalates when asked" and escalated almost everything in production, because the set had no should-not cases.
 - Run escalation triggers outside the agent's own loop, so a confused agent can't talk itself out of escalating.
 - Show the reviewer the escalation rules next to the trace, so labels follow the policy and not the reviewer's instinct.
 
 ## Two languages
 
-- Traces in Spanish are read and labeled by someone who knows the language and the local market. Never through LLM translation: it smooths out exactly the tone and wording errors you're looking for.
+- Traces in Spanish are read and labeled by someone who knows the language and the local market. Never through LLM translation, which smooths out exactly the tone and wording errors you're looking for.
 - Stratify the eval set by language and report every score per language. An average hides a language that fails.
 - Validate each judge on each language separately. A judge aligned in English isn't aligned in Spanish until measured.
 - Test mid-conversation language switches and answers that mix two languages.
@@ -24,7 +24,7 @@ Six things a support agent needs that generic eval methods skip. Apply them at w
 
 ## Tools and account state
 
-- **A case passes only if the ledger changed exactly as intended and nothing else did.** "I processed your withdrawal" proves nothing; check the state.
+- **A case passes only if the ledger changed exactly as intended and nothing else did.** "I processed your withdrawal" proves nothing. Check the state.
 - **Test authorization and preconditions in the tool,** not in the reply: KYC approved, destination allowed, customer confirmed. The tool must refuse when a precondition fails, whatever the model says.
 - **The agent never states a customer fact without a tool result behind it,** and claims success only after the tool confirms it.
 - **Check arguments that change meaning:** currency (ARS vs USDT), network, amount, the account the action lands on.
@@ -40,6 +40,6 @@ Six things a support agent needs that generic eval methods skip. Apply them at w
 
 - Policy judges read the actual policy or procedure text and fail any answer that contradicts it (quoting 14 days when the window is 30).
 - Every tool call passes a policy check before it executes, in code.
-- No unrequested extra action, however helpful: an agent told to "make the customer feel better" hands out discounts nobody authorized.
+- No unrequested extra action, however helpful. An agent told to "make the customer feel better" hands out discounts nobody authorized.
 - The agent explains what's missing in a KYC case and re-requests documents. It never decides risk, and never gives investment advice.
-- Mandatory text (a disclosure, a legal notice) is rendered by the platform, not written by the model. An instruction followed 99 times in 100 is a compliance failure.
+- Mandatory text (a disclosure, a legal notice) comes from the platform, never from the model. An instruction followed 99 times in 100 is a compliance failure.
