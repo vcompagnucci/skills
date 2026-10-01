@@ -29,7 +29,7 @@ Must runs be comparable across versions? (CI, regression)
 
 ## Runs and metrics
 
-- 5 runs per case in CI, because at 90% per run only 59% of cases pass 5 of 5, so flaky cases show up that one run hides. Gate on pass^k, where a case passes only if every run passes. pass@k (any run passes) is for exploring what the agent can do, never for gating.
+- 15 runs per case in CI, because a case that fails 1 run in 20 still passes 15 of 15 only 46% of the time, so it shows up instead of hiding. Gate on pass^k, where a case passes only if every run passes. pass@k (any run passes) is for exploring what the agent can do, never for gating.
 - Reliability drops with repetition: 9 successes in 10 gives about a one-in-three chance of 10 clean runs. Expect the gap and design for it.
 - **Estimate from n runs, don't rerun k times.** With c passes in n runs: pass@k = 1 - C(n-c, k) / C(n, k), and pass^k = C(c, k) / C(n, k). Check: 6 of 8 gives pass@2 = 0.964 and pass^4 = 0.214.
 - **Rerun only infrastructure errors** (timeout, missing trace, no reward), never a failed verdict. A red regression case is evidence to read, not noise to retry. Don't classify a case from a baseline with an infrastructure error, and never change a classification to get the mix you want.
@@ -47,14 +47,14 @@ Must runs be comparable across versions? (CI, regression)
 ## Release gates
 
 ```
-Did this case pass all 5 baseline runs?
+Did this case pass all 15 baseline runs?
 ├── Yes → regression case: must stay at 100%, any failed run blocks the release
 └── No → capability case: report the score, never block
 ```
 
 - **CI holds** core journeys, every past production bug, and known edge cases, with a code check for every case whose outcome is objective, plus a holdout you run but never tune against, and a rolling set of recent production failures.
 - **Cadence.** Cheap checks on every change, expensive judges nightly and before each release. A capability case that starts passing every run graduates to regression. Never retire a regression case, because it's what stops an old bug from coming back.
-- **Case record:** id, failure mode, input (role, user, opening message, scripted follow-ups), initial state, `checks` (code), `judges` (frozen judge and expected verdict), `assertions` (plain-language intent, never scored). Add `kind` and the baseline pass rate after the 5 baseline runs.
+- **Case record:** id, failure mode, input (role, user, opening message, scripted follow-ups), initial state, `checks` (code), `judges` (frozen judge and expected verdict), `assertions` (plain-language intent, never scored). Add `kind` and the baseline pass rate after the 15 baseline runs.
 - **Prove every case is solvable.** Before a case enters CI, run a reference solution (a scripted run or a person using the same tools) in the reset sandbox and confirm it reaches the expected state. Store it in the case record as `reference`. If it can't reach the state, the case is broken, not the agent. A case is also broken if two domain experts would reach different verdicts on the same run, or if the grader checks something the case never asked for.
 - **Quality gates come before cost.** Policy compliance, action correctness, security, and escalation accuracy must pass before you compare cost or latency. Among passed cases only, report step, tool-call, and latency ratios against an ideal run (observed divided by the fewest calls a correct run needs). Use them to compare versions that already pass. They never fail a case, because rule 5 keeps the path out of the gate. Count cost per resolved case, retries and fallbacks included: a published benchmark cost that left out fallbacks, which happened on about 40% of tasks, understated the real cost. Set the latency limit from when real users give up (the distribution of time until they abandon), not from a round number.
 - **Every model change reruns a broken-tool case.** Make a tool fail and check that the agent tells the customer instead of answering as if it worked. On OpenAI's broken-search test, a small model hid the failure in 28.7% of cases and a large one in 1.5%, so the cheaper model is where to look.
