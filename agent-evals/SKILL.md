@@ -9,7 +9,7 @@ A process for evaluating an AI agent that talks to people, looks things up, and 
 
 ## Where are you?
 
-Inheriting an eval setup, or unsure you can trust it? → references/audit.md first.
+Inheriting an eval setup, or unsure you can trust it? → references/audit.md first. Changing the prompt, tools, harness, or model to raise a score, or comparing versions or models on accuracy and cost → references/improve.md.
 
 ```
 Is there an agent yet?
@@ -26,8 +26,7 @@ Do you have real conversations or tickets to read?
         └── Yes → Is the agent live?
             ├── No → references/testing.md (simulation, CI, release gates)
             └── Yes → references/production.md
-Customer-facing agent? Before a check touches handoffs, language, sensitive data,
-tools and account state, multi-turn, or policy → references/support-checks.md
+Customer-facing agent? Before a check touches handoffs, language, sensitive data, tools and account state, multi-turn, or policy → references/support-checks.md
 ```
 
 The stages point to three tools:
@@ -45,7 +44,7 @@ Open one reference at a time. **Never compute a formula from memory** (corrected
 4. **Grade against ground truth from data or policy, never against the model's own answer.** "Your refund is on its way" fails if the tool only opened a review case.
 5. **Gate on the outcome, diagnose with the path.** A case passes when the system state ended exactly as intended (for a support agent, the account and ledger) and every step compliance requires happened (identity verified, customer confirmed, no forbidden or unrequested action). Tool order and other path details explain failures but never gate, because many valid paths reach the same state.
 6. **Run every case more than once.** Agents are nondeterministic. Gate on pass^k (every run passes), never pass@k. At 75% per run, 3 of 3 passes only about 42% of the time.
-7. **Keep a held-out set you never tune against.** If train scores rise while held-out stays flat, you are fitting the eval, not improving the agent.
+7. **Score the held-out test set once, after freezing the final version.** Tune only on development cases. Once you read test results, those cases are development knowledge, and any later change needs a new test set.
 8. **Fix the cause in the right place.** Behavior the prompt never asked for goes into the prompt. A policy, safety, or authorization rule goes into tool code with a test. Appending "never do X" to the prompt after an incident degrades the prompt and doesn't stop X.
 9. **Every production failure becomes a permanent test.** Reproduce it, fix it, and keep the case in CI so it can't come back.
 10. **Read transcripts before believing any number.** Broken tasks, flaky infrastructure, and miscalibrated judges all look like model failures in a score.
