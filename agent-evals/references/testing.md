@@ -39,14 +39,6 @@ Must runs be comparable across versions? (CI, regression)
 - Confirm each finding in the trace and the database, never on a scanner's verdict alone. A scanner can't see whether protected state changed. Load attack fixtures only into a throwaway copy of the data.
 - Include exfiltration through retrieved content: a planted article asking the agent to add a link or image carrying customer data. Strip links and images to non-allowlisted hosts on output.
 
-## Improving against the eval
-
-**Check the eval before climbing it.** A stronger model or higher effort must score higher, and the best model at its highest effort must stay well below 100% for reasons other than broken cases. If scores don't rise with capability, ambiguous cases or a miscalibrated grader are capping them. If the current version already scores about 95% or more, there's no quality left to measure: aim at cost or latency with quality held.
-
-Change one thing at a time and keep it only if the held-out set improves too. First check that the eval's run-to-run noise is smaller than the smallest gain you'd act on, or add cases and repetitions. Prompts, skills, and tool descriptions are cheap to change and revert. Harness code isn't. Never paste failing transcripts into the prompt. When the score stalls for 2 or 3 rounds, stop editing and sort every remaining failure by cause. That finds broken cases and graders. Report the final version against the baseline on the held-out set with intervals, and don't merge a gain that sits within the noise.
-
-**Read passing runs too.** When a case or grader is new, and after each improvement round, read a sample of passes with the grader's reasoning. Look for shortcuts: extra articles cited to satisfy a citation check, an action claimed that the trace doesn't show, the answer read from the environment, a proxy met without finishing the task. A pass earned by a shortcut is a grader bug.
-
 ## Release gates
 
 ```
