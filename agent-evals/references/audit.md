@@ -9,7 +9,7 @@ Inspect the actual artifacts: traces, judge prompts, labels, CI config, dashboar
 
 Check:
 
-1. Failure modes came from read traces. Generic labels ("helpfulness", "hallucination score", "toxicity") mean they were brainstormed. If there's no error analysis, stop here and start with discover.md. Recommend no evaluators or dashboards before it.
+1. Failure modes came from read traces. Generic labels ("helpfulness", "hallucination score", "toxicity") mean they were brainstormed. If there's no error analysis, stop here and start with discover.md. Recommend no judges or dashboards before it, only code tests for rules already known.
 2. Every judge is Pass/Fail, checks one mode, and does nothing code could check (format, schema, keywords, resulting state).
 3. No similarity metric (ROUGE, BERTScore, cosine) is the main grader for answers.
 4. Every judge has TPR and TNR on a held-out test split, not accuracy, percent agreement, or kappa, and its few-shot examples appear in neither dev nor test.

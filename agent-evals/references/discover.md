@@ -1,6 +1,6 @@
 # Discover failures
 
-The goal of this stage is a short list of named, binary failure modes that come from real conversations. Nothing gets built before it.
+The goal of this stage is a short list of named, binary failure modes that come from real conversations. No judge or dashboard gets built before it. Code tests for rules you already know are the exception (evaluators.md).
 
 ## Before reading anything
 

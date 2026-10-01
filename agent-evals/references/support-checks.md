@@ -8,7 +8,7 @@ Six things a support agent needs that generic eval methods skip. Apply them at w
 - Grade escalation in both directions, escalating when it should and not when it shouldn't. A voice support bot scored 98% offline on "escalates when asked" and escalated almost everything in production, because the set had no should-not cases.
 - Run escalation triggers outside the agent's own loop, so a confused agent can't talk itself out of escalating.
 - Show the reviewer the escalation rules next to the trace, so labels follow the policy and not the reviewer's instinct.
-- Grade the timing too. Escalating before a reasonable attempt fails, and so does continuing for several turns after it's clear the agent can't help. Write the expected escalation turn into the case, from the escalation policy.
+- Grade the timing too. Escalating before trying the first step the procedure names fails, and so does continuing for several turns after it's clear the agent can't help. Write the expected escalation turn into the case, from the escalation policy.
 - If several agents hand off to each other, test that a specialist hands control back when the topic changes and that handoffs never loop.
 
 ## Two languages

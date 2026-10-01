@@ -26,8 +26,8 @@ Can code check it from the trace? (state, arguments, schema, forbidden text, cit
 
 ## Label
 
-- One domain expert labels, or two annotators align first on 20 to 50 shared traces.
-- About 100 labels per mode, balanced between Pass and Fail. Never fewer than 30 of each. Below that the confidence interval is too wide to decide anything.
+- One domain expert labels. If others help, they first align with the expert on 20 to 50 shared traces, and the expert settles every disagreement.
+- About 100 labels per mode, balanced between Pass and Fail. Never fewer than 30 of each. Below that the confidence interval is too wide to decide anything. For a rare mode (a wrong withdrawal), generate targeted scenarios (discover.md) until you have 30 Fails.
 - **One record per conversation before splitting.** Keep one of each group of repeated runs or close scenario variants, or the same conversation lands in train and test and inflates agreement.
 - **Split once:** stratified by label, fixed seed, about 20% train (examples), 40% dev (iterating on the prompt), 40% test (measured once, after the prompt is frozen). Check each split's Pass and Fail counts before picking examples, and never re-split afterward. Revise the prompt at most twice against dev. Past that you are fitting dev.
 - **The judge input holds only the trace:** conversation, tool calls and results, retrieved text. Never human labels, review notes, or the scenario's expected outcome. Any of them leaks the answer. Save the exact inputs once and reuse them for every prompt version.
@@ -43,11 +43,11 @@ Can code check it from the trace? (state, arguments, schema, forbidden text, cit
 - **Break the agent on purpose.** In a copy of the agent, make one behavior worse (remove the instruction behind it) and run all judges on the same cases. The matching judge's fail rate must rise and the others must stay flat. Labels show the judge agrees with a human on past traces. This shows it reacts to the failure it names.
 - **Backtest when you have history.** Run the frozen judge on traces from two past versions whose real result you know (an A/B test, a release that raised complaints). It must rank them the same way. A judge that can't recover a known win or loss won't catch the next one.
 - **Pairwise judges run in both orders.** A win counts only when both orders agree, and a flip counts as a tie. Let judges and labelers answer tie. Keep compared answers similar in length, or check the winner isn't just the longer one.
-- **A judge is its prompt, model snapshot, input formatter, and verdict parser, frozen together.** Change any of the four and it's a new judge, so re-validate it on test before use. CI and monitoring call the frozen judge exactly as you validated it, and never an unvalidated one.
+- **A judge is its prompt, model snapshot, input formatter, and verdict parser, frozen together.** Change any of the four and it's a new judge: tune it on dev, then score test once. If you already changed it after reading test results, label a fresh test split. CI and monitoring call the frozen judge exactly as you validated it, and never an unvalidated one.
 
 ## Guardrails are different
 
-A guardrail blocks live traffic, so measure it like a classifier with precision (legitimate requests blocked) and recall (threats missed), using the exact config you deploy. TPR and TNR are for judges that feed a failure rate.
+A guardrail blocks live traffic, so measure it like a classifier with precision (the share of blocks that were real threats; low precision means legitimate requests blocked) and recall (the share of threats blocked; low recall means threats got through), using the exact config you deploy. TPR and TNR are for judges that feed a failure rate.
 
 ## Retrieval and abstention
 
