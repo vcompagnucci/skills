@@ -14,6 +14,13 @@ Most rules come from the harness, architecture, context, and tool files of the c
 - Anthropic: [Mid-conversation system messages](https://platform.claude.com/docs/en/build-with-claude/mid-conversation-system-messages) (2026-09-01) and the tool changes they allow (2026-09-22, beta), [Compaction on demand](https://platform.claude.com/docs/en/build-with-claude/compaction-on-demand) (2026-09-14), [Managed Agents permission policies](https://platform.claude.com/docs/en/managed-agents/permission-policies) (2026-09-10), [Managed Agents updates](https://claude.com/blog/claude-managed-agents-updates) (2026-05-19, self-hosted sandbox), and [How Anthropic's sales team rebuilt inbound](https://claude.com/blog/how-anthropics-sales-team-rebuilt-inbound-with-claude-managed-agents) (2026-09-30, escalation reasons, staging, rollback).
 - OpenAI: Agents API [functions](https://developers.openai.com/api/docs/guides/agents-api/tools/functions), [sessions](https://developers.openai.com/api/docs/guides/agents-api/sessions), and [multi-agent](https://developers.openai.com/api/docs/guides/agents-api/multi-agent) (2026-09-10), [openai-agents-python #5240](https://github.com/openai/openai-agents-python/pull/5240) (2026-09-29, sibling results on resume), and Codex PRs [#49441](https://github.com/openai/codex/pull/49441) and [#49880](https://github.com/openai/codex/pull/49880) (2026-09-30 and 10-01, terminal errors, turn-scoped approvals).
 
+- OpenAI tooling changes used in build-or-buy.md: the visual workflow builder winds down by 2026-11-30 (`agentkit` in openai-agents), and the hosted Evals platform goes read-only on 2026-10-31 and shuts down on 2026-11-30 ([deprecations](https://developers.openai.com/api/docs/deprecations)).
+
+## Support vendors
+
+- Lorikeet: [Reliable handoffs](https://www.lorikeetcx.ai/blog/outcomes) (2026-07-07, the model picks a named outcome and code carries it out) and [Resolution Loop](https://www.lorikeetcx.ai/blog/launching-resolution-loop) (2026-03-05, asking a human privately versus handing over).
+- Plaude ([docs](https://plaude.com/docs), checked 2026-09-30) and Intercom Fin ([pricing](https://www.intercom.com/pricing)) are named only as examples of vertical vendors.
+
 ## Practitioners
 
 - Cognition: [Devin's Slack etiquette](https://devin.ai/blog/devins-slack-etiquette) (2026-08-20, re-sent channel rules, "no reply" as an end), [Multi-agents working](https://cognition.com/blog/multi-agents-working) (2026-04-22, one writer).
