@@ -13,10 +13,10 @@ Everything Claude receives besides your prompt: system prompt, tools, instructio
 
 - **The team removed over 80% of Claude Code's system prompt for Opus 5 and Fable 5,** with no measurable loss on coding evals. (`ctx-eng`)
 - **Conflicting instructions cost thinking.** Transcripts showed "leave documentation as appropriate" and "DO NOT add comments" in one request. A server that says "return JSON" and a skill that says "use markdown tables" force Claude to guess. (`ctx-eng`, `skills-and-mcp`)
-- **Ritual instructions cost money and accuracy.** Verification rituals, emphasis boosters, mandatory scratchpads, stale examples, and contradictory rules patched older models. On an Opus 4.8 to 5.5 support migration, `prompt-audit` cut another 9% of cost and raised accuracy about 2 points. Contradictory refund rules had withheld four owed refunds. (`platform-cost`, `cost`)
+- **Ritual instructions cost money and accuracy.** Verification rituals, emphasis boosters, mandatory scratchpads, stale examples, and contradictory rules patched older models. On an Opus 4.8 to 5.5 support migration, `prompt-audit` cut another 9% of cost and raised accuracy about 2 points. Contradictory refund rules had withheld four owed refunds. Moving to Sonnet 5.5, remove refusal steering, tool-call retry shims, and "do not be lazy", then re-run evals before tuning anything else. (`platform-cost`, `cost`, `sonnet-5-5`)
 - **Rules → judgment.** The old prompt said "default to writing no comments". The new one says "Write code that reads like the surrounding code: match its comment density, naming, and idiom." (`ctx-eng`)
 - **Explain why instead of shouting.** "NEVER use bullet points" works worse than stating the preference and its reason, which lets the model generalize. Say what to do, not what not to do. (`prompt-engineering`)
-- **Other changes.** Examples → interface design. Everything up front → loaded when needed. Repeated instructions → one tool description. "Think carefully" lines → deleted. (`ctx-eng`, `opus-5-5`, `cb-ctx-tools`)
+- **Other changes.** Examples → interface design. Everything up front → loaded when needed. Repeated instructions → one tool description. "Think carefully" lines → deleted. Asking for written-out reasoning → reading `thinking.display`, since the request invites `reasoning_extraction` refusals. (`ctx-eng`, `opus-5-5`, `cb-ctx-tools`, `sonnet-5-5`)
 
 ## Write prompts at the right altitude
 
@@ -47,6 +47,7 @@ Everything Claude receives besides your prompt: system prompt, tools, instructio
 
 - **Memory is files the model chooses to write.** The memory tool is client-side: Claude calls `view`, `create`, `str_replace` and so on against `/memories`, and your app owns the storage. Its protocol assumes the window can reset at any moment, and its value depends on how well the model takes notes. (`cb-memory`, `cb-ctx-tools`)
 - **In Managed Agents a memory store is a mounted directory.** Up to eight per session, for example one read-write store per customer plus a shared read-only one. The store's description goes into the system prompt, so make it specific. Seed it from data you already have. Every write is a versioned, auditable event. (`cb-user-memory`)
+- **Gate who can write shared memory.** At Asana anyone can give an agent feedback on a task, but only named admins and editors can commit it to permanent memory or delete from it, and everyone else's applies to that task only. The team that owns the standard (brand voice) owns the agent, so one or two experts improve it for everyone. (`asana`)
 - **Memory is a prompt-injection vector.** "Memory poisoning" is the risk. Claude reads the files back into context, so sanitize before storing, scope per user or project, log every operation, and tell Claude to ignore instructions found in memory. Store patterns, not raw history, and never secrets or PII. (`cb-memory`)
 
 ## Layer by layer

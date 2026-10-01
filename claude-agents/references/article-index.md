@@ -1,9 +1,9 @@
 # Article index
 
-The 121 sources the skill cites, grouped by main theme. The skill is scoped to building your own agent, so it keeps only sources with a lesson for that:
+The 124 sources the skill cites, grouped by main theme. The skill is scoped to building your own agent, so it keeps only sources with a lesson for that:
 
-- 9 of the 11 posts on claude.dev (2026-04-10 to 2026-09-28)
-- 26 of the 38 posts in claude.com's agents category (2025-09-29 to 2026-09-08)
+- 10 of the 12 posts on claude.dev (2026-04-10 to 2026-09-28)
+- 28 of the 40 posts in claude.com's agents category (2025-09-29 to 2026-09-29)
 - 24 of the 25 posts on anthropic.com/engineering (2024-09-19 to 2026-05-25)
 - the 6 use-case guides in the docs (undated, keys `uc-*`)
 - 43 notebooks from the claude-cookbooks repo, taken from every one outside `third_party/` that the registry tags Agent Patterns, Claude Agent SDK, Claude Managed Agents, or Skills (2024-03-13 to 2026-09-18, keys `cb-*`, authors are GitHub handles)
@@ -129,6 +129,7 @@ Several category posts are product announcements with only a few real positions,
 - **[The vulnerability detection agent](https://github.com/anthropics/claude-cookbooks/blob/main/claude_agent_sdk/06_The_vulnerability_detection_agent.ipynb)** (`cb-vuln-agent`, 2026-04-22, eugeneyan-ant). A vulnerability agent needs a threat model for where to look, a quality rubric for what to report, and an independent triage pass for its overconfidence.
 - **[Finding bugs with Claude and property-based testing](https://www.anthropic.com/research/property-based-testing)** (`pbt-agent`, 2026-01-14, Muhammad Maaz et al.). An agent that infers properties from code and writes property-based tests found real bugs in NumPy, SciPy, and Pandas, once false positives were filtered hard.
 - **[Build a scheduled repository reviewer](https://github.com/anthropics/claude-cookbooks/blob/main/claude_agent_sdk/scheduled_repository_reviewer/scheduled_repository_reviewer.ipynb)** (`cb-repo-reviewer`, 2026-08-26, codyanthony736). An unattended scheduled reviewer must be bounded (read-only tools, caps, hooks), prove continuity across runs, and emit machine-readable output.
+- **[Building with Claude Sonnet 5.5](https://claude.dev/blog/building-with-claude-sonnet-5-5/)** (`sonnet-5-5`, 2026-09-28, Addy Osmani). Sonnet 5.5 fits well-scoped work with a clear spec and a way to check the result, costs the same per token as Sonnet 5 but less per task, and moving to it means re-running the effort sweep and dropping old workarounds.
 
 ## Safety and containment (`references/safety-and-containment.md`)
 
@@ -144,6 +145,7 @@ Several category posts are product announcements with only a few real positions,
 - **[Data residency: pin an agent's inference geography](https://github.com/anthropics/claude-cookbooks/blob/main/managed_agents/CMA_pin_inference_geo.ipynb)** (`cb-inference-geo`, 2026-07-23, cj-ant). Put data residency on the agent definition, validated and enforced every turn, so the constraint travels with the agent instead of living in a runbook.
 - **[Managed Agents tutorial: production setup](https://github.com/anthropics/claude-cookbooks/blob/main/managed_agents/CMA_operate_in_production.ipynb)** (`cb-production`, 2026-04-08, pauly-ant). What the loop needs before real users: MCP toolsets or custom tools by reachability, per-user credential vaults, webhooks instead of open connections, and geography pinning.
 - **[Measuring AI agent autonomy in practice](https://www.anthropic.com/research/measuring-agent-autonomy)** (`agent-autonomy`, 2026-02-18, Anthropic). People grant agents more autonomy with experience, and oversight shifts from approving each step to monitoring and interrupting.
+- **[Giving companies more control over their AI agents, with NVIDIA](https://claude.com/blog/giving-companies-more-control-over-their-ai-agents-with-nvidia)** (`openshell`, 2026-09-28, Anthropic). Mostly a partnership announcement: protect agents in independent layers outside the model, with Managed Agents holding credentials in a vault and NVIDIA OpenShell denying by default what the agent can execute and reach.
 
 ## Agents in production (`references/agents-in-production.md`)
 
@@ -163,3 +165,4 @@ Several category posts are product announcements with only a few real positions,
 - **[Project Swap: What happens when agents trade for us?](https://www.anthropic.com/research/project-swap)** (`project-swap`, 2026-09-24, Zoë Hitzig et al.). In a 201-person book-trading market, agents negotiated well but were capped by what a short intake chat captured, and stronger models, not ruthless or kind instructions, drove the outcomes.
 - **[Build a Slack data analyst bot with Claude Managed Agents](https://github.com/anthropics/claude-cookbooks/blob/main/managed_agents/slack_data_bot.ipynb)** (`cb-slack-bot`, 2026-04-08, charmaine). Code walkthrough of a Slack front end for an agent. Acknowledge within Slack's 3 seconds, and map one thread to one session.
 - **[Build an SRE incident response agent with Claude Managed Agents](https://github.com/anthropics/claude-cookbooks/blob/main/managed_agents/sre_incident_responder.ipynb)** (`cb-sre-responder`, 2026-04-10, gaganb-ant). Team conventions go in skills, custom tools are where the agent leaves its sandbox, and a hard approval rule gates the destructive action.
+- **[Agents you can coach: how Asana builds human-agent teams with Claude](https://claude.com/blog/agents-you-can-coach-how-asana-builds-human-agent-teams-with-claude)** (`asana`, 2026-09-29, Aleksandra Todorova and Kristen Swanson). A customer story: give each agent a defined role, bound its access by whoever triggers it, let only named owners change its shared memory, and post its work where reviewers can steer it.
