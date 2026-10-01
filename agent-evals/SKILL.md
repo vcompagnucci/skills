@@ -57,7 +57,7 @@ Open one reference at a time. **Never compute a formula from memory** (corrected
 | When error analysis is done | saturation, around 100 traces |
 | Human labels per judge | about 100, balanced, never under 30 Pass and 30 Fail |
 | CI suite size | start at 20 to 50 cases, grow past 100 |
-| Runs per CI case | 5 |
+| Runs per CI case | 15 |
 | Runs to reproduce and verify a production bug fix | 10, or 20 if it was seen once |
 | Red-team probes per attack type | 50+ |
 
