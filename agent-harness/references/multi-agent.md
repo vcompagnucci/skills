@@ -12,7 +12,7 @@ Does one agent with good tools and a clear prompt fail at this?
     └── None → fix the prompt and tools instead
 ```
 
-- **Multi-agent costs 3 to 10 times the tokens of one agent for the same task,** and it works mainly because it spends more. Better prompting on one agent matched months of elaborate architecture, per Anthropic.
+- **Multi-agent typically uses 3 to 10 times the tokens of one agent for the same task,** and it works mainly because it spends more. Billed cost can come out lower when a strong coordinator hands the reading to cheap workers, so compare at the same rigor. Better prompting on one agent matched months of elaborate architecture, per Anthropic.
 - **A conversation with a customer is one session.** A single agent loading the right procedures beat subagent designs on quality, cost, and speed for commerce chat. Split the back office (a review, an investigation), not the conversation.
 - **Split by context, not by type of work.** Planner, implementer, and reviewer agents play telephone and spend more tokens coordinating than working. The agent that does a piece of work also writes its checks (tests, validations). When a second opinion is needed, a clean-context verifier gets only the artifact, the criteria, and tools, not the history.
 - **One agent writes; others advise.** Parallel agents changing the same state conflict. Extra agents earn their place as a clean-context reviewer or a specialist the writer consults.
@@ -33,7 +33,7 @@ Does one agent with good tools and a clear prompt fail at this?
 
 ## Failures between agents
 
-- **Agents make the same choice the same way, so one bad default spreads.** Agents sharing a job queue converged on the same polling rate and sent 2.4 million requests for 117 jobs. Give each agent its own rate limit in code.
+- **Agents make the same choice the same way, so one bad default spreads to all of them.** Give each agent its own rate limit in code.
 
 ## Where the answer depends on the case
 

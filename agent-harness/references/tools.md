@@ -5,7 +5,7 @@
 - **A tool must know, do, or show something:** bring data the model lacks (the customer's account, a transfer's status), take a real action, or present information better than text. A tool that does none of these is noise the model has to weigh.
 - **Group tools by the customer's intent, not by your API's endpoints.** One `get_withdrawal_status` beats `list_withdrawals` plus `get_withdrawal` plus `get_network_fee`. Each extra tool is one more choice the model can get wrong.
 - **Overlap matters more than count.** OpenAI saw some agents handle 15 or more distinct tools while others failed with fewer than 10 overlapping ones. If a person can't say which tool fits a situation, the model can't either. Fix names and descriptions before splitting into more agents.
-- **Business actions are typed tools with structured returns.** A support agent gets no shell or file-reading tools. No support task needs them, and each one widens what a confused or manipulated model can do.
+- **Business actions are typed tools with structured returns.** A support agent gets no shell or file-reading tools. No support task needs them, and each one is a choice the model can get wrong.
 - **Test each tool against the no-tool baseline** on a few positive, negative, and edge cases. A tool that doesn't beat the model's answer without it goes.
 
 ## Arguments and descriptions
@@ -19,13 +19,13 @@
 ## What tools return
 
 - **Return only the fields the next decision needs,** with ids resolved to names. Tool output can dominate the context, and internal fields ("just in case") cost tokens and leak data.
-- **Cap output at about 10K tokens, keeping the head and tail,** with a marker saying how much was cut, so the model knows it saw part of the result.
+- **Cap output at about 10K tokens.** For text and logs, keep the head and tail with a marker saying how much was cut. For JSON, page it or offer a `response_format` parameter (concise or detailed), because cutting the middle breaks the structure.
 - **Separate what the model sees from what only the UI needs.** Images, price variants, and display data go to a channel the model never reads.
 - **A call to a tool that doesn't exist, a timeout, or a human rejection also comes back as a result** (SKILL.md rule 4), so the model can pick another tool or ask the customer.
 
 ## Many tools, or many calls
 
-- **Load tool definitions on demand when either one is true: more than 10 tools, or more than 10K tokens of definitions.** 12 tools qualify even at 6K tokens. Keep the 3 to 5 most used always loaded. Deferred loading with tool search cut context 85% and raised accuracy from 49% to 74% in Anthropic's test; that measurement is the evidence SKILL.md rule 1 asks for, so apply it from 11 tools on without waiting for your own failure.
-- **Let code run 3 or more dependent calls or filter large data,** and show the model only what needs judgment (programmatic tool calling). Keep state-changing and high-impact tools as direct calls, so each one stays reviewable.
+- **Past about 10 tools, or 10K tokens of definitions (either one), try loading definitions on demand and keep it if your evals hold.** Keep the 3 to 5 most used always loaded, and defer whole groups of related tools rather than single ones. Anthropic measured the gain on 58 tools and 55K tokens (context down 85%, accuracy 49% to 74%), so expect less at a dozen.
+- **Let code run 3 or more dependent calls or filter large data,** and show the model only what needs judgment (programmatic tool calling). The program runs in a sandbox that may call only tools you allowlisted. Keep state-changing and high-impact tools as direct calls, so each one stays reviewable.
 - **Namespace tools by system** (`intercom_search`, `ledger_search`) so names never collide.
 - **Keep the tool list stable within a conversation.** Tools sit in the cached prefix, so adding or removing one mid-conversation breaks the cache on most models. On Claude 5.x models (Opus 5 and 5.5, Sonnet 5.5, Fable 5.1), a mid-conversation `role: "system"` message can add or change a tool without breaking it (beta, 2026-09). Elsewhere, mask a tool's availability instead of removing it.
