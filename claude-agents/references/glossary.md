@@ -1,6 +1,6 @@
 # Glossary
 
-Every term the 121 sources coin or use in their own sense, in alphabetical order.
+Every term the 124 sources coin or use in their own sense, in alphabetical order.
 
 - **Ablation.** Removing individual system-prompt lines to measure each line's impact. (`postmortem-apr-2026`)
 - **Adversarial sampling.** Picking eval cases because today's model fails them, which measures that model's failure fingerprint instead of what matters. (`eval-hillclimb`)
@@ -21,12 +21,14 @@ Every term the 121 sources coin or use in their own sense, in alphabetical order
 - **Agentic search.** The agent searching the file system itself with bash tools, versus pre-embedded semantic search. (`agent-sdk`)
 - **Agentic systems.** Umbrella for both workflows and agents. (`effective-agents`)
 - **AI slop (frontend).** The generic look Claude defaults to without guidance: safe fonts, purple gradients on white, predictable layouts. (`cb-frontend`)
+- **AI teammates.** Asana's agents, which take roles in projects and keep a shared memory that only named editors can change. (`asana`)
 - **AI vendoring.** Having an LLM reimplement the functionality you use from a poorly maintained small dependency instead of relying on it. (`ai-offense`)
 - **Alien science.** The risk that AI-found research results become too hard for humans to verify as capability grows. (`auto-alignment`)
 - **Approval fatigue.** Users no longer paying attention to what they approve after constant prompts. (`auto-mode`, `sandboxing`)
 - **Attention budget.** The finite attention an LLM spends across its context. Every token depletes it. (`effective-context`)
 - **Augmented LLM.** The building block: an LLM enhanced with retrieval, tools, and memory. (`effective-agents`)
 - **Automated alignment researchers (AARs).** Claude instances with a sandbox, a shared forum, and a scoring server, proposing and testing research ideas on their own. (`auto-alignment`)
+- **`between_tools`.** A Sonnet 5.5 thinking mode where the model thinks only between tool calls. It replaces turning thinking off. (`sonnet-5-5`)
 - **Blast radius.** The damage an agent could do if it fails, as distinct from how likely failure is. (`containment`)
 - **Blastbox.** An isolation environment that hides the agent from sensitive internals without hindering it, built on the assumption that it may be hijacked. (`outtake`)
 - **Brain / hands / session.** Claude plus harness, the sandboxes and tools that act, the durable event log. (`managed-agents`)
@@ -120,6 +122,7 @@ Every term the 121 sources coin or use in their own sense, in alphabetical order
 - **Patch gap.** The window between a patch being published and it being applied, now exploitable because models turn patches into exploits. (`ai-offense`)
 - **Performance gap recovered (PGR).** The share of the gap between a weak teacher and a strong model's ceiling that training on the weak signal recovers. (`auto-alignment`)
 - **Pet vs cattle.** A hand-tended server you can't lose vs interchangeable instances. (`managed-agents`)
+- **Policy prover.** The part of NVIDIA OpenShell that uses mathematical proof to confirm what an agent can reach under a team's rules. (`openshell`)
 - **Prefilling.** Starting the assistant's response yourself (e.g. `{`) to force format or skip preamble. (`prompt-engineering`)
 - **Presentation tools.** UI components exposed as typed tool calls the client renders. (`commerce-agents`)
 - **Pre-warming the cache.** Sending a `max_tokens: 0` request with a cache breakpoint so the first real request hits a warm cache. (`platform-cost`)
