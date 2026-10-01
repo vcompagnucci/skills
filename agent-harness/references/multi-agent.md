@@ -8,20 +8,20 @@ Does one agent with good tools and a clear prompt fail at this?
 └── Yes → Is the failure one of these three?
     ├── A subtask floods the context (it returns 1,000+ mostly irrelevant tokens) → subagent that returns a summary
     ├── Independent work that can run in parallel → parallel subagents, aggregation designed first
-    ├── 20+ tools or conflicting instructions confuse it → try loading tools on demand first, then split by domain
+    ├── Too many or overlapping tools, or conflicting instructions → load tools on demand and fix overlap first (tools.md), then split by domain
     └── None → fix the prompt and tools instead
 ```
 
-- **Multi-agent costs 3 to 10 times the tokens of one agent for the same task,** and it works mainly because it spends more. Better prompting on one agent matched months of multi-agent architecture in Anthropic's customer work.
+- **Multi-agent costs 3 to 10 times the tokens of one agent for the same task,** and it works mainly because it spends more. Better prompting on one agent matched months of elaborate architecture, per Anthropic.
 - **A conversation with a customer is one session.** A single agent loading the right procedures beat subagent designs on quality, cost, and speed for commerce chat. Split the back office (a review, an investigation), not the conversation.
-- **Split by context, not by type of work.** Planner, implementer, and reviewer agents play telephone and spend more tokens coordinating than working. The agent that does a piece of work also checks its own result. A separate verifier only needs the artifact, the criteria, and tools, not the history.
+- **Split by context, not by type of work.** Planner, implementer, and reviewer agents play telephone and spend more tokens coordinating than working. The agent that does a piece of work also writes its checks (tests, validations). When a second opinion is needed, a clean-context verifier gets only the artifact, the criteria, and tools, not the history.
 - **One agent writes; others advise.** Parallel agents changing the same state conflict. Extra agents earn their place as a clean-context reviewer or a specialist the writer consults.
 
 ## Who keeps the conversation
 
 - **A manager calls specialists as tools and keeps the customer;** use it when one voice should answer and shared checks run in one place. **A handoff gives the conversation to another agent for good;** use it when a specialist fully takes over. The question is who owns the final answer.
 - **Route in code when ownership matters.** Classify the request with structured output and pick the specialist in code. A model-decided transfer can route differently on the same request, and a takeover that's wrong is hard to undo.
-- **A handoff forwards the whole transcript unless you narrow it, and narrowing is not redaction.** Tool arguments and results survive inside a generated summary. Treat the receiving agent and its model provider as recipients of everything forwarded.
+- **A handoff forwards the whole transcript unless you narrow it.** Decide what the receiving agent needs; what leaks through a summary is a security question.
 - **An agent called as a tool starts a nested run.** Give it structured input, not a free-text string, and extract its output before the caller sees it, with a fallback when it's malformed.
 - **Backend actions stay with the main agent.** In OpenAI's Agents API, subagents can't call your function tools at all, and keeping refunds and account changes in one agent keeps one place to check them.
 
@@ -33,8 +33,7 @@ Does one agent with good tools and a clear prompt fail at this?
 
 ## Failures between agents
 
-- **Agents make the same choice the same way, so one bad default spreads.** Agents sharing a job queue converged on the same polling rate and sent 2.4 million requests for 117 jobs. Give each agent its own limits.
-- **Interactive supervision tops out at 3 to 5 parallel sessions** per person. Past that, the bottleneck is human attention, not the agents.
+- **Agents make the same choice the same way, so one bad default spreads.** Agents sharing a job queue converged on the same polling rate and sent 2.4 million requests for 117 jobs. Give each agent its own rate limit in code.
 
 ## Where the answer depends on the case
 

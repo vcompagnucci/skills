@@ -6,7 +6,7 @@ From most done for you to least:
 
 1. **A vertical vendor** (a CX platform such as Intercom Fin or Plaude). It brings the loop, the inbox, channels, handoff to humans, and a place to write procedures.
 2. **A model vendor's hosted harness** (Claude Managed Agents, OpenAI's Agents API). It hosts the loop, sessions, memory, and sandbox. You build the channel, the inbox, and the tools. Anthropic also offers a self-hosted sandbox, where the loop stays with Anthropic and the tools run inside your network.
-3. **A provider SDK in your infrastructure** (Claude Agent SDK, OpenAI Agents SDK, Vercel AI SDK). The loop comes as a library, and hosting, state, retries, and integrations are yours. OpenAI calls its Agents SDK feature complete now that the Agents API exists.
+3. **A provider SDK in your infrastructure** (Claude Agent SDK, OpenAI Agents SDK, Vercel AI SDK). The loop comes as a library, and hosting, state, retries, and integrations are yours.
 4. **Your own loop on the raw API** (Messages API, Responses API). You write everything.
 
 Visual workflow builders sit outside this list. OpenAI is shutting its own down on 2026-11-30 and moving those workflows to its SDK, because a workflow that has to keep running belongs in code.
@@ -20,7 +20,7 @@ Must the loop, memory, or data stay inside your perimeter (regulation, a contrac
     ├── Yes → 3: you'll need control over memory, files, and the loop
     └── No → Does a vendor already live where your conversations are (your help desk)?
         ├── Yes → shortlist 1 and 2, and run both on the same eval cases before choosing
-        └── No → 2
+        └── No → 2 or 3: see "Where the answer depends on the case" below
 ```
 
 Choose with data: run the same eval cases (agent-evals) against each candidate and compare. A vendor demo shows its best conversations, not yours.
