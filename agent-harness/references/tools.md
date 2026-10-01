@@ -5,7 +5,7 @@
 - **A tool must know, do, or show something:** bring data the model lacks (the customer's account, a transfer's status), take a real action, or present information better than text. A tool that does none of these is noise the model has to weigh.
 - **Group tools by the customer's intent, not by your API's endpoints.** One `get_withdrawal_status` beats `list_withdrawals` plus `get_withdrawal` plus `get_network_fee`. Each extra tool is one more choice the model can get wrong.
 - **Overlap matters more than count.** OpenAI saw some agents handle 15 or more distinct tools while others failed with fewer than 10 overlapping ones. If a person can't say which tool fits a situation, the model can't either. Fix names and descriptions before splitting into more agents.
-- **Business actions are typed tools with structured returns.** A support agent gets no shell or file-reading tools: no support task needs them, and each one widens what a confused or manipulated model can do.
+- **Business actions are typed tools with structured returns.** A support agent gets no shell or file-reading tools. No support task needs them, and each one widens what a confused or manipulated model can do.
 - **Test each tool against the no-tool baseline** on a few positive, negative, and edge cases. A tool that doesn't beat the model's answer without it goes.
 
 ## Arguments and descriptions

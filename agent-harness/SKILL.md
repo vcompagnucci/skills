@@ -1,11 +1,11 @@
 ---
 name: agent-harness
-description: Build the harness around an AI agent - own or vendor, the loop, tools, context and memory, pausing for a human, and multi-agent. Use when choosing whether to build a harness or use one (Managed Agents, Agents API, a CX vendor), designing the loop and its failure handling, designing tools and what they return, managing context, compaction, or memory, or splitting work across agents.
+description: Build the harness around an AI agent: own or vendor, the loop, tools, context and memory, pausing for a human, and multi-agent. Use when choosing whether to build a harness or use one (Managed Agents, Agents API, a CX vendor), designing the loop and its failure handling, designing tools and what they return, managing context, compaction, or memory, or splitting work across agents.
 ---
 
 # Agent harness
 
-The harness is everything around the model that makes it an agent: the loop, what the model sees each turn, the tools and what they return, the state that survives a crash or a pause, and the log. Where sources disagreed, the most recent position won. Where Anthropic and OpenAI disagree with no date to settle it, both positions sit under "Where the answer depends on the case" in the reference: report both, never pick one from memory.
+The harness is everything around the model that makes it an agent: the loop, what the model sees each turn, the tools and what they return, the state that survives a crash or a pause, and the log. Where sources disagreed, the most recent position won. Where Anthropic and OpenAI disagree with no date to settle it, both positions sit under "Where the answer depends on the case" in the reference. Report both, and never pick one from memory.
 
 Out of scope: who may approve what and prompt injection (security), measuring the agent (agent-evals), and writing the system prompt.
 

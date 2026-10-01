@@ -23,13 +23,13 @@ Must the loop, memory, or data stay inside your perimeter (regulation, a contrac
         └── No → 2 or 3: see "Where the answer depends on the case" below
 ```
 
-Choose with data: run the same eval cases (agent-evals) against each candidate and compare. A vendor demo shows its best conversations, not yours.
+Run the same eval cases (agent-evals) against each candidate and let the results decide. A vendor demo shows its best conversations, not yours.
 
 ## What stays yours whatever you choose
 
 - **The tools.** Every action is an endpoint in your systems, with its policy check inside it (SKILL.md rules 2 and 3). No vendor can write your business rules.
 - **The procedures and the prompt.** A vendor gives you the place to write them, not the content.
-- **The evals.** You need every conversation exported in full, with each tool call's input and output. A vendor's built-in evals can't replace yours, and OpenAI shutting down its hosted Evals platform (2026-11-30) shows why: you lose them if the vendor drops the feature.
+- **The evals.** You need every conversation exported in full, with each tool call's input and output. A vendor's built-in evals can't replace yours, and OpenAI shutting down its hosted Evals platform (2026-11-30) shows why. You lose them when the vendor drops the feature.
 - **Versions and rollback.** A staging copy of the agent, pinned versions, and a one-step rollback.
 
 ## Ask a vendor before signing
