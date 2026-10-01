@@ -1,6 +1,6 @@
 # Sources and licenses
 
-Checked on 2026-09-29. Where two sources disagreed on the same question, I kept the most recent position and removed the older one.
+Checked on 2026-10-01. Where two sources disagreed on the same question, I kept the most recent position and removed the older one.
 
 ## Adapted with attribution (Apache-2.0)
 
@@ -9,7 +9,7 @@ Checked on 2026-09-29. Where two sources disagreed on the same question, I kept 
 ## Ideas and numbers, in our own words
 
 - [Evals FAQ](https://hamel.dev/blog/posts/evals-faq/) by Hamel Husain and Shreya Shankar, updated 2026-09-18.
-- [cartwheel-homeworks](https://github.com/ai-evals-course/cartwheel-homeworks), commit `752bee3` (2026-09-27). Text used with the authors' permission: the judge prompt skeleton, the review app, the audit checklist, the synthetic pilot, the bootstrap, and the case record adapt it.
+- [cartwheel-homeworks](https://github.com/ai-evals-course/cartwheel-homeworks), commit `987db12` (2026-09-30). Text used with the authors' permission: the judge prompt skeleton, the review app, the audit checklist, the synthetic pilot, the bootstrap, the case record, and the improve loop (split, search budget, keep rule, test-once frontier) adapt it.
 - Anthropic: [Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) (2026-01-09), [Automating eval design and hillclimbing](https://claude.dev/blog/automating-eval-design-and-hillclimbing/) (2026-09-28), and the docs guide on [customer support agents](https://platform.claude.com/docs/en/about-claude/use-case-guides/customer-support-chat).
 - OpenAI: [Realtime eval guide](https://developers.openai.com/cookbook/examples/realtime_eval_guide) (2026-01-25), [voice agent evaluation](https://developers.openai.com/cookbook/examples/audio/voice_agent_evaluation) (2026-09-10), [cost and quality](https://developers.openai.com/cookbook/examples/agent_optimization/optimizing_agents_for_cost_and_quality) (2026-09-14), the [GPT-6.1 Sol system card](https://deploymentsafety.openai.com/gpt-6-1-sol) and [launch post](https://openai.com/index/introducing-gpt-6-1-sol) (2026-09-29) (evaluation awareness in replayed runs, the broken-tool test, fallbacks in cost).
 - Salesforce: [Measure system outcomes, not conversations](https://engineering.salesforce.com/how-to-evaluate-production-ai-agents-measure-system-outcomes-not-conversations/) (2026-08-17), [deterministic rendering](https://engineering.salesforce.com/how-agentforce-achieves-100-deterministic-rendering-for-ai-agent-ux/) (2026-09-03), [CRMArena-Pro](https://arxiv.org/abs/2505.18878) (2025-05-24).
