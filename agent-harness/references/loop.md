@@ -5,7 +5,7 @@
 - **One turn is: build the prompt, call the model, run its tool calls, append the results, repeat until it answers without a tool call.** One customer message can take many model calls. Record each message, tool call, result, and approval as its own typed item in order, because one blob with attached calls hides what happened first.
 - **Name every way a run ends:** a final answer, new customer input, an interrupt, a fatal error after retries, a wait for approval, or the turn limit. Give each a controlled ending. The turn limit, a refusal, and an answer that fails its schema each return an application fallback (an apology plus a handoff), validated against the same output schema, without retrying the model or replaying tool side effects.
 - **"No reply" is a valid end** in a channel where a customer's "thanks" needs nothing back. A loop that must always answer sends filler.
-- **Release a forced tool call after one call.** If a tool stays required, the model must call it again after every result, forever. Sonnet 5.5 rejects a forced `tool_choice` outright: send `auto`, mark the tool strict, and say in the prompt when to use it.
+- **Release a forced tool call after one call.** If a tool stays required, the model must call it again after every result, forever. Sonnet 5.5 rejects a forced `tool_choice` outright. Send `auto`, mark the tool strict, and say in the prompt when to use it.
 - **Every escalation carries a reason in a fixed field.** Anthropic's inbound agent halved its handoffs to humans by reading those reasons and fixing the top ones.
 
 ## Messages that arrive mid-turn
@@ -17,12 +17,12 @@
 
 - **Know which calls are still owed.** In OpenAI's Agents API only `required_actions` lists pending calls; a tool call in the history doesn't prove a result is still owed. Store each result by session, turn, and call id.
 - **An idle session is not success.** Read the turn's completed, failed, or cancelled status. A completed turn can still hold a failed tool.
-- **Retry only transient errors** (timeouts, overload), with backoff, jitter, and an attempt limit, honoring the server's Retry-After. Quota, billing, and policy errors are terminal: they need a person, not a faster retry. Stop retrying when the error changes.
+- **Retry only transient errors** (timeouts, overload), with backoff, jitter, and an attempt limit, honoring the server's Retry-After. Quota, billing, and policy errors are terminal. They need a person, not a faster retry. Stop retrying when the error changes.
 - **Replay from the last checkpoint, not from the start,** so model calls and tool calls that finished don't run again.
 
 ## Pausing for a human
 
-- **Keep the sibling results.** If a turn called two tools and one needs approval, store the finished one's result before pausing. OpenAI's SDK fixed exactly this: without it, the model is called again and `submit_order` runs twice.
+- **Keep the sibling results.** If a turn called two tools and one needs approval, store the finished one's result before pausing. OpenAI's SDK fixed exactly this. Without it, the model is called again and `submit_order` runs twice.
 - **An approval belongs to the turn that asked for it.** A later turn asks for something different, and reusing the earlier yes approves an action nobody looked at.
 
 ## A person takes over
