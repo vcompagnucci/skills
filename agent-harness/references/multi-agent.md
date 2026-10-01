@@ -13,6 +13,7 @@ Does one agent with good tools and a clear prompt fail at this?
 ```
 
 - **Multi-agent typically uses 3 to 10 times the tokens of one agent for the same task,** and it works mainly because it spends more. Billed cost can come out lower when a strong coordinator hands the reading to cheap workers, so compare at the same rigor. Better prompting on one agent matched months of elaborate architecture, per Anthropic.
+- **Splitting has a ceiling.** In Google's 2026 study, splitting sequential work lost 39% to 70%, adding agents made results worse once one agent passed about 45% success, and independent agents amplified errors 17.2 times against 4.4 times under one coordinator.
 - **A conversation with a customer is one session.** A single agent loading the right procedures beat subagent designs on quality, cost, and speed for commerce chat. Split the back office (a review, an investigation), not the conversation.
 - **Split by context, not by type of work.** Planner, implementer, and reviewer agents play telephone and spend more tokens coordinating than working. The agent that does a piece of work also writes its checks (tests, validations). When a second opinion is needed, a clean-context verifier gets only the artifact, the criteria, and tools, not the history.
 - **One agent writes; others advise.** Parallel agents changing the same state conflict. Extra agents earn their place as a clean-context reviewer or a specialist the writer consults.

@@ -15,7 +15,8 @@ Out of scope: who may approve what and prompt injection (security), measuring th
 Do you have a harness yet?
 ├── No → references/build-or-buy.md first. A vendor may already do most of what follows.
 └── Yes → What are you changing?
-    ├── Turns, stopping, retries, failures, pausing for a human, a person taking over, versions → references/loop.md
+    ├── Turns, stopping, retries, failures, durable state, versions, latency → references/loop.md
+    ├── Pausing for a person, a person taking over, when a conversation ends → references/humans.md
     ├── Which tools, their descriptions and arguments, what they return → references/tools.md
     ├── What the model sees, compaction, memory → references/context-memory.md
     └── More than one agent → references/multi-agent.md

@@ -21,43 +21,30 @@
 - **Know which calls are still owed.** In OpenAI's Agents API only `required_actions` lists pending calls; a tool call in the history doesn't prove a result is still owed. Store each result by session, turn, and call id.
 - **An idle session is not success.** Read the turn's completed, failed, or cancelled status. A completed turn can still hold a failed tool.
 - **Sort every tool failure into a fixed class** (timeout, bad arguments, not found, upstream error). A failure that fits no class is a harness bug to fix, and a class rising above its usual rate raises an alert, so a broken tool shows up the day it breaks.
-- **Retry only transient errors** (timeouts, overload), with backoff, jitter, and an attempt limit, honoring the server's Retry-After. Quota, billing, and policy errors are terminal. They need a person, not a faster retry. Stop retrying when the error changes.
+- **A timeout on a state-changing call is an unknown outcome,** not a transient error. Read the real state, or retry only with the same dedup key, because the first call may still land. Never retry a model call after its output started streaming.
+- **Retry only transient errors** (overload, a timeout on a read), with backoff, jitter, and an attempt limit, honoring the server's Retry-After. Quota, billing, and policy errors are terminal. They need a person, not a faster retry. Stop retrying when the error changes.
+- **When the model provider fails** (5xx, rate limits, a call slower than your p99), fail over to the same model snapshot on a second host. Switching to a different model loses the cache and changes behavior mid-conversation.
+- **Put a clock on everything:** a timeout per model call and per tool call, a deadline for the whole run, and a no-progress timer. No SDK bounds the whole run for you.
 - **Replay from the last checkpoint, not from the start,** so model calls and tool calls that finished don't run again.
-
-## Pausing for a human
-
-- **On resume, take ownership of the run first, then reload its history,** because the saved snapshot may be stale if another worker touched it.
-- **Keep the sibling results.** If a turn called two tools and one needs approval, store the finished one's result before pausing. OpenAI's SDK fixed exactly this. Without it, the model is called again and `submit_order` runs twice.
-- **An approval belongs to the turn that asked for it.** A later turn asks for something different, and reusing the earlier yes approves an action nobody looked at.
-
-## A person takes over
-
-- **The conversation has one owner at a time, stored in state, and code checks it before every agent reply.** While a person owns it, the agent doesn't answer. A prompt that says "stay quiet while a human handles this" fails the first time the customer writes again.
-- **A stop or a takeover ends the run, not just the reply.** Code cancels the turn and rejects any tool call that arrives after it. If the customer said stop, the agent answers once with what already happened and what didn't. If a person took over, that summary goes to the log for them and the customer gets nothing from the agent.
-- **The model picks a named outcome; code carries it out.** The agent chooses "hand to KYC team" with its reason, and code replies to the customer, tags, reassigns, and closes in a fixed order, so no step is skipped.
-- **Escalate on two triggers:** failures crossing a threshold you set, or an action that is high-risk and irreversible. An optional question to the customer proceeds after a short wait on a stated assumption; a required approval blocks. Elapsed time is never an approval.
-- **Two modes, kept apart:** the agent asks your team a private question and keeps the conversation, or a person takes the conversation. The first is a pause (above); the second changes the owner.
-- **When the conversation comes back, the agent reads what the person did** (their messages, actions, and notes in the log) before replying, and any run paused before the takeover is discarded, not resumed.
-
-## When a conversation ends
-
-- **Define the end in code:** an explicit close, or an idle timeout you choose. The end of a conversation triggers the memory pass (context-memory.md) and discards paused runs that can no longer resume. Without a defined end, both happen never or at random.
 
 ## Durable state
 
 - **The harness and the session outlive any container.** Keep the session log and state outside the process that runs the loop, so a crash loses nothing and a new worker picks up the run. Postgres alone carried one team's durable agent runs for five months; you need leases, a watchdog for stuck runs, and dedup keys more than you need a workflow engine.
+- **One active run per conversation.** Route by conversation id or lock it, and a new message waits under the mid-turn rule above. Two runs answering the same customer contradict each other.
+- **Log writes are at-least-once.** Dedupe by entry id, and alert when a batch is dropped, since a dropped batch has no other copy.
 - **One conversation thread is one session.** Store the thread-to-session map, ignore repeated webhook deliveries of the same message, and acknowledge within the channel's timeout (Slack gives 3 seconds) while the work runs in the background. A redelivered webhook otherwise gets two replies.
 - **Keep state on the server.** Browser tabs close and phones lose signal, so a client can't be the source of truth for a run.
 - **Hooks that observe are separate from checks that control.** Logging and metrics go in hooks. Anything that blocks or changes a call is plain code before and after the model call, where you keep the rejection reason.
 
 ## Versions
 
-- **Every change to prompt, model, or tools is a new pinned version,** tested on a staging copy before production. Rollback is re-pinning the last good version. Edits to a saved agent reach only new sessions, so a running conversation finishes on its version. Anthropic's sales team rolled back to an older version after a week, and could only because versions were pinned.
+- **Every change to prompt, model, or tools is a new pinned version,** tested on a staging copy before production. After staging, give a new version a small share of new conversations (Ada starts at 1%), then widen. Rollback is re-pinning the last good version, but keep the newer version runnable until the runs it paused drain, because older code rejects state saved by newer code. Edits to a saved agent reach only new sessions, so a running conversation finishes on its version. Anthropic's sales team rolled back to an older version after a week, and could only because versions were pinned.
 - **Re-test after a model change before tuning anything else.** Remove workarounds written for the old model first (retry shims, "do not be lazy"), then measure.
 
 ## Latency and cost
 
 - **Anything repeated inside the loop is paid on every model call.** Cut re-sent history and run independent tool calls in parallel before buying a faster model.
+- **In chat, end the turn at the first question the agent has to ask anyway** instead of gathering everything first. Rappi cut its first turn from over 60 seconds to 20.
 - **Move work that doesn't change the reply off the customer's path:** QA scoring, tagging, summaries, and memory writing run after the reply is sent.
 - **Route models per step, not per message.** A small model classifies and handles routine questions; the largest takes account access and disputes. Never switch the model inside one conversation, because each model has its own cache and reasoning format; send the step to a subagent on the other model instead.
 
@@ -67,3 +54,7 @@ A support conversation fits in one window. Back-office work (a batch of reviews,
 
 - **Give the run a goal with a completion condition and evidence:** what must be true, how to check it, what must not regress, when to stop as blocked. "Blocked" is allowed only after the same blocker repeats for 3 consecutive turns, and an exhausted budget ends in a summary, never in "done".
 - **Keep progress in files the agent rereads:** the goal, a plan with checkable milestones, a status log that records failed approaches too. A fresh session gets its bearings from them instead of from a summary.
+
+## Where the answer depends on the case
+
+- **Does a slower reply hurt?** Fin measured no drop in resolution for delays up to 20 seconds in web chat (2025-04). Rappi, newer and on WhatsApp, cut turns because waiting hurt (2026-09). Decide by channel, and measure it.
