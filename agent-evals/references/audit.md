@@ -18,3 +18,5 @@ Check:
 7. Error analysis and judge validation happened after the last model, prompt, or tool change and after the last incident.
 8. Production rates come from a random sample, corrected and with an interval. CI runs each case several times and gates on pass^k.
 9. For customer-facing agents, escalation and actions have should-not cases, scores are reported per language, and graders judge actions on resulting state, not on the reply.
+10. The case set itself was audited: code checks on every case, a person reading a stratified 20 to 50, and an LLM auditor per case. Each expected answer records where it came from, and none was copied from the current model's output.
+11. A person reviewed the cases an auditing agent approved. Agent auditors found about half the lenient graders humans found (4.1% of tasks against 9.4%).

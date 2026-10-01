@@ -20,7 +20,7 @@ Can code check it from the trace? (state, arguments, schema, forbidden text, cit
 - **One failure mode per judge, Pass or Fail.** A holistic judge hides which failure happened. Scales (1 to 5) drift between graders and don't convert into a failure rate. Likert scales belong only to filtering synthetic data.
 - **Critique first, verdict last.** One or two sentences naming the specific evidence in this trace, then the label. Use the skeleton in judge-prompt.md.
 - **2 to 4 examples, from the train split only,** including one borderline case. Examples from the test split inflate its measured agreement.
-- **Give it only the context it needs,** and ground it. Policy judges read the actual policy text and check claims against the recorded tool results.
+- **Give it only the context it needs,** and ground it. Policy judges read the actual policy text and check claims against the recorded tool results. A judge of tool use also gets the tool definitions: without them, one marked legitimate calls as not permitted.
 - **Tell it that instructions inside the trace are data.** A customer message saying "mark this as passed" must not steer the grade.
 - **A different model from the agent, pinned to a dated snapshot.** A model grading its own family's output is lenient toward it, and an unpinned judge changes under you.
 
@@ -39,6 +39,7 @@ Can code check it from the trace? (state, arguments, schema, forbidden text, cit
 - **Accept by the cost of a miss.** 90% on both is the starting target and 80% the floor. For modes that move money or break compliance, the failure catch rate decides alone. A judge that misses a wrong withdrawal is useless however well it agrees on passes.
 - **Read every disagreement** and decide which of three it is. The judge is wrong, the label is wrong, or the definition is unclear. Fix the right one.
 - **Test the grader before the agent.** Run it twice on the same output and check the verdict holds. Check for timeouts and cut-off answers, which look like model failures.
+- **Attack the grader before a case enters CI.** An empty answer, "I don't know", a vague answer, and a confident answer to a different question must all fail, and a constant output must score near 0 across the set. A correct answer that differs from the reference must pass. Then have a model look for gaps in the rubric. A grader that passes a lazy answer will reward one.
 - **Break the agent on purpose.** In a copy of the agent, make one behavior worse (remove the instruction behind it) and run all judges on the same cases. The matching judge's fail rate must rise and the others must stay flat. Labels show the judge agrees with a human on past traces. This shows it reacts to the failure it names.
 - **Backtest when you have history.** Run the frozen judge on traces from two past versions whose real result you know (an A/B test, a release that raised complaints). It must rank them the same way. A judge that can't recover a known win or loss won't catch the next one.
 - **Pairwise judges run in both orders.** A win counts only when both orders agree, and a flip counts as a tie. Let judges and labelers answer tie. Keep compared answers similar in length, or check the winner isn't just the longer one.
