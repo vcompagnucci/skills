@@ -1,6 +1,6 @@
 ---
 name: agent-evals
-description: Build and run evals for an AI agent, from reading the first conversations to monitoring production, with extra checks for customer-support agents. Use when designing test cases, reviewing traces for failure modes, writing or validating an LLM judge, grading tool calls and resulting state, testing escalation, multi-turn, or bilingual conversations, evaluating retrieval, gating a release, auditing an existing eval setup, or measuring a live agent. Merges Hamel Husain and Shreya Shankar's eval method with Anthropic's, OpenAI's, and support teams' lessons, conflicts resolved.
+description: Build and run evals for an AI agent, from reading the first conversations to monitoring production, with extra checks for customer-support agents. Use when designing test cases, reviewing traces for failure modes, writing or validating an LLM judge, grading tool calls and resulting state, testing escalation, multi-turn, or bilingual conversations, evaluating retrieval, improving the agent against the eval (prompt, tool, or model changes, GEPA, keep or revert, accuracy and cost frontier), gating a release, auditing an existing eval setup, or measuring a live agent. Merges Hamel Husain and Shreya Shankar's eval method with Anthropic's, OpenAI's, and support teams' lessons, conflicts resolved.
 ---
 
 # Agent evals
@@ -9,7 +9,7 @@ A process for evaluating an AI agent that talks to people, looks things up, and 
 
 ## Where are you?
 
-Inheriting an eval setup, or unsure you can trust it? → references/audit.md first. Changing the prompt, tools, harness, or model to raise a score, or comparing versions or models on accuracy and cost → references/improve.md.
+Inheriting an eval setup, or unsure you can trust it? → references/audit.md first. Improving the agent after error analysis (which failure to fix first, prompt or tool or harness, an optimizer like GEPA, keeping or reverting a change, when to stop, comparing versions or models on accuracy and cost) → references/improve.md, always, before answering.
 
 ```
 Is there an agent yet?
