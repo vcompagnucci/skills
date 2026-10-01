@@ -9,6 +9,7 @@ Six things a support agent needs that generic eval methods skip. Apply them at w
 - Run escalation triggers outside the agent's own loop, so a confused agent can't talk itself out of escalating.
 - Show the reviewer the escalation rules next to the trace, so labels follow the policy and not the reviewer's instinct.
 - Grade the timing too. Escalating before a reasonable attempt fails, and so does continuing for several turns after it's clear the agent can't help. Write the expected escalation turn into the case, from the escalation policy.
+- If several agents hand off to each other, test that a specialist hands control back when the topic changes and that handoffs never loop.
 
 ## Two languages
 
@@ -16,6 +17,7 @@ Six things a support agent needs that generic eval methods skip. Apply them at w
 - Stratify the eval set by language and report every score per language. An average hides a language that fails.
 - Validate each judge on each language separately. A judge aligned in English isn't aligned in Spanish until measured.
 - Test mid-conversation language switches and answers that mix two languages.
+- **Same case, different customer.** Change only the stated country, language, or identity and run it again. Report each variant's distance from the mean with a 95% bootstrap interval. It passes when no variant changes the outcome significantly.
 
 ## Sensitive data in traces
 
@@ -37,6 +39,7 @@ Six things a support agent needs that generic eval methods skip. Apply them at w
 - Grade the whole conversation first, then find the first failure upstream and reduce it to a single-turn repro you can iterate on.
 - Include customers who withhold information until asked, and tasks where the customer must act (re-upload a document, pick a network). Agents score about 20 points lower when information comes out over several turns.
 - Test both logged-in and anonymous starts.
+- **The customer changes a value mid-conversation** (amount, network, date). Check that the final reply uses the new value. In 3 of 4 such failures Google found, the state was right and the message repeated the old value, which a state check alone misses.
 
 ## Policies and procedures
 
