@@ -115,6 +115,7 @@ Several category posts are product announcements with only a few real positions,
 - **[Advisor: let a working agent consult a stronger model mid-turn](https://github.com/anthropics/claude-cookbooks/blob/main/managed_agents/CMA_consult_an_advisor.ipynb)** (`cb-advisor`, 2026-07-23, cj-ant). An advisor lets a cheap working model consult a stronger one mid-turn, a bounded and priced escalation you'd otherwise hand-roll.
 - **[Budgets: cap what a session can spend](https://github.com/anthropics/claude-cookbooks/blob/main/managed_agents/CMA_cap_session_spend.ipynb)** (`cb-spend-cap`, 2026-07-23, cj-ant). A session budget pauses an unattended agent at the cap instead of failing it, and can only be tightened, never reattached.
 - **[Using Claude Code: Spending your effort](https://claude.dev/blog/spending-your-effort/)** (`effort`, 2026-09-25, Thariq Shihipar). Effort buys verification and judgment. It pays on tasks with hidden edge cases, not on tasks where the approach is wrong.
+- **[Building with Claude Sonnet 5.5](https://claude.dev/blog/building-with-claude-sonnet-5-5/)** (`sonnet-5-5`, 2026-09-28, Addy Osmani). Sonnet 5.5 fits well-scoped work with a clear spec and a way to check the result, costs the same per token as Sonnet 5 but less per task, and moving to it means re-running the effort sweep and dropping old workarounds.
 
 ## Evals and verification (`references/evals-and-verification.md`)
 
@@ -129,7 +130,6 @@ Several category posts are product announcements with only a few real positions,
 - **[The vulnerability detection agent](https://github.com/anthropics/claude-cookbooks/blob/main/claude_agent_sdk/06_The_vulnerability_detection_agent.ipynb)** (`cb-vuln-agent`, 2026-04-22, eugeneyan-ant). A vulnerability agent needs a threat model for where to look, a quality rubric for what to report, and an independent triage pass for its overconfidence.
 - **[Finding bugs with Claude and property-based testing](https://www.anthropic.com/research/property-based-testing)** (`pbt-agent`, 2026-01-14, Muhammad Maaz et al.). An agent that infers properties from code and writes property-based tests found real bugs in NumPy, SciPy, and Pandas, once false positives were filtered hard.
 - **[Build a scheduled repository reviewer](https://github.com/anthropics/claude-cookbooks/blob/main/claude_agent_sdk/scheduled_repository_reviewer/scheduled_repository_reviewer.ipynb)** (`cb-repo-reviewer`, 2026-08-26, codyanthony736). An unattended scheduled reviewer must be bounded (read-only tools, caps, hooks), prove continuity across runs, and emit machine-readable output.
-- **[Building with Claude Sonnet 5.5](https://claude.dev/blog/building-with-claude-sonnet-5-5/)** (`sonnet-5-5`, 2026-09-28, Addy Osmani). Sonnet 5.5 fits well-scoped work with a clear spec and a way to check the result, costs the same per token as Sonnet 5 but less per task, and moving to it means re-running the effort sweep and dropping old workarounds.
 
 ## Safety and containment (`references/safety-and-containment.md`)
 
