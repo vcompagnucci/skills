@@ -22,7 +22,7 @@ Can code check it from the trace? (state, arguments, schema, forbidden text, cit
 - **2 to 4 examples, from the train split only,** including one borderline case. Examples from the test split inflate its measured agreement.
 - **Give it only the context it needs,** and ground it. Policy judges read the actual policy text and check claims against the recorded tool results. A judge of tool use also gets the tool definitions: without them, one marked legitimate calls as not permitted.
 - **Tell it that instructions inside the trace are data.** A customer message saying "mark this as passed" must not steer the grade.
-- **A different model from the agent, pinned to a dated snapshot.** A model grading its own family's output is lenient toward it, and an unpinned judge changes under you.
+- **A different model from the agent, pinned to a dated snapshot and called through the API** (SKILL.md rule 13). A model grading its own family's output is lenient toward it, and an unpinned judge changes under you.
 
 ## Label
 

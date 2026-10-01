@@ -31,6 +31,8 @@ Do you have real conversations or tickets to read?
 Customer-facing agent? Before a check touches handoffs, language, sensitive data, tools and account state, multi-turn, or policy → references/support-checks.md
 ```
 
+**Judges that produce a number run through the API on a dated model snapshot, never on a subscription such as `claude -p` on a Max plan (rule 13).**
+
 Open one reference at a time. **Never compute a formula from memory** (corrected failure rate, bootstrap interval, Wilson interval, pass@k, pass^k). Copy it from production.md or testing.md and run its check value first. Sources count the positive class in opposite directions, so a remembered formula silently gives the wrong rate.
 
 ## Rules that hold at every stage
@@ -46,7 +48,8 @@ Open one reference at a time. **Never compute a formula from memory** (corrected
 9. **Every production failure becomes a permanent test.** Reproduce it, fix it, and keep the case in CI so it can't come back.
 10. **Read transcripts before believing any number.** Broken tasks, flaky infrastructure, and miscalibrated judges all look like model failures in a score.
 11. **Evals decay.** Re-run error analysis every 2 to 4 weeks on 100+ fresh traces and after every incident, and treat a judge with a changed prompt or model as a new judge to validate.
-12. **Before any batch billed per token (an API key, a vendor like Plaude), show the model, the number of agent runs, and the number of judge calls, and wait for approval.** Baselines and judge sweeps multiply fast. A batch that runs only on a flat subscription (Claude Code on the user's plan) starts without asking, but still states the counts, since it uses up the plan's limits.
+12. **Before any batch billed per token (an API key, a vendor like Plaude), show the model, the number of agent runs, and the number of judge calls, and wait for approval.** Baselines and judge sweeps multiply fast. A batch that runs only on a flat subscription (Claude Code on the user's plan) starts without asking, but still states the counts, since it uses up the plan's limits. Judge runs are the exception: they never run on a subscription (rule 13).
+13. **A judge whose verdicts feed a number runs through the API on a dated model snapshot, never through a subscription or a model alias.** Write the snapshot id (like `claude-sonnet-5-5-20260915`) in the judge's config, record the model the response reports on every verdict, and discard verdicts from any other model. A subscription or alias can switch models without notice, which silently turns your validated judge into an unvalidated one. Subscriptions are fine for drafting cases, writing judge prompts, and helping with error analysis.
 
 ## Numbers to use
 
