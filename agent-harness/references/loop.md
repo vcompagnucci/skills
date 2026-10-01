@@ -6,6 +6,7 @@
 - **Name every way a run ends:** a final answer, new customer input, an interrupt, a fatal error after retries, a wait for approval, or the turn limit. Give each a controlled ending. The turn limit, a refusal, and an answer that fails its schema each return an application fallback (an apology plus a handoff), validated against the same output schema, without retrying the model or replaying tool side effects.
 - **History holds what the customer actually saw.** If you stream and a check on the output fires late, cancel the reply, cut the history at what was delivered, and tell the model which check fired so it answers again.
 - **Give each run a spending budget.** Reserve the worst-case cost before each model call and settle to the real cost after. When a charge is uncertain (a timed-out call may still bill), stop the run, and turn off automatic client retries, which spend money nobody reserved.
+- **When a turn must end with a result tool (a back-office worker filing its finding), code checks that it was called.** If not, the harness reminds the model at most twice, then returns the fallback. A prompt line asking for it is skipped some fraction of the time.
 - **"No reply" is a valid end** in a channel where a customer's "thanks" needs nothing back. A loop that must always answer sends filler.
 - **Release a forced tool call after one call.** If a tool stays required, the model must call it again after every result, forever. Sonnet 5.5 rejects a forced `tool_choice` outright. Send `auto`, mark the tool strict, and say in the prompt when to use it.
 - **Every escalation carries a reason in a fixed field.** Anthropic's inbound agent halved its handoffs to humans by reading those reasons and fixing the top ones.
@@ -19,6 +20,7 @@
 
 - **Know which calls are still owed.** In OpenAI's Agents API only `required_actions` lists pending calls; a tool call in the history doesn't prove a result is still owed. Store each result by session, turn, and call id.
 - **An idle session is not success.** Read the turn's completed, failed, or cancelled status. A completed turn can still hold a failed tool.
+- **Sort every tool failure into a fixed class** (timeout, bad arguments, not found, upstream error). A failure that fits no class is a harness bug to fix, and a class rising above its usual rate raises an alert, so a broken tool shows up the day it breaks.
 - **Retry only transient errors** (timeouts, overload), with backoff, jitter, and an attempt limit, honoring the server's Retry-After. Quota, billing, and policy errors are terminal. They need a person, not a faster retry. Stop retrying when the error changes.
 - **Replay from the last checkpoint, not from the start,** so model calls and tool calls that finished don't run again.
 
@@ -31,6 +33,7 @@
 ## A person takes over
 
 - **The conversation has one owner at a time, stored in state, and code checks it before every agent reply.** While a person owns it, the agent doesn't answer. A prompt that says "stay quiet while a human handles this" fails the first time the customer writes again.
+- **A stop or a takeover ends the run, not just the reply.** Code cancels the turn and rejects any tool call that arrives after it. If the customer said stop, the agent answers once with what already happened and what didn't. If a person took over, that summary goes to the log for them and the customer gets nothing from the agent.
 - **The model picks a named outcome; code carries it out.** The agent chooses "hand to KYC team" with its reason, and code replies to the customer, tags, reassigns, and closes in a fixed order, so no step is skipped.
 - **Escalate on two triggers:** failures crossing a threshold you set, or an action that is high-risk and irreversible. An optional question to the customer proceeds after a short wait on a stated assumption; a required approval blocks. Elapsed time is never an approval.
 - **Two modes, kept apart:** the agent asks your team a private question and keeps the conversation, or a person takes the conversation. The first is a pause (above); the second changes the owner.

@@ -30,6 +30,14 @@ Most rules come from the harness, architecture, context, and tool files of the c
 - LangChain: [The runtime behind production deep agents](https://www.langchain.com/blog/runtime-behind-production-deep-agents) (2026-04-20, messages that arrive mid-turn), [Organizing context in a multi-agent harness](https://www.langchain.com/blog/organizing-context-in-a-multi-agent-harness) (2026-09-08).
 - Manus: [Context engineering lessons](https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus) (2025-07-18, reversible compaction, masking tools).
 
+## Added on 2026-10-01, second pass
+
+- Linear: [Agent signals](https://linear.app/developers/agent-signals) and [How we built Linear Agent](https://linear.app/now/how-we-built-linear-agent) (2026-08-10): a stop or takeover ends the run. Its many shallow tools lose to Anthropic's "fewer, consolidated tools".
+- Cursor: [Continually improving the agent harness](https://cursor.com/blog/continually-improving-agent-harness) (2026-04-30): fixed failure classes with alerts. Its model switches mid-conversation lose to Anthropic and OpenAI.
+- Sierra: [Agent development life cycle](https://sierra.ai/blog/agent-development-life-cycle) (2024-06-03, still its reference): the knowledge snapshot is part of the pinned version.
+- xAI: [prompt caching](https://docs.x.ai/developers/advanced-api-usage/prompt-caching/best-practices.md) (routing key, agrees with OpenAI) and the open-source [Grok Build](https://github.com/xai-org/grok-build) harness at `2bdd1d6` (2026-09-22): summary size check, required result tool with bounded reminders.
+- Checked with nothing new for the harness: Cognition after 2026-09-24, Replit's model-chosen effort (loses to Anthropic and OpenAI), Boris Cherny, Shrivu Shankar, Amp, Decagon, Factory, Karpathy, Jason Liu, swyx.
+
 ## Resolved conflicts
 
 - **Changing tools mid-conversation.** The claude-agents skill says tools are part of the cache prefix and must not change mid-session. Anthropic's 2026-09-22 docs allow it on Claude 5.x through a system message. Newest wins for those models; the old rule still holds elsewhere.
