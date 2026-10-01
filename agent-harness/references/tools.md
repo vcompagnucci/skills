@@ -14,10 +14,13 @@
 - **Give allowed values as enums** (`network: "TRC20" | "ERC20"`), so the model maps the customer's words to a value instead of guessing which exist.
 - **Turn on strict schemas.** Newer models invent keys without them, and strict mode removed that failure in practitioners' runs.
 - **Enforce limits in the handler, not only in the description.** A refund tool rejects an amount over the limit whatever the model sends. A one-time action consumes a single-use token, so a second call fails.
+- **The model never fills an amount.** A refund or credit tool takes the case and the evidence, and the handler gets the amount from your policy system. A limit check still lets the model pick any amount under the limit.
+- **Build the dedup key from the run id and the call id,** never at call time, because a key generated on each attempt changes on replay. Record times and random values once and reuse them on replay.
 - **Mark each tool read-only or state-changing.** Read-only tools can run in parallel and be retried freely; state-changing ones need a dedup key (SKILL.md rule 5) and stay direct calls.
 
 ## What tools return
 
+- **Return JSON.** Token-saving formats (TOON, TRON) cut 18% to 27% of tokens but lost 9 to 14 points of accuracy in a 2026 study, and one broke parallel tool calls.
 - **Return only the fields the next decision needs,** with ids resolved to names. Tool output can dominate the context, and internal fields ("just in case") cost tokens and leak data.
 - **Cap output at about 10K tokens.** For text and logs, keep the head and tail with a marker saying how much was cut. For JSON, page it or offer a `response_format` parameter (concise or detailed), because cutting the middle breaks the structure.
 - **Separate what the model sees from what only the UI needs.** Images, price variants, and display data go to a channel the model never reads.

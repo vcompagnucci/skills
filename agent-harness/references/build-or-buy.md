@@ -39,7 +39,8 @@ Run the same eval cases (agent-evals) against each candidate and let the results
 3. Which model processes the data, where, for how long, and is it used for training? Get it in writing.
 4. Can I pin the model and the agent's configuration, test changes on a staging copy, and roll back?
 5. How does the agent hand a conversation to my team, and can it ask my team a question without handing over?
-6. What do you charge for: a message, a conversation, or a resolved case? How do you define "resolved", and can I audit each charge?
+6. Can I export the agent's definition (procedures, prompts, tool definitions) as files I can diff, and ship changes on my own schedule?
+7. What do you charge for: a message, a conversation, or a resolved case? How do you define "resolved", and can I audit each charge?
 
 ## How the vendors' positions converged
 
