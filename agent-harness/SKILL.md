@@ -5,7 +5,7 @@ description: Build the harness around an AI agent: own or vendor, the loop, tool
 
 # Agent harness
 
-The harness is everything around the model that makes it an agent: the loop, what the model sees each turn, the tools and what they return, the state that survives a crash or a pause, and the log. Where sources disagreed, the most recent position won. Where Anthropic and OpenAI disagree with no date to settle it, both positions sit under "Where the answer depends on the case" in the reference. Report both, and never pick one from memory.
+The harness is everything around the model that makes it an agent: the loop, what the model sees each turn, the tools and what they return, the state that survives a crash or a pause, and the log. Where sources disagreed, the most recent position won. Where the right answer depends on your channel or task, or Anthropic and OpenAI disagree with no date to settle it, state.md, operations.md, context.md, compaction.md, and multi-agent.md end with "Where the answer depends on the case". Report both; never pick one from memory.
 
 Out of scope: who may approve what and prompt injection (security), measuring the agent (agent-evals), and writing the system prompt.
 
@@ -15,14 +15,23 @@ Out of scope: who may approve what and prompt injection (security), measuring th
 Do you have a harness yet?
 ├── No → references/build-or-buy.md first. A vendor may already do most of what follows.
 └── Yes → What are you changing?
-    ├── Turns, stopping, retries, failures, durable state, versions, latency → references/loop.md
-    ├── Pausing for a person, a person taking over, when a conversation ends → references/humans.md
-    ├── Which tools, their descriptions and arguments, what they return → references/tools.md
-    ├── What the model sees, compaction, memory → references/context-memory.md
+    ├── Turns, endings, step caps, the turn budget, mid-turn messages, concurrency limits, back-office runs longer than one window → references/loop.md
+    ├── Retries, timeouts, streams, reconnecting, failover, refusals → references/failures.md
+    ├── Sessions, the log, checkpoints, webhooks, hooks versus checks, runs in flight, realtime → references/state.md
+    ├── Versions, model changes, model routing, latency, cost, spend caps → references/operations.md
+    ├── Pausing for a person, a person taking over, cancelling, when a conversation ends → references/humans.md
+    ├── Which tools, their descriptions and arguments, what they return, MCP, handles and tasks that carry state across calls → references/tools.md
+    ├── What the model sees each turn, caching → references/context.md
+    ├── Long conversations: clearing, compaction, summaries → references/compaction.md
+    ├── What the agent remembers across conversations → references/memory.md
     └── More than one agent → references/multi-agent.md
 ```
 
 Open one reference at a time.
+
+**Words.** A conversation is everything with one customer on one channel; a session is the provider's container for it, and a conversation can span several. A run is the work one input starts (a message, an approval, a webhook) until it ends or pauses. A turn is one customer message and the reply; a step is one model call inside it, and the step cap limits steps per turn. Compaction replaces old history with a summary.
+
+**First harness, in order:** loop.md, failures.md, state.md, tools.md, humans.md. Open the others when a measured failure points there.
 
 ## Rules that hold everywhere
 
@@ -30,9 +39,9 @@ Open one reference at a time.
 2. **Code holds the authority; the model proposes.** Anything that must happen every time (an identity check, a policy check, a mandatory notice, who owns the conversation after a handoff) is code around the loop or inside the tool, never an instruction. An instruction followed 99 times in 100 still fails once.
 3. **Identity and scope come from the run, never from a tool argument the model fills.** The harness attaches the authenticated customer id, and anything else that sets scope (the account, the channel), to each call. A model that never supplies the id can't be talked into supplying someone else's.
 4. **A tool failure goes back to the model as a result that says what to do next,** never as a crash. The model can recover from "the account is locked, ask the customer to verify identity", not from a stack trace.
-5. **A failure doesn't say what already happened.** A dropped stream or a crashed turn may already have changed the account. Before retrying, read the real state and continue only the unfinished work. Never resend a task, payment, or approval automatically. Retry only transient errors, with backoff and an attempt limit. Every tool that changes state takes a dedup key, so a replay can't run it twice.
-6. **Pausing for a human pauses the same run.** Save the run's state on your server with the agent version it started on, wait at zero compute, and resume where it stopped, keeping the results of tools that already finished. Starting a new conversation instead loses the pending call or runs it twice.
-7. **The session log is the source of truth, not the context window.** Keep an append-only log of every message, tool call, result, and approval outside the window. Compaction and trimming are views over it, so a bad summary loses nothing permanently, and evals, debugging, and resuming read the same log.
-8. **Version the whole bundle and pin it.** Prompt, model snapshot, effort level, skill versions, tools, the knowledge-base snapshot, and harness code ship together and roll back together, and a paused run resumes on the version it started on. An unpinned agent picks up edits nobody reviewed, including a help-center article someone changed this morning.
+5. **A failure doesn't say what already happened.** A dropped stream or a crashed turn may already have changed the account. Before retrying, read the real state and continue only the unfinished work. Never resend a task, payment, or approval automatically. Retry only transient errors, with backoff and an attempt limit, in one retry layer. Every tool that changes state and every customer message submitted to the agent takes an idempotency key (a stable id the receiver uses to ignore a repeat), so a replay can't run anything twice.
+6. **Pausing for a human pauses the same run.** Save the run's state on your server with the agent version it started on. When the wait can exceed seconds, wait at zero compute, then resume where it stopped, keeping the results of tools that already finished. Starting a new conversation instead loses the pending call or runs it twice.
+7. **The session log is the source of truth, not the context window.** Keep an append-only log of every message, tool call, result, and approval outside the window, holding exactly what was sent and received, so replaying it rebuilds the same request. Compaction and trimming are views over it, so a bad summary loses nothing permanently, and evals, debugging, and resuming read the same log.
+8. **Version the whole bundle and pin it.** Prompt, model snapshot, effort level, skill versions, tools, the knowledge-base snapshot, harness code, and the exact SDK release ship together and roll back together, and every run, paused or not, finishes on the version it started on. An unpinned agent picks up edits nobody reviewed, including a help-center article someone changed this morning.
 
-Company material (the procedures, the tool list, the backoffice endpoints) belongs in a private skill. Sources and dates: `references/sources.md`.
+Company material (the procedures, the tool list, the backoffice endpoints) belongs in a private skill. Sources and dates: `references/sources.md` and `references/sources-deep-pass.md`.

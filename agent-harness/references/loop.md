@@ -1,60 +1,47 @@
 # The loop
 
+Failures, streams, and retries are in failures.md; durable state in state.md; versions, latency, cost, and spend caps in operations.md.
+
 ## Turns and endings
 
-- **One turn is: build the prompt, call the model, run its tool calls, append the results, repeat until it answers without a tool call.** One customer message can take many model calls. Record each message, tool call, result, and approval as its own typed item in order, because one blob with attached calls hides what happened first.
-- **Name every way a run ends:** a final answer, new customer input, an interrupt, a fatal error after retries, a wait for approval, or the turn limit. Give each a controlled ending. The turn limit, a refusal, and an answer that fails its schema each return an application fallback (an apology plus a handoff), validated against the same output schema, without retrying the model or replaying tool side effects.
-- **History holds what the customer actually saw.** If you stream and a check on the output fires late, cancel the reply, cut the history at what was delivered, and tell the model which check fired so it answers again.
-- **Give each run a spending budget.** Reserve the worst-case cost before each model call and settle to the real cost after. When a charge is uncertain (a timed-out call may still bill), stop the run, and turn off automatic client retries, which spend money nobody reserved.
-- **When a turn must end with a result tool (a back-office worker filing its finding), code checks that it was called.** If not, the harness reminds the model at most twice, then returns the fallback. A prompt line asking for it is skipped some fraction of the time.
+- **One turn is: build the prompt, call the model, run its tool calls, append the results, repeat until it answers without a tool call.** Each model call is a step, and one customer message can take many. Record each message, tool call, result, and approval as its own typed item in order, because one blob with attached calls hides what happened first.
+- **Name every way a run ends:** a final answer, new customer input, an interrupt, a fatal error after retries, a wait for approval, the step limit, the output limit, and a full context window. Give each a controlled ending.
+- **A refusal in the model's own text and an answer that fails its schema return an application fallback** (an apology plus a handoff), validated against the same output schema, without retrying the model or replaying tool side effects. A provider's safety-classifier refusal gets one retry first (failures.md).
+- **A response cut by the output limit holds incomplete tool calls: run none of them.** Answer each with a failed result (every call gets one, failures.md), then re-request with a higher output limit or ask the model to continue. Arguments salvaged from a cut stream can pass schema validation and still be incomplete. Asking pays: in Finding the Right Fit (2026-10), 48 of 100 cut runs asked to continue went on to score above zero.
+- **A response that filled the context window is truncated, not done, and so is a context-overflow error.** Compact once and retry once as a fresh attempt, never resending the same request. If compaction fails, end with the fallback instead of looping.
+- **A provider pause and an empty answer end the response, not the run.** Server tools the provider runs itself (web search, code execution) stop after 10 iterations by default on Claude with stop reason `pause_turn`: send the response back unchanged to continue. An empty final answer right after tool results means your harness appended text after the results: fix the message shape and never send the empty reply.
+- **When a turn must end with a result tool (a back-office worker filing its finding), code checks that it was called.** If not, the harness reminds the model at most twice, then returns the fallback. A prompt line asking for it is not enough.
 - **"No reply" is a valid end** in a channel where a customer's "thanks" needs nothing back. A loop that must always answer sends filler.
 - **Release a forced tool call after one call.** If a tool stays required, the model must call it again after every result, forever. Sonnet 5.5 rejects a forced `tool_choice` outright. Send `auto`, mark the tool strict, and say in the prompt when to use it.
 - **Every escalation carries a reason in a fixed field.** Anthropic's inbound agent halved its handoffs to humans by reading those reasons and fixing the top ones.
 
+## Stop conditions
+
+- **Set the step cap yourself, from your own distribution of model calls per turn.** Framework defaults range from none to 500 (Vercel's AI SDK agent stops at 20 steps, Google's ADK at 500 model calls, Strands has no cap), and some runtimes return partial output at the cap without raising. Hitting the cap is the step-limit ending, never a finished answer. Count it per customer message, across every continuation that a mid-turn message starts, because each continuation gets fresh limits from the provider.
+- **At the step limit, make one final call with tool use switched off for that request** (`tool_choice: none`), so the model says what it did and what is still open, validated against the output schema. Never remove the tools to do it, because that invalidates the cache and the earlier reasoning. If that call fails, return the application fallback.
+- **Count consecutive tool errors separately from the step cap, and reset the count on any success.** A run that keeps failing stops early (Microsoft's Agent Framework stops after 3 in a row), and a long run with occasional failures continues.
+- **When the model repeats the same failing call, answer with the error naming the bad or missing argument and warn that the next repeat ends the run.** End with the fallback only after that, never silently. Ending on the repeat throws the repair away: in Finding the Right Fit (2026-10), 180 of 192 repairs came from the model itself once the harness returned the error, while a harness that ended runs on repeats ended 55 and only 1 of those scored above zero.
+- **Show the model a budget for the whole turn, so it wraps up instead of being cut off mid-action.** Size it from your measured per-task distribution and set it once: changing it per request breaks the cache, and a clearly too-small budget makes the model refuse, scope down, or stop early. It's advisory, so keep a hard output cap per request, the step cap above, and the spend caps (operations.md) in code.
+
 ## Messages that arrive mid-turn
 
-- **Decide what happens when the customer writes again while the agent works:** queue it for the next turn, add it to the current turn, or interrupt. A support customer sends three short messages in a row, so the default has to be written down, not left to timing.
-- **Tell the model what it couldn't see.** Say when the customer interrupted on purpose, that an interrupted tool may have partly run, and the current time. On Claude, relay operator facts mid-turn as a `role: "system"` message after the tool results, never mixed into the customer's text.
-
-## Failures and retries
-
-- **Know which calls are still owed.** In OpenAI's Agents API only `required_actions` lists pending calls; a tool call in the history doesn't prove a result is still owed. Store each result by session, turn, and call id.
-- **An idle session is not success.** Read the turn's completed, failed, or cancelled status. A completed turn can still hold a failed tool.
-- **Sort every tool failure into a fixed class** (timeout, bad arguments, not found, upstream error). A failure that fits no class is a harness bug to fix, and a class rising above its usual rate raises an alert, so a broken tool shows up the day it breaks.
-- **A timeout on a state-changing call is an unknown outcome,** not a transient error. Read the real state, or retry only with the same dedup key, because the first call may still land. Never retry a model call after its output started streaming.
-- **Retry only transient errors** (overload, a timeout on a read), with backoff, jitter, and an attempt limit, honoring the server's Retry-After. Quota, billing, and policy errors are terminal. They need a person, not a faster retry. Stop retrying when the error changes. Provider client libraries also retry on their own (OpenAI's and Anthropic's twice by default, with a 10-minute timeout), so set their retries to 0 and keep one retry policy in your harness, or your backoff stacks on theirs and a timeout surfaces ten minutes late.
-- **When the model provider fails** (5xx, rate limits, a call slower than your p99), fail over to the same model snapshot on a second host. Switching to a different model loses the cache and changes behavior mid-conversation.
-- **Put a clock on everything:** a timeout per model call and per tool call, a deadline for the whole run, and a no-progress timer. No SDK bounds the whole run for you.
-- **Replay from the last checkpoint, not from the start,** so model calls and tool calls that finished don't run again.
-
-## Durable state
-
-- **The harness and the session outlive any container.** Keep the session log and state outside the process that runs the loop, so a crash loses nothing and a new worker picks up the run. Postgres alone carried one team's durable agent runs for five months; you need leases, a watchdog for stuck runs, and dedup keys more than you need a workflow engine.
-- **One active run per conversation.** Route by conversation id or lock it, and a new message waits under the mid-turn rule above. Two runs answering the same customer contradict each other.
-- **Log writes are at-least-once.** Dedupe by entry id, and alert when a batch is dropped, since a dropped batch has no other copy.
-- **One conversation thread is one session.** Store the thread-to-session map, ignore repeated webhook deliveries of the same message, and acknowledge within the channel's timeout (Slack gives 3 seconds) while the work runs in the background. A redelivered webhook otherwise gets two replies.
-- **Keep state on the server.** Browser tabs close and phones lose signal, so a client can't be the source of truth for a run.
-- **Hooks that observe are separate from checks that control.** Logging and metrics go in hooks. Anything that blocks or changes a call is plain code before and after the model call, where you keep the rejection reason.
-
-## Versions
-
-- **Every change to prompt, model, or tools is a new pinned version,** tested on a staging copy before production. After staging, give a new version a small share of new conversations (Ada starts at 1%), then widen. Rollback is re-pinning the last good version, but keep the newer version runnable until the runs it paused drain, because older code rejects state saved by newer code. Edits to a saved agent reach only new sessions, so a running conversation finishes on its version. Anthropic's sales team rolled back to an older version after a week, and could only because versions were pinned.
-- **Re-test after a model change before tuning anything else.** Remove workarounds written for the old model first (retry shims, "do not be lazy"), then measure.
-
-## Latency and cost
-
-- **Anything repeated inside the loop is paid on every model call.** Cut re-sent history and run independent tool calls in parallel before buying a faster model.
-- **In chat, end the turn at the first question the agent has to ask anyway** instead of gathering everything first. Rappi cut its first turn from over 60 seconds to 20.
-- **Move work that doesn't change the reply off the customer's path:** QA scoring, tagging, summaries, and memory writing run after the reply is sent.
-- **Route models per step, not per message.** A small model classifies and handles routine questions; the largest takes account access and disputes. Never switch the model inside one conversation, because each model has its own cache and reasoning format; send the step to a subagent on the other model instead.
+- **Decide what happens when the customer writes again while the agent works, and write the default down.** A support customer sends three short messages in a row, so it can't be left to timing. A per-customer debounce that starts a run only after messages stop arriving absorbs a burst. Implement the rest as delivery modes:
+  - next: deliver when the running tool calls finish, inside the same turn.
+  - later: hold for a new turn.
+  - now: move tool calls that can keep running to the background and deliver at once. Feed in each background result when it lands, one per call, each as a new message after the batch is answered.
+  - append: add context without a model call.
+- **A message that joins a running turn rewrites nothing and cancels nothing.** The current output and any started tool finish first. The pending queue lives only on the connection, so record what you injected and reconcile it against history after a disconnect before resending.
+- **An interrupt stops model output at once but waits for running tools to finish.** The provider may report the interrupted turn as an ordinary end (Claude's Managed Agents has no interrupt stop reason), so record the interrupt in your own log.
+- **Tell the model what it couldn't see.** Before every model call, inject events that arrived while the agent worked, so it acts on the current state. Say when the customer interrupted on purpose, that an interrupted tool may have partly run, and the current time. On Claude, relay operator facts mid-turn as a `role: "system"` message after the tool results, never mixed into the customer's text.
+- **When the customer changes a request mid-task, update the active task and drop results that come back for the old version.** Tag delegated work with a task id or version, so a late result, including one from a previous session after a reconnect, can't overwrite newer work.
+- **Give every customer message you submit to the agent an idempotency key.** Create it once, save it with the message before sending, and reuse it on any retry after a timeout or a lost response, so a retry can't start a second turn. Make a new key for each distinct submission, even when the text is identical.
+- **A retry of a request that is still running attaches to it and gets the same result.** Match it by idempotency key (above), and give waiters an explicit "aborted" error if the original is cancelled. A different request on the same conversation never runs alongside it (state.md): it follows the delivery modes above or is rejected. Without a guard, overlapping writes to one session overwrite each other and neither call errors.
+- **Limit concurrent runs per tenant, team, and customer, nested, and let resumed runs go ahead of new ones.** One account's burst or a provider slowdown then can't starve the rest (Restate's example: 1,000 per org, 100 per team, 10 per user).
 
 ## Runs longer than one context window
 
 A support conversation fits in one window. Back-office work (a batch of reviews, an investigation) may not.
 
-- **Give the run a goal with a completion condition and evidence:** what must be true, how to check it, what must not regress, when to stop as blocked. "Blocked" is allowed only after the same blocker repeats for 3 consecutive turns, and an exhausted budget ends in a summary, never in "done".
+- **Give the run a goal with a completion condition and evidence:** what must be true, how to check it, what must not regress, when to stop as blocked. An exhausted budget ends in a summary, never in "done".
+- **Check progress in a structured way every round:** is the request satisfied, are we looping, are we making progress, what comes next. After 3 consecutive rounds without progress, replan; after 2 replans, stop as blocked and end in a summary (Microsoft's Magentic defaults), so a stuck run doesn't spend its whole budget.
 - **Keep progress in files the agent rereads:** the goal, a plan with checkable milestones, a status log that records failed approaches too. A fresh session gets its bearings from them instead of from a summary.
-
-## Where the answer depends on the case
-
-- **Does a slower reply hurt?** Fin measured no drop in resolution for delays up to 20 seconds in web chat (2025-04). Rappi, newer and on WhatsApp, cut turns because waiting hurt (2026-09). Decide by channel, and measure it.

@@ -1,6 +1,6 @@
 # Sources
 
-Checked on 2026-10-01. Where two sources disagreed, the most recent position won. Where Anthropic and OpenAI disagree with no date to settle it, both positions are under "Where the answer depends on the case" in the reference that covers the question.
+Checked on 2026-10-01; the deep pass of 2026-10-05 is in sources-deep-pass.md.
 
 ## Anthropic and OpenAI
 
@@ -15,7 +15,7 @@ Most rules come from the harness, architecture, context, and tool files of the c
 - OpenAI: Agents API [functions](https://developers.openai.com/api/docs/guides/agents-api/tools/functions), [sessions](https://developers.openai.com/api/docs/guides/agents-api/sessions), and [multi-agent](https://developers.openai.com/api/docs/guides/agents-api/multi-agent) (2026-09-10), [openai-agents-python #5240](https://github.com/openai/openai-agents-python/pull/5240) (2026-09-29, sibling results on resume), and Codex PRs [#49441](https://github.com/openai/codex/pull/49441) and [#49880](https://github.com/openai/codex/pull/49880) (2026-09-30 and 10-01, terminal errors, turn-scoped approvals).
 
 - Cost and caching: Anthropic's prompt-caching posts and cookbooks (static first, compaction that keeps the cache) and OpenAI's spend-controller cookbook (per-run budgets), both in the sibling skills.
-- OpenAI tooling changes used in build-or-buy.md: the visual workflow builder winds down by 2026-11-30 (`agentkit` in openai-agents), and the hosted Evals platform goes read-only on 2026-10-31 and shuts down on 2026-11-30 ([deprecations](https://developers.openai.com/api/docs/deprecations)).
+- OpenAI tooling change used in build-or-buy.md: the visual workflow builder winds down by 2026-11-30 (`agentkit` in openai-agents, [deprecations](https://developers.openai.com/api/docs/deprecations)).
 
 ## Corrected and added on 2026-10-05
 
@@ -39,7 +39,7 @@ Most rules come from the harness, architecture, context, and tool files of the c
 ## Added on 2026-10-01, second pass
 
 - Linear: [Agent signals](https://linear.app/developers/agent-signals) and [How we built Linear Agent](https://linear.app/now/how-we-built-linear-agent) (2026-08-10): a stop or takeover ends the run. Its many shallow tools lose to Anthropic's "fewer, consolidated tools".
-- Cursor: [Continually improving the agent harness](https://cursor.com/blog/continually-improving-agent-harness) (2026-04-30): fixed failure classes with alerts. Its model switches mid-conversation lose to Anthropic and OpenAI.
+- Cursor: [Continually improving the agent harness](https://cursor.com/blog/continually-improving-agent-harness) (2026-04-30): fixed failure classes with alerts. Its free model switching gives way to one model per conversation, switching only at a turn boundary where the cache is already lost (sources-deep-pass.md).
 - Sierra: [Agent development life cycle](https://sierra.ai/blog/agent-development-life-cycle) (2024-06-03, still its reference): the knowledge snapshot is part of the pinned version.
 - xAI: [prompt caching](https://docs.x.ai/developers/advanced-api-usage/prompt-caching/best-practices.md) (routing key, agrees with OpenAI) and the open-source [Grok Build](https://github.com/xai-org/grok-build) harness at `2bdd1d6` (2026-09-22): summary size check, required result tool with bounded reminders.
 - Checked with nothing new for the harness: Cognition after 2026-09-24, Replit's model-chosen effort (loses to Anthropic and OpenAI), Boris Cherny, Shrivu Shankar, Amp, Decagon, Factory, Karpathy, Jason Liu, swyx.
@@ -54,7 +54,7 @@ Most rules come from the harness, architecture, context, and tool files of the c
 
 - **Changing tools mid-conversation.** The claude-agents skill says tools are part of the cache prefix and must not change mid-session. Anthropic's 2026-09-22 docs allow it on Claude 5.x through a system message. Newest wins for those models; the old rule still holds elsewhere.
 - **Multi-agent.** Cognition's "Don't build multi-agents" (2025-06-12) is superseded by its 2026-04-22 post, which allows advisor agents but keeps one writer, in line with Anthropic and OpenAI.
-- **Own harness or hosted.** Ronacher's "build your own abstraction" (2025-11), Anthropic's "use the API directly" (2024-12), and OpenAI's list of tradeoffs (2026-04-15) are older than Anthropic's case for hosted harnesses (2026-06-10) and OpenAI's own hosted Agents API, whose [guide](https://developers.openai.com/api/docs/guides/agents) calls the SDK feature complete (2026-09-10). Newest wins: hosted by default, unless data or the loop must stay inside your perimeter.
+- **Own harness or hosted.** Ronacher's "build your own abstraction" (2025-11), Anthropic's "use the API directly" (2024-12), and OpenAI's list of tradeoffs (2026-04-15) are older than Anthropic's case for hosted harnesses (2026-06-10) and OpenAI's own hosted Agents API (2026-09-10), whose [guide](https://developers.openai.com/api/docs/guides/agents) presents the SDK beside it for agents whose deployment, storage, and approvals stay in your application. Newest wins: hosted by default, unless data or the loop must stay inside your perimeter.
 - **Reasoning across turns.** Ronacher halved tool-schema failures by stripping thinking blocks (2026-07-04). OpenAI's ARC-AGI-3 result for keeping reasoning (2026-07-29) is newer and matches Anthropic's append-only history, so the skill keeps reasoning.
 - **Knowledge base in the prompt.** Anthropic's 2024 "under 200K, put it all in the prompt" is older than its 2025-09 finding that recall falls as context grows, so it's reported as background, not a rule.
 - **Left out:** Thorsten Ball's view that the harness matters less (2026-08), an aside rather than a lesson from building.
