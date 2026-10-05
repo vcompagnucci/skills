@@ -17,10 +17,11 @@ Most rules come from the harness, architecture, context, and tool files of the c
 - Cost and caching: Anthropic's prompt-caching posts and cookbooks (static first, compaction that keeps the cache) and OpenAI's spend-controller cookbook (per-run budgets), both in the sibling skills.
 - OpenAI tooling changes used in build-or-buy.md: the visual workflow builder winds down by 2026-11-30 (`agentkit` in openai-agents), and the hosted Evals platform goes read-only on 2026-10-31 and shuts down on 2026-11-30 ([deprecations](https://developers.openai.com/api/docs/deprecations)).
 
-## Corrected on 2026-10-05
+## Corrected and added on 2026-10-05
 
 - OpenAI [prompt caching](https://developers.openai.com/api/docs/guides/prompt-caching) (checked 2026-10-01): from GPT-5.6, a 30-minute lifetime and `prompt_cache_key` only for accounting, not routing; the Agents SDK sets the key per session (`src/agents/run_internal/prompt_cache_key.py`). Replaces "send the conversation id so calls land where the prefix is cached" for those models.
 - OpenAI [Agents](https://developers.openai.com/api/docs/guides/agents) and [Agents SDK](https://developers.openai.com/api/docs/guides/agents/sdk) pages (checked 2026-10-01): they present the SDK beside the Agents API. The "feature complete" notice a 2026-09-24 read quoted from the SDK page is no longer there, so build-or-buy.md drops it.
+- OpenAI [function calling](https://developers.openai.com/api/docs/guides/function-calling) (under 20 functions per turn, 10 per deferred group), [prompt caching](https://developers.openai.com/api/docs/guides/prompt-caching) (settings in the prefix, compaction lowers reuse, miss diagnostics), and the openai-python client defaults (2 retries, 600 s timeout), all checked 2026-10-01; Anthropic's client defaults (2 retries, 10-minute timeout) and the effort-and-thinking cache rule from the claude-agents prompt-caching file.
 
 ## Support vendors
 

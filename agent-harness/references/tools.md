@@ -28,7 +28,7 @@
 
 ## Many tools, or many calls
 
-- **Past about 10 tools, or 10K tokens of definitions (either one), try loading definitions on demand and keep it if your evals hold.** Keep the 3 to 5 most used always loaded, and defer whole groups of related tools rather than single ones. Anthropic measured the gain on 58 tools and 55K tokens (context down 85%, accuracy 49% to 74%), so expect less at a dozen.
+- **Past about 10 tools, or 10K tokens of definitions (either one), try loading definitions on demand and keep it if your evals hold.** Keep the 3 to 5 most used always loaded, and defer whole groups of related tools rather than single ones. OpenAI's function-calling guide gives a soft ceiling of 20 functions per turn and 10 per group loaded on demand. Anthropic measured the gain on 58 tools and 55K tokens (context down 85%, accuracy 49% to 74%), so expect less at a dozen.
 - **Let code run 3 or more dependent calls or filter large data,** and show the model only what needs judgment (programmatic tool calling). The program runs in a sandbox that may call only tools you allowlisted. Keep state-changing and high-impact tools as direct calls, so each one stays reviewable.
 - **Namespace tools by system** (`intercom_search`, `ledger_search`) so names never collide.
 - **Keep the tool list stable within a conversation.** Tools sit in the cached prefix, so adding or removing one mid-conversation breaks the cache on most models. On Claude 5.x models (Opus 5 and 5.5, Sonnet 5.5, Fable 5.1), a mid-conversation `role: "system"` message can add or change a tool without breaking it (beta, 2026-09). Elsewhere, mask a tool's availability instead of removing it.
