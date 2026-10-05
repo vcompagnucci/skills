@@ -1,6 +1,6 @@
 # Sources and licenses
 
-Checked on 2026-10-01. Where two sources disagreed on the same question, I kept the most recent position and removed the older one. Where dates didn't settle it, Anthropic and OpenAI won over other sources.
+Checked on 2026-10-01; the deep pass of 2026-10-05 is in sources-deep-pass.md. Where two sources disagreed on the same question, I kept the most recent position and removed the older one. Where dates didn't settle it, Anthropic and OpenAI won over other sources.
 
 ## Adapted with attribution (Apache-2.0)
 

@@ -13,4 +13,4 @@ Build a small local app (Python standard-library server plus one HTML page) befo
 
 ## While the human reviews
 
-Poll the annotations file every few seconds and keep a running taxonomy (mode, description, count, example ids, quotes) visible in the app. Once the agent may help (after 30 human-read traces, see discover.md), scan all records with one subagent per mode, not per record, and push the hits as suggestions, favoring recall. A false hit costs one click, a missed one costs a failure mode. When new modes appear, tell the reviewer which earlier traces to re-read.
+Poll the annotations file every few seconds and keep a running taxonomy (mode, description, count, example ids, quotes) visible in the app. Once the agent may help (after 30 human-read traces, see discover.md), scan all records with one subagent per mode, not per record, and push the hits as suggestions, favoring recall. Check each subagent's coverage first (discover.md, step 4). A false hit costs one click, a missed one costs a failure mode. When new modes appear, tell the reviewer which earlier traces to re-read.
