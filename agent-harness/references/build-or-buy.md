@@ -6,7 +6,7 @@ From most done for you to least:
 
 1. **A vertical vendor** (a CX platform such as Intercom Fin or Plaude). It brings the loop, the inbox, channels, handoff to humans, and a place to write procedures.
 2. **A model vendor's hosted harness** (Claude Managed Agents, OpenAI's Agents API). It hosts the loop, sessions, memory, and sandbox. You build the channel, the inbox, and the tools. Anthropic also offers a self-hosted sandbox, where the loop stays with Anthropic and the tools run inside your network.
-3. **A provider SDK in your infrastructure** (Claude Agent SDK, OpenAI Agents SDK, Vercel AI SDK). The loop comes as a library, and hosting, state, retries, and integrations are yours. OpenAI calls its Agents SDK feature complete now that its hosted Agents API exists.
+3. **A provider SDK in your infrastructure** (Claude Agent SDK, OpenAI Agents SDK, Vercel AI SDK). The loop comes as a library, and hosting, state, retries, and integrations are yours. OpenAI's docs place the SDK beside its hosted Agents API: the SDK when deployment, storage, and approvals stay in your application, the API for long-running tasks OpenAI manages.
 4. **Your own loop on the raw API** (Messages API, Responses API). You write everything.
 
 Visual workflow builders sit outside this list. OpenAI is shutting its own down on 2026-11-30 and moving those workflows to its SDK, because a workflow that has to keep running belongs in code.
@@ -44,4 +44,4 @@ Run the same eval cases (agent-evals) against each candidate and let the results
 
 ## How the vendors' positions converged
 
-OpenAI's 2026-04-15 post listed what each option trades: frameworks underuse frontier models, provider SDKs hide the harness, and hosted harnesses limit where the agent runs and how it reaches sensitive data. Anthropic (2026-06-10) said maintaining a harness is overhead that doesn't differentiate most products. OpenAI's newer position (2026-09-10) is to ship its own harness as a hosted service and call the SDK feature complete, which agrees with Anthropic. The 2026-04 tradeoff still decides the first question in the tree: if data or the loop must stay inside your perimeter, hosted is out.
+OpenAI's 2026-04-15 post listed what each option trades: frameworks underuse frontier models, provider SDKs hide the harness, and hosted harnesses limit where the agent runs and how it reaches sensitive data. Anthropic (2026-06-10) said maintaining a harness is overhead that doesn't differentiate most products. OpenAI's newer position (2026-09-10) is to ship its own harness as a hosted service, which agrees with Anthropic, while its docs keep the SDK for agents whose deployment, storage, and approvals must stay in your application. The 2026-04 tradeoff still decides the first question in the tree: if data or the loop must stay inside your perimeter, hosted is out.

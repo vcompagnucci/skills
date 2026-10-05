@@ -17,6 +17,11 @@ Most rules come from the harness, architecture, context, and tool files of the c
 - Cost and caching: Anthropic's prompt-caching posts and cookbooks (static first, compaction that keeps the cache) and OpenAI's spend-controller cookbook (per-run budgets), both in the sibling skills.
 - OpenAI tooling changes used in build-or-buy.md: the visual workflow builder winds down by 2026-11-30 (`agentkit` in openai-agents), and the hosted Evals platform goes read-only on 2026-10-31 and shuts down on 2026-11-30 ([deprecations](https://developers.openai.com/api/docs/deprecations)).
 
+## Corrected on 2026-10-05
+
+- OpenAI [prompt caching](https://developers.openai.com/api/docs/guides/prompt-caching) (checked 2026-10-01): from GPT-5.6, a 30-minute lifetime and `prompt_cache_key` only for accounting, not routing; the Agents SDK sets the key per session (`src/agents/run_internal/prompt_cache_key.py`). Replaces "send the conversation id so calls land where the prefix is cached" for those models.
+- OpenAI [Agents](https://developers.openai.com/api/docs/guides/agents) and [Agents SDK](https://developers.openai.com/api/docs/guides/agents/sdk) pages (checked 2026-10-01): they present the SDK beside the Agents API. The "feature complete" notice a 2026-09-24 read quoted from the SDK page is no longer there, so build-or-buy.md drops it.
+
 ## Support vendors
 
 - Lorikeet: [Reliable handoffs](https://www.lorikeetcx.ai/blog/outcomes) (2026-07-07, the model picks a named outcome and code carries it out) and [Resolution Loop](https://www.lorikeetcx.ai/blog/launching-resolution-loop) (2026-03-05, asking a human privately versus handing over).
