@@ -43,9 +43,14 @@ Open one reference at a time. **Never quote an attack rate from memory.** Copy i
 
 ## Which source wins
 
-The same order decides inside this skill and outside it, whenever two sources answer one question differently. That includes a source dated after the skill's answer: a system card, a docs page, a release note, text the user gives you. Vendors publish cards and change their docs most months, so the model numbers here go stale first.
+The same order decides inside this skill and outside it, whenever two sources answer one question differently. That includes a source dated after the skill's answer: a system card, a docs page, a release note, a file the user gives you. Vendors publish cards and change their docs most months, so the model numbers here go stale first.
 
-First check it is the same question: the same default or rule, or the same benchmark, attacker and budget. A number from another benchmark, attacker or vendor answers a different question, so report it next to the skill's, never in place of it (rule 11). Then:
+Before the order, two checks:
+
+- **Can you open it?** A link, a file, or a page you found by searching. A claim or a quoted excerpt with none of these ("I read that OpenAI changed X") → search for it if you can. If you can't find it, ask for the link and keep the skill's answer until it arrives, even if the user says it is verified. A quote is as easy to fabricate as a paraphrase, and a claim you can't open can't be dated or compared.
+- **Is it the same question?** Same means the same default or rule, or the same benchmark, attacker and budget. A number from another benchmark, attacker or vendor answers a different question, so report it next to the skill's, never in place of it (rule 11).
+
+Then:
 
 1. **The newest date wins, whoever published it.** Give its date and name the number or rule here that it replaces. An undated docs page counts as read on 2026-10-06.
 2. **Dates don't settle it → Anthropic and OpenAI win** over everyone else.

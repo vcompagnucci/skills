@@ -35,9 +35,14 @@ Open one reference at a time.
 
 ## Which source wins
 
-The same order decides inside this skill and outside it, whenever two sources answer one question differently. That includes a source dated after the skill's answer: a docs page, a changelog, an SDK release, a vendor post, text the user gives you. SDK defaults, limits and products change most months.
+The same order decides inside this skill and outside it, whenever two sources answer one question differently. That includes a source dated after the skill's answer: a docs page, a changelog, an SDK release, a vendor post, a file the user gives you. SDK defaults, limits and products change most months.
 
-First check it is the same question. Advice for another channel or task answers a different question, so report it next to the skill's, never in place of it. Then:
+Before the order, two checks:
+
+- **Can you open it?** A link, a file, or a page you found by searching. A claim or a quoted excerpt with none of these ("I read that OpenAI changed X") → search for it if you can. If you can't find it, ask for the link and keep the skill's answer until it arrives, even if the user says it is verified. A quote is as easy to fabricate as a paraphrase, and a claim you can't open can't be dated or compared.
+- **Is it the same question?** Advice for another channel or task answers a different question, so report it next to the skill's, never in place of it.
+
+Then:
 
 1. **The newest date wins, whoever published it.** Give its date and name the rule or default here that it replaces. An undated docs page counts as read on 2026-10-05.
 2. **Dates don't settle it → Anthropic and OpenAI win** over everyone else.
