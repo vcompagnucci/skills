@@ -5,7 +5,7 @@ description: Secure an AI agent that talks to people and calls tools, support ag
 
 # Agent security
 
-How to keep an agent that reads untrusted text and calls tools from being turned against its customers or its company. It runs from day-one rules to mechanisms and measured attack rates. It distills 288 sources read in October 2026, from Anthropic's and OpenAI's docs, posts, model specs and system cards to labs, standards bodies, support vendors, security researchers and public incidents. Where sources disagreed, the newest position won. Where dates didn't settle it, Anthropic and OpenAI won. The losing position is gone, so don't bring it back from memory. Real ties sit under "Where the answer depends on the case" in conversation.md and models.md, and you report both sides. Every claim cites its source as (`slug`), listed in `references/article-index.md`. Quoted text followed by a slug is that source's wording. Quoted text without one is an example.
+How to keep an agent that reads untrusted text and calls tools from being turned against its customers or its company. It runs from day-one rules to mechanisms and measured attack rates. It distills 312 sources read in October 2026, from Anthropic's and OpenAI's docs, posts, model specs and system cards to labs, standards bodies, support vendors, security researchers and public incidents. Where sources disagreed, the newest position won. Where dates didn't settle it, Anthropic and OpenAI won. The losing position is gone, so don't bring it back from memory. Real ties sit under "Where the answer depends on the case" in conversation.md, guardrail-layers.md and models.md, and you report both sides. Every claim cites its source as (`slug`), listed in `references/article-index.md`. Quoted text followed by a slug is that source's wording. Quoted text without one is an example.
 
 > The model will eventually be talked into something, so security is deciding in code what a talked-into agent can still reach.
 
@@ -62,7 +62,6 @@ Open one reference at a time. **Never quote an attack rate from memory.** Copy i
 | Question | Answer |
 |---|---|
 | Most robust model in the only independent head-to-head | Claude Opus 4.5, 0.5% (61 successes in 11,969 human attempts); all 13 models hijacked (Gray Swan IPI Arena, 2026-03-16) (`grayswan-ipi-arena`). Every newer model has only vendor-published numbers, which don't compare across vendors (models.md) |
-| Injection through content the agent reads vs typed in the chat | 27.1% vs 5.7% of attacks succeeded (Gray Swan ART, 1.8 million attacks, 2025-07-28) (`grayswan-art-benchmark`) |
 | Why you measure the system you ship, not the model | Opus 5.5: 54.61% of Shade coding attempts, 85.73% on requests rerouted to Opus 4.8, 0 of 2,872 answered by Opus 5.5 itself, 11.13% with probes (200 attempts per scenario, 2026-09-22, Anthropic) (`anthropic-system-card-opus-5-5`) |
 | GPT-6 Astra on Gray Swan IPI, safeguards on | 8.5% against 27.0% for GPT-5.6 Sol (15 attempts per scenario, 1,810 attacks, 2026-09-03, OpenAI) (`openai-gpt-6-astra-system-card`) |
 | Default LLM judge in OpenAI's Guardrails | gpt-4.1-mini: recall 0.000 at 1% false positives on jailbreaks and injections; gpt-4.1 1.000 on jailbreaks (2025-12-15) (`openai-guardrails-check-jailbreak`, `openai-guardrails-check-prompt-injection`) |
