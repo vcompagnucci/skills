@@ -19,12 +19,9 @@ These are head-to-heads that a vendor ran or published, with competitors in the 
 | Gemini 3.8 Flash | 5.5% | k=15; Q1+Q2 set | 2026-09-28 | Anthropic |
 | Gemini 3.7 Flash | 9.2% | k=15; Q1+Q2 set | 2026-09-01 | Anthropic |
 | Most other frontier models | 24% to 53% | k=15; Q1+Q2 set | 2026-09-01 | Anthropic |
-| Claude Opus 5 | 0.2%, 2.0% | k=1, 15; Q1 set | 2026-08-19 | Anthropic |
 | Claude Mythos 5 | 2.6% | k=15; Q1 set | 2026-08-19 | Anthropic |
 | Claude Opus 4.8 | 0.5%, 5.5% | k=1, 15; Q1 set | 2026-08-19 | Anthropic |
-| Claude Sonnet 5 | 5.9% | k=15; Q1 set | 2026-08-19 | Anthropic |
 | Muse Spark | 16.5% | k=15; Q1 set | 2026-08-19 | Anthropic |
-| GPT-5.6 Sol | 3.1%, 20.0% | k=1, 15; Q1 set | 2026-08-19 | Anthropic |
 | GPT-5.5 | 20.8% | k=15; Q1 set | 2026-08-19 | Anthropic |
 | GPT-5.6 Terra | 30.4% | k=15; Q1 set | 2026-08-19 | Anthropic |
 | GPT-5.6 Luna | 43.9% | k=15; Q1 set | 2026-08-19 | Anthropic |
@@ -68,8 +65,6 @@ These are head-to-heads that a vendor ran or published, with competitors in the 
 | Kimi K3 | 0.58% | not stated; 11 scenarios | 2026-08-19 | Anthropic |
 | GPT-5.6 Sol, high reasoning | 0.61% | not stated; 11 scenarios | 2026-08-19 | Anthropic |
 | DeepSeek V4 Flash | 8.09% | not stated; 11 scenarios | 2026-08-19 | Anthropic |
-| Claude Sonnet 5 | 0.19% | one week; 11 scenarios | 2026-06-30 | Anthropic |
-| Claude Opus 4.8 | 0.19% | one week; 11 scenarios | 2026-06-30 | Anthropic |
 | Claude Sonnet 4.6 | 1.41% | one week; 11 scenarios | 2026-06-30 | Anthropic |
 | GPT-5.5, high reasoning | 3.08% | one week; 11 scenarios | 2026-06-30 | Anthropic |
 | Gemini 3.5 Flash | 6.66% | one week; 11 scenarios | 2026-06-30 | Anthropic |
