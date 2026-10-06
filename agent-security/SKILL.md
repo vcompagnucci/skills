@@ -61,7 +61,7 @@ Open one reference at a time. **Never quote an attack rate from memory.** Copy i
 
 | Question | Answer |
 |---|---|
-| Most robust model in the only independent head-to-head | Claude Opus 4.5, 0.5% (61 successes in 11,969 human attempts); all 13 models hijacked (Gray Swan IPI Arena, 2026-03-16) (`grayswan-ipi-arena`) |
+| Most robust model in the only independent head-to-head | Claude Opus 4.5, 0.5% (61 successes in 11,969 human attempts); all 13 models hijacked (Gray Swan IPI Arena, 2026-03-16) (`grayswan-ipi-arena`). Every newer model has only vendor-published numbers, which don't compare across vendors (models.md) |
 | Injection through content the agent reads vs typed in the chat | 27.1% vs 5.7% of attacks succeeded (Gray Swan ART, 1.8 million attacks, 2025-07-28) (`grayswan-art-benchmark`) |
 | Why you measure the system you ship, not the model | Opus 5.5: 54.61% of Shade coding attempts, 85.73% on requests rerouted to Opus 4.8, 0 of 2,872 answered by Opus 5.5 itself, 11.13% with probes (200 attempts per scenario, 2026-09-22, Anthropic) (`anthropic-system-card-opus-5-5`) |
 | GPT-6 Astra on Gray Swan IPI, safeguards on | 8.5% against 27.0% for GPT-5.6 Sol (15 attempts per scenario, 1,810 attacks, 2026-09-03, OpenAI) (`openai-gpt-6-astra-system-card`) |
