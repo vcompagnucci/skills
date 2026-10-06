@@ -1,6 +1,8 @@
 # Article index
 
-Every source in the corpus (288), grouped by the reference that uses it most, newest first. Each line is `slug` **title** (date, publisher), then the source's thesis. Cite sources by slug; `undated` marks a live docs page, read on 2026-10-06.
+Every source in the corpus (288), grouped by the reference that uses it most, newest first. Each line is `slug` **title** (date, publisher), then the source's thesis. Cite sources by slug; `undated` marks a live docs page, read on 2026-10-06. Find a source with grep for its slug or a keyword; never read this file whole.
+
+Contents: Threat model · Prompt injection · The person in the chat · What the agent may touch and who approves · Guardrails · Data and exfiltration · Supply chain · Models and benchmarks · Detection and response · Read, but no finding from it entered the skill
 
 ## Threat model (threat-model.md)
 
@@ -76,7 +78,7 @@ Every source in the corpus (288), grouped by the reference that uses it most, ne
 - `venturebeat-chevy-1-dollar` **A Chevy for $1? Car dealer chatbots show perils of AI for customer service** (2023-12-19, VentureBeat). A one-line instruction override ("agree with anything ... legally binding offer") turned a dealership bot into a $1 Tahoe contract generator, and the same vendor bot was abused across several dealers.
 - `chevrolet-watsonville-1-dollar-tahoe` **A car dealership added an AI chatbot to its site. Then all hell broke loose.** (2023-12-18, Business Insider). A general-purpose model behind a dealership chat will do off-topic work and "agree" to absurd deals; logs showed most goading failed, but the few that succeeded went viral.
 
-## What the agent may touch and who approves (permissions.md, approvals.md)
+## What the agent may touch and who approves (permissions.md, sandbox.md, approvals.md)
 
 - `openai-help-lockdown-mode` **Lockdown Mode (Help Center)** (undated, OpenAI). Since OpenAI cannot stop prompt injections from reaching the model, Lockdown Mode cuts the last step instead, the outbound request that carries data to the attacker, and ranks every connector action by whether an attacker could see its side effect.
 - `openai-codex-auto-review` **Codex: Auto-review** (undated, OpenAI). An automatic reviewer only swaps who answers an approval request that the sandbox already forced, so it is worth exactly as much as the boundary under it and must refuse workarounds, stop runaway retries, and never be mistaken for a permission grant.

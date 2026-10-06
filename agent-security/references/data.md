@@ -1,6 +1,6 @@
 # Data: what the agent reads, and every way it can leave
 
-Whatever the agent can read, an injected instruction or a persuasive customer can try to send somewhere. Shrink what it reads, close every channel out in code, keep secrets out of reach, and treat memory as input that outlives the conversation; which hosts the agent may reach at all is permissions.md.
+Whatever the agent can read, an injected instruction or a persuasive customer can try to send somewhere. Shrink what it reads, close every channel out in code, keep secrets out of reach, and treat memory as input that outlives the conversation; which hosts the agent may reach at all is sandbox.md.
 
 ## Give the agent only the data the task needs
 
