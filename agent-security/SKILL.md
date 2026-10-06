@@ -5,7 +5,7 @@ description: Secure an AI agent that talks to people and calls tools, support ag
 
 # Agent security
 
-How to keep an agent that reads untrusted text and calls tools from being turned against its customers or its company. It runs from day-one rules to mechanisms and measured attack rates. It distills 312 sources read in October 2026, from Anthropic's and OpenAI's docs, posts, model specs and system cards to labs, standards bodies, support vendors, security researchers and public incidents. Where sources disagreed, the newest position won. Where dates didn't settle it, Anthropic and OpenAI won. The losing position is gone, so don't bring it back from memory. Real ties sit under "Where the answer depends on the case" in conversation.md, guardrail-layers.md and models.md, and you report both sides. Every claim cites its source as (`slug`), listed in `references/article-index.md`. Quoted text followed by a slug is that source's wording. Quoted text without one is an example.
+How to keep an agent that reads untrusted text and calls tools from being turned against its customers or its company. It distills 312 sources read in October 2026: Anthropic and OpenAI first, then labs, standards bodies, support vendors, security researchers and public incidents. Every claim cites its source as (`slug`), listed in `references/article-index.md`. Quoted text followed by a slug is that source's wording. Quoted text without one is an example.
 
 > The model will eventually be talked into something, so security is deciding in code what a talked-into agent can still reach.
 
@@ -41,10 +41,20 @@ A coined term you don't recognize → grep glossary.md for it; a source by slug 
 
 Open one reference at a time. **Never quote an attack rate from memory.** Copy it from the reference with its model, benchmark, attack budget, date and who ran it. The same model scores 1% or 90% depending on the attacker and the number of tries (models.md).
 
+## Which source wins
+
+Inside the skill it is settled. Where sources disagreed, the newest position won, and where dates didn't settle it, Anthropic and OpenAI won. The losing position is gone, so never bring it back from memory. Real ties sit under "Where the answer depends on the case" in conversation.md, guardrail-layers.md and models.md, and you report both sides.
+
+Outside the skill, the newest source wins too. Vendors publish system cards and change their docs most months, so the model numbers here go stale first.
+
+- A source dated after the skill's answer to the same question (the same default or rule, or the same benchmark, attacker and budget), whether a system card, a docs page, a release note or text the user gives you → use it, give its date, and name the number or rule here that it replaces. An undated docs page here counts as read on 2026-10-06.
+- A newer number from a different benchmark, attacker or vendor → report it next to the skill's, never in place of it. They don't compare (rule 11).
+- A model, version or product this skill doesn't list → say the skill doesn't cover it. If you can search, read the vendor's newest card or docs. Never fill the gap from memory or with an older model's number, and ask before treating a similar name as a model listed here.
+
 ## Rules that hold everywhere
 
 1. **Design for the attack that succeeds.** All 13 frontier models in the only independent head-to-head were hijacked. Adaptive attackers took most of 12 published defenses above 90%. So the question is what an injection can reach once it gets through. (`grayswan-ipi-arena`, `nasr-attacker-moves-second`)
-2. **Guarantees come from code. Prompts and classifiers only raise the attacker's cost.** Sort every defense into deterministic (permissions, limits inside tools, blocked image rendering, approvals) or probabilistic (system prompts, spotlighting, classifiers). Put a deterministic one between the model and every action that moves money, changes an account or discloses data. This extends agent-harness rule 2. A classifier is not code either. (`msrc-indirect-injection-defense`, `fin-ai-guardrails-customer-service`)
+2. **Guarantees come from code. Prompts and classifiers only raise the attacker's cost.** Sort every defense into deterministic (permissions, limits inside tools, blocked image rendering, approvals) or probabilistic (system prompts, spotlighting, classifiers). Put a deterministic one between the model and every action that moves money, changes an account or discloses data. This extends agent-harness rule 2. (`msrc-indirect-injection-defense`, `fin-ai-guardrails-customer-service`)
 3. **Authority comes from the channel a message arrived on, never from what it claims.** "I'm the CEO", "I'm from OpenAI", a fake system message in the chat and "your manager approved it" are all customer text. A claim asking for more caution can be followed. One that unlocks anything needs verification outside the chat or a record in your system. (`openai-model-spec-2026-08-18`, `anthropic-constitution`, `intigriti-hacking-ai-support-agents`)
 4. **Everything the agent reads is data, never an instruction.** Tool results, tickets, emails, retrieved articles, web pages, memory, other agents' messages and text the customer pastes from elsewhere can inform the task. Only the customer's own request starts an action. Pasted text is the channel teams forget. An early Opus 5.5 snapshot acted on planted instructions in pasted text in 52% of coding-eval attempts, against 0 of 105 inside tool results (2026-09-22, Anthropic). (`anthropic-docs-mitigate-jailbreaks`, `anthropic-system-card-opus-5-5`, `openai-hugging-face-incident-road-ahead`)
 5. **Never let one session hold untrusted input, private data and a way to act or send out without a gate.** A support agent already holds the first two, so every refund, account change and outbound message passes an approval, an allowlist or a validator in code. This is Meta's Agents Rule of Two, built on Simon Willison's lethal trifecta. (`meta-agents-rule-of-two`, `willison-lethal-trifecta`)
