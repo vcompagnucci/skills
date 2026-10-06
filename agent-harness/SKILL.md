@@ -5,7 +5,7 @@ description: Build the harness around an AI agent: own or vendor, the loop, tool
 
 # Agent harness
 
-The harness is everything around the model that makes it an agent: the loop, what the model sees each turn, the tools and what they return, the state that survives a crash or a pause, and the log. Where sources disagreed, the most recent position won. Where the right answer depends on your channel or task, or Anthropic and OpenAI disagree with no date to settle it, state.md, operations.md, context.md, compaction.md, and multi-agent.md end with "Where the answer depends on the case". Report both; never pick one from memory.
+The harness is everything around the model that makes it an agent: the loop, what the model sees each turn, the tools and what they return, the state that survives a crash or a pause, and the log.
 
 Out of scope: who may approve what and prompt injection (security), measuring the agent (agent-evals), and writing the system prompt.
 
@@ -32,6 +32,18 @@ Open one reference at a time.
 **Words.** A conversation is everything with one customer on one channel; a session is the provider's container for it, and a conversation can span several. A run is the work one input starts (a message, an approval, a webhook) until it ends or pauses. A turn is one customer message and the reply; a step is one model call inside it, and the step cap limits steps per turn. Compaction replaces old history with a summary.
 
 **First harness, in order:** loop.md, failures.md, state.md, tools.md, humans.md. Open the others when a measured failure points there.
+
+## Which source wins
+
+The same order decides inside this skill and outside it, whenever two sources answer one question differently. That includes a source dated after the skill's answer: a docs page, a changelog, an SDK release, a vendor post, text the user gives you. SDK defaults, limits and products change most months.
+
+First check it is the same question. Advice for another channel or task answers a different question, so report it next to the skill's, never in place of it. Then:
+
+1. **The newest date wins, whoever published it.** Give its date and name the rule or default here that it replaces. An undated docs page counts as read on 2026-10-05.
+2. **Dates don't settle it → Anthropic and OpenAI win** over everyone else.
+3. **Anthropic and OpenAI disagree and nothing settles it → report both, never pick one.** Those ties, and answers that depend on your channel or task, sit under "Where the answer depends on the case" at the end of state.md, operations.md, context.md, compaction.md and multi-agent.md.
+
+Inside the skill the newest position already won, and the losing one is gone, so never bring it back from memory. A product, SDK version or feature this skill doesn't list → say the skill doesn't cover it, and never fill the gap from memory.
 
 ## Rules that hold everywhere
 

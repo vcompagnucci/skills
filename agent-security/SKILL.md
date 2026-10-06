@@ -43,13 +43,15 @@ Open one reference at a time. **Never quote an attack rate from memory.** Copy i
 
 ## Which source wins
 
-Inside the skill it is settled. Where sources disagreed, the newest position won, and where dates didn't settle it, Anthropic and OpenAI won. The losing position is gone, so never bring it back from memory. Real ties sit under "Where the answer depends on the case" in conversation.md, guardrail-layers.md and models.md, and you report both sides.
+The same order decides inside this skill and outside it, whenever two sources answer one question differently. That includes a source dated after the skill's answer: a system card, a docs page, a release note, text the user gives you. Vendors publish cards and change their docs most months, so the model numbers here go stale first.
 
-Outside the skill, the newest source wins too. Vendors publish system cards and change their docs most months, so the model numbers here go stale first.
+First check it is the same question: the same default or rule, or the same benchmark, attacker and budget. A number from another benchmark, attacker or vendor answers a different question, so report it next to the skill's, never in place of it (rule 11). Then:
 
-- A source dated after the skill's answer to the same question (the same default or rule, or the same benchmark, attacker and budget), whether a system card, a docs page, a release note or text the user gives you → use it, give its date, and name the number or rule here that it replaces. An undated docs page here counts as read on 2026-10-06.
-- A newer number from a different benchmark, attacker or vendor → report it next to the skill's, never in place of it. They don't compare (rule 11).
-- A model, version or product this skill doesn't list → say the skill doesn't cover it. If you can search, read the vendor's newest card or docs. Never fill the gap from memory or with an older model's number, and ask before treating a similar name as a model listed here.
+1. **The newest date wins, whoever published it.** Give its date and name the number or rule here that it replaces. An undated docs page counts as read on 2026-10-06.
+2. **Dates don't settle it → Anthropic and OpenAI win** over everyone else.
+3. **Anthropic and OpenAI disagree and nothing settles it → report both, never pick one.** The skill's own ties sit under "Where the answer depends on the case" in conversation.md, guardrail-layers.md and models.md.
+
+Inside the skill this order already ran, and the losing position is gone, so never bring it back from memory. A model, version or product this skill doesn't list → say the skill doesn't cover it. If you can search, read the vendor's newest card or docs. Never fill the gap from memory or with an older model's number, and ask before treating a similar name as a model listed here.
 
 ## Rules that hold everywhere
 

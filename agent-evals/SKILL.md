@@ -5,7 +5,7 @@ description: Build and run evals for an AI agent, with extra checks for customer
 
 # Agent evals
 
-A process for evaluating an AI agent that talks to people, looks things up, and takes actions, with examples from customer support, where the method was tested hardest. It merges Hamel Husain and Shreya Shankar's method with what labs, support teams, and eval vendors published up to early October 2026. Where they disagreed, the most recent position won, and where dates didn't settle it, Anthropic and OpenAI won. The losing position is gone, so don't bring it back from memory.
+A process for evaluating an AI agent that talks to people, looks things up, and takes actions, with examples from customer support, where the method was tested hardest. It merges Hamel Husain and Shreya Shankar's method with what labs, support teams, and eval vendors published up to early October 2026.
 
 ## Where are you?
 
@@ -45,6 +45,18 @@ Customer-facing agent? Before a check touches handoffs, language, sensitive data
 ```
 
 Open one reference at a time. **Never compute a formula from memory** (corrected failure rate, bootstrap and Wilson intervals, pass@k, pass^k, effective n for clustered cases, power and the smallest detectable difference, paired tests). Copy it from statistics.md and run its check value first. Sources count the positive class in opposite directions, so a remembered formula silently gives the wrong rate.
+
+## Which source wins
+
+The same order decides inside this skill and outside it, whenever two sources answer one question differently. That includes a source dated after the skill's answer: a docs page, a vendor's eval guide, a paper, a release note, text the user gives you. Eval tooling and vendor guidance change most months.
+
+First check it is the same question. Advice for another kind of agent or channel, or a number from another benchmark or setup, answers a different question, so report it next to the skill's, never in place of it. Then:
+
+1. **The newest date wins, whoever published it.** Give its date and name the rule or number here that it replaces. An undated docs page counts as read on 2026-10-05.
+2. **Dates don't settle it → Anthropic and OpenAI win** over everyone else.
+3. **Anthropic and OpenAI disagree and nothing settles it → report both, never pick one.**
+
+Inside the skill this order already ran, and the losing position is gone, so never bring it back from memory. A tool, vendor or model this skill doesn't list → say the skill doesn't cover it, and never fill the gap from memory.
 
 ## Rules that hold at every stage
 
