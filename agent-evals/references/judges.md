@@ -10,9 +10,10 @@ Agreement with expert labels (evaluators.md) shows a judge was right on past tra
 - **Sampling k times and voting is part of the judge.** Freeze k and the vote rule with the prompt, and measure TPR and TNR with that exact aggregation. Check vendor defaults before trusting a number: ADK samples its judge 5 times and takes the majority unless configured otherwise.
 - **Check in code that every verdict reaches the gate, and never read silence as clean.** In one deployed ordering agent the judge noted a suspected bug on 125 of 220 rounds and none became a gate failure, and it flagged 0 of 100 rounds in which humans confirmed 23 defects. A judge that flags nothing hasn't shown the rate is zero: label a sample first.
 
-## Agreeable judges
+## Biased judges
 
 - **Expect a judge to pass too much.** Across 14 judges grading 366 programs, TPR was above 96% and TNR mostly below 25%, and the judge with the best TNR (53.5%) had the lowest TPR (83.8%). That's why the failure catch rate decides acceptance (evaluators.md) and why several judges are combined with a low Fail threshold, never a majority.
+- **Test the judge for length bias.** Regress its verdicts on the agent version plus normalized reply length. A significant length coefficient means the judge rewards length, not the behavior.
 
 ## Several judges on one mode
 
@@ -34,6 +35,6 @@ Agreement with expert labels (evaluators.md) shows a judge was right on past tra
 ## When validation stops holding
 
 - **Vendor-managed, built-in, and default evaluators are judges that change under you.** Pin the evaluator's version, record it on every verdict, and re-validate when it changes. Where the vendor won't let you pin (managed evaluators upgraded without version selection, a metric name that resolves to the latest version, a default judge on a model alias), run the vendor's prompt on a model snapshot you pin yourself (SKILL.md rule 13).
-- **A judge validated on one journey isn't validated on another.** Split the validation labels by journey, as by language (support-checks.md), and report TPR and TNR per journey before using the judge there. A task-completion judge that looked ready on telecom support traces had a 20-point accuracy gap on function-calling traces, where the failure was silent state corruption.
-- **A judge-based comparison between two versions needs each version's own calibration.** A version that writes differently changes how the judge errs. Label a sample of each side's outputs and report each side's TPR, TNR, and J = TPR + TNR - 1 with intervals, plus the difference in J with its bootstrap interval (statistics.md). If that difference is large or its interval excludes zero, weaken the claim.
+- **A judge validated on one stratum isn't validated on another.** Split the validation labels by journey, language (support-checks.md), reply length, and request complexity, and report TPR and TNR per stratum before using the judge there. A dominant stratum inflates the overall number: a task-completion judge that looked ready on telecom support traces had a 20-point accuracy gap on function-calling traces, where the failure was silent state corruption.
+- **A judge-based comparison between two versions needs each version's own calibration.** A version that writes differently changes how the judge errs. Label a sample of each side's outputs and report each side's TPR, TNR, and J = TPR + TNR - 1 (check: 0.92 and 0.88 give 0.80) with intervals, plus the difference in J with its interval (statistics.md, "Difference in J"). If that interval excludes zero, don't report the judge-based difference: have the expert label both sides on the same cases and use the exact paired test.
 - **Never correct both sides with one shared TPR and TNR.** A shared correction amplifies any mismatch by 1/J. In one study a true difference of +0.003 came out as a significant loss from raw judge rates (-0.046, interval -0.078 to -0.016) and from a shared correction (-0.089), and as no detectable difference with per-version calibration (-0.009, interval -0.084 to +0.059). The same holds when comparing the agent with human agents (production.md).

@@ -25,13 +25,8 @@ Enforce the JSON with the provider's structured output as well as the prompt. A 
 
 - **Never tell the judge what its label will cause or who wrote the reply.** No training data, alert, or refund the verdict triggers, and no model or agent name. Told that non-compliant labels would become negative training data, Claude judges mislabeled 62.2% to 85.6% of transcripts, and 3.3% to 16.7% with the consequence reversed.
 - **Count "unknown" as its own outcome,** reported as coverage and sent to human review, never as a pass. With an abstain option, judges still returned 4.4% to 26.7% wrong labels, so it narrows the problem without removing it.
-- **Give the judge enough output tokens, and count cut-off responses.** A truncated deliberation hides the label: raising one judge's budget from 10K to 32K tokens raised its measured mislabel rate from 50.0% to 74.4%.
+- **Give the judge enough output tokens, and count cut-off responses.** At 10K output tokens, cut-off responses hid mislabels: at 32K the measured rate was 74.4%, not 50.0%.
 - **Run a consequence-swap test before trusting a judge on a value-laden mode** (a goodwill refund, a policy exception the judge may find kind). Grade the same transcripts once with a stated consequence and once with it reversed. A label that flips tracks the consequence, not the transcript. Judges from other providers mislabeled 1.1% to 14.4% on transcripts chosen around Claude's values, so measure each judge instead of assuming.
-
-## Choose the judge model
-
-- **Compare one frontier and one cheap judge model per mode on dev, then score the chosen one on test once.** The cheap model is fine where its failure catch rate holds and harmful where it misses the rare class. On 456 support traces six judge models scored 85.3% to 88.4% on task completion, while on groundedness the cheapest separated grounded from ungrounded replies far worse (PR-AUC 0.60 against 0.82, with 0.33 as chance) and missed hallucinations.
-- **When the output is a score you threshold** (a per-case rubric total, a vendor evaluator), check ranking before the cutoff. Good ranking with a bad cutoff: re-tune the cutoff on dev labels. Weak ranking: replace the model, because no cutoff separates scores that don't separate passes from fails.
 
 ## If dev agreement stalls
 

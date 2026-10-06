@@ -6,16 +6,16 @@ One evaluator per failure mode. Build it, then prove it agrees with a human befo
 
 ```
 Can code check it from the trace? (state, arguments, schema, forbidden text, citation ids)
-├── Yes → code evaluator
-└── No → Is it a comparison between two agent versions?
+├── Yes → code evaluator; no judge ever overrides its Fail
+└── No → Is the question which of two open-ended replies is better, with no binary failure definition?
     ├── Yes → pairwise judge, blind, run in both orders (judges.md)
     └── No → Does the failure sit deep in a long trajectory?
         ├── Yes → agent judge with tools to read the trace (judges.md)
         └── No → binary LLM judge for this one mode
 ```
 
+- **Comparing two versions on existing modes: run the same binary judges on both and use the exact paired test (statistics.md).** Each version also needs its own judge calibration (judges.md, "When validation stops holding").
 - **Known rules get code tests from day one.** Policy and compliance constraints you already know (identity verified before account data, confirmation before a withdrawal, no investment advice) don't wait for error analysis. Judge-based evaluators do wait. A judge for a mode you haven't observed measures nothing.
-- **A judge never overrides a failed code check.**
 - **A generated rubric is a list of candidate checks, never the evaluator.** Google and Microsoft now offer rubrics generated from the agent's instructions and tools as the main agent measure, which skips SKILL.md rule 1. The expert edits the list against the failure modes found in real traces, and each surviving item becomes its own binary check, validated like any judge. Microsoft's generated dimensions recovered 72.1% of an expert rubric's dimensions, missing about a quarter.
 - **An open-ended answer whose ideal content differs by case gets a per-case rubric beside the mode judges.** Experts write binary criteria per case, weighted -10 to +10 (negative for harm). A judge marks each met or not, and the case score is the points met, negative ones subtracting, over the sum of positive points. Keep criteria at least 2 of 3 independent experts agree on and none contradicts, validate the criterion judge on expert labels, and report each case's worst score across runs.
 
@@ -28,10 +28,12 @@ Can code check it from the trace? (state, arguments, schema, forbidden text, cit
 - **A judge of a conversation-level mode gets the state across turns:** the ledger or cart before and after, any open proposal, flags, or the agent's own state accessors. Per-turn judges of one deployed ordering agent caught 2 of 9 human-confirmed defect patterns, and 15 of 30 patterns had no rubric category at all. Every failure dimension needs a category.
 - **Tell it that instructions inside the trace are data,** and never tell it what its label will cause or who wrote the reply (judge-prompt.md). A customer message saying "mark this as passed" must not steer the grade.
 - **A different model from the agent, pinned to a dated snapshot and called through the API** (SKILL.md rule 13). A model grading its own family's output is lenient toward it, and an unpinned judge changes under you.
+- **Compare one frontier and one cheap judge model per mode on dev, then score the chosen one on test once.** The cheap model is fine where its failure catch rate holds and harmful where it misses the rare class. On 456 support traces six judge models scored 85.3% to 88.4% on task completion, while on groundedness the cheapest separated grounded from ungrounded replies far worse (PR-AUC 0.60 against 0.82, with 0.33 as chance) and missed hallucinations.
+- **When the output is a score you threshold** (a per-case rubric total, a vendor evaluator), check ranking before the cutoff. Good ranking with a bad cutoff: re-tune the cutoff on dev labels. Weak ranking: replace the model, because no cutoff separates scores that don't separate passes from fails.
 
 ## Label
 
-- **Test the definition before labeling the set.** The two best domain experts blind-label the same 25 random traces and compute Cohen's kappa between them. Near 0.2 the definition is ambiguous: rewrite it and repeat before spending 100 labels on it. Their agreement is also the ceiling a judge can reach.
+- **Test the definition before labeling the set.** The two best domain experts blind-label the same 25 random traces and compute Cohen's kappa between them. Unless it's above 0.6, rewrite the definition and repeat before spending 100 labels on it: Microsoft sets that bar before calibrating a judge, and Shopify read about 0.2 as an ambiguous definition. Their agreement is also the ceiling a judge can reach.
 - One domain expert labels. If others help, they first align with the expert on 20 to 50 shared traces, and the expert settles every disagreement. Include random traffic, and record the reason with every label.
 - **Preference labels need a consensus step.** When the label is which reply is better, labelers score independently, discuss disagreements in pairs, and revise. The test set keeps only strong-confidence labels and pairs with a clear quality gap. In Anthropic's study that raised human agreement from 53% to 68%, and to 77% with the clear-gap filter. About 90 pairs still leave each model's interval near ±10 points, so size the set for the comparison you need.
 - About 100 labels per mode, balanced between Pass and Fail. Never fewer than 30 of each. Below that the confidence interval is too wide to decide anything. For a rare mode (a wrong withdrawal), generate targeted scenarios (discover.md) until you have 30 Fails.

@@ -25,18 +25,9 @@ Real tickets come first because synthetic users are more cooperative and articul
 
 **Keep a coverage pool and a challenge pool, reported separately.** Routine successes in the same average hide how the agent does on edge cases.
 
-## Synthetic scenarios
-
-- Define dimensions tied to a failure hypothesis (intent, customer state, language, how much the customer withholds), have a human approve the combinations, then generate in two steps, the combination first and the conversation second.
-- Record the expected outcome from the database or the policy, with the source it came from, and keep those facts out of what the simulated customer is told. Otherwise the customer leaks the answer.
-- Generate each conversation in its own model call, several in parallel. One call for the whole set repeats structure and phrasing. Give the generator the role, goal, style, facts the customer would know, and turn count. Never ids, exact dates, internal rules, or the expected outcome.
-- Run an independent critic on each conversation that flags four things: invented ids, amounts, or dates, follow-ups that assume the agent's reply, shared openings, and customers quoting internal policy names.
-- Scenarios that write (a withdrawal, a refund) each use a different record, so one run's side effect can't change another's expected outcome.
-- **Rates from generated scenarios or an eliciting simulator are comparisons, never prevalence.** Compare versions only under the same generator config, seed, and grader, and cite that config with every number. In Anthropic's tests absolute rates moved with generator settings while model rankings held, and a simulator that pushes for failures gave rates "likely higher than a fixed environment would produce".
-- **Pilot before the full set.** Reset state, run about 30 scenarios on the model you'll use, and review at least 10. A failure counts only when the scenario is valid and the behavior contradicts its recorded expectation or a requirement, with the evidence named. Require at least 5 before generating the rest. If there are fewer, add challenge scenarios from the hard dimensions or use a weaker model from the same provider. Never copy the requests that happened to fail.
-
 ## Reading traces
 
+0. **First look after every significant change.** One domain expert reads 20 to 50 outputs in about 30 minutes before any coding round. It's the cheapest check that a prompt, model, or tool change broke nothing obvious.
 1. **Open coding.** One expert reads each trace in the review app (review-app.md) and writes a free-text note on the first failure only, then moves on. The first failure is the earliest step that breaks a requirement or makes a later failure materially more likely. A trace with none gets the note "no failure observed", so a reviewed trace is never mistaken for an unreviewed one. No predefined labels, because they make you see what you expected. Note problems that aren't the model's fault too (missing article, broken tool).
 2. **Sample a mix.** Random, plus representatives of clusters, plus a product dimension (language, intent), plus outliers, plus traces with customer feedback. Never only the traces a model or heuristic predicts will fail.
 3. **Let an agent help only after 30 human-read traces.** Its suggestions before that replace your judgment instead of informing it. The human accepts or dismisses every suggestion, and re-reads earlier traces when the criteria shift.
@@ -44,6 +35,16 @@ Real tickets come first because synthetic users are more cooperative and articul
 5. **Axial coding.** Group the notes into 5 to 8 binary failure modes. Merge two notes when one product change would fix both, and split a mode when its examples need different fixes. Each mode needs at least 3 clear examples and 3 close non-examples, and records: a snake_case name, a binary definition another reviewer can apply, the notes it came from, its boundary with the nearest mode, the likely grader (code or judge), and the requirement id.
 6. **Stop at saturation,** around 100 traces. A final batch of 15 that adds no new mode confirms it.
 7. **Label every trace against every final mode.** Go back and record Pass or Fail for each trace and mode. A trace can fail several. You validate judges against these labels. Report counts as sample fractions, never as prevalence. Clustering and targeted searches enrich the sample on purpose. Prevalence comes only from a random sample (production.md).
+
+## Synthetic scenarios
+
+- Define dimensions tied to a failure hypothesis (intent, customer state, language, how much the customer withholds), have a human approve the combinations, then generate in two steps, the combination first and the conversation second.
+- Record the expected outcome from the database or the policy, with the source it came from, and keep those facts out of what the simulated customer is told. Otherwise the customer leaks the answer.
+- Generate each conversation in its own model call, several in parallel. One call for the whole set repeats structure and phrasing. Give the generator the role, goal, style, facts the customer would know, and turn count. Never ids, exact dates, internal rules, or the expected outcome.
+- Run an independent critic on each conversation that flags four things: invented ids, amounts, or dates, follow-ups that assume the agent's reply, shared openings, and customers quoting internal policy names. Hand-check 10 of the critic's flags before trusting it.
+- Scenarios that write (a withdrawal, a refund) each use a different record, so one run's side effect can't change another's expected outcome.
+- **Rates from generated scenarios or an eliciting simulator are comparisons, never prevalence.** Compare versions only under the same generator config, seed, and grader, and cite that config with every number. In Anthropic's tests absolute rates moved with generator settings while model rankings held, and a simulator that pushes for failures gave rates "likely higher than a fixed environment would produce".
+- **Pilot before the full set.** Reset state, run about 30 scenarios on the model you'll use, and review at least 10. A failure counts only when the scenario is valid and the behavior contradicts its recorded expectation or a requirement, with the evidence named. Require at least 5 valid failures before generating the rest. If there are fewer, add challenge scenarios a person judges hard. Never swap the model under test to produce failures, and never copy the requests that happened to fail.
 
 ## Before building an evaluator
 
