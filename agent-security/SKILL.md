@@ -39,7 +39,7 @@ What are you deciding?
 A coined term you don't recognize → grep glossary.md for it; a source by slug → grep article-index.md
 ```
 
-Open one reference at a time. **Never quote an attack rate from memory.** Copy it from the reference with its model, benchmark, attack budget, date and who ran it. The same model scores 1% or 90% depending on the attacker and the number of tries (models.md).
+Open one reference at a time. **Never quote an attack rate from memory.** Copy it from the reference with its model, benchmark, attack budget, date and who ran it. On the same 40 coding scenarios, Opus 5 broke on 2.68% or 88.92% of attempts depending on the attacker (models.md).
 
 ## Which source wins
 
