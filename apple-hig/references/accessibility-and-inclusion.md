@@ -11,7 +11,7 @@ How to make an app work for everyone, whatever their abilities, language, cultur
 - **If your default colors can't meet those ratios, provide a higher-contrast scheme when Increase Contrast is on, and prefer system colors.** System-defined colors have accessible variants that adapt automatically to Increase Contrast and to light and dark appearances. (`accessibility`)
 - **Never convey information with color alone.** People with color blindness struggle with pairings like red-green and blue-orange, so add distinct shapes or icons for differences in function and state, and consider letting people customize colors, as in charts or game characters. (`accessibility`)
 - **Describe your interface and content for VoiceOver.** The screen reader lets people use the app without seeing the display, so it depends on the descriptions you provide. (`accessibility`)
-- **Never convey dialogue or crucial information through audio alone.** Depending on the context, offer text-based ways to experience audio and video, like captions, subtitles, audio descriptions, or transcripts, and let people customize how that text looks. (`accessibility`)
+- **Never convey dialogue or important information through audio alone.** Depending on the context, offer text-based ways to experience audio and video, like captions, subtitles, audio descriptions, or transcripts, and let people customize how that text looks. (`accessibility`)
 - **Match the text alternative to the media.** Captions sync text with audible information, as in game cutscenes and video clips, subtitles show dialogue in people's preferred language for TV and movies, audio descriptions narrate visual-only information in pauses, and transcripts suit podcasts and audiobooks. (`accessibility`)
 - **Pair audio cues with matching haptics.** A success chime, error sound, or game feedback then reaches people who can't hear it or have audio off. In iOS and iPadOS, Music Haptics and Audio Graphs let people experience music and infographics through vibration and texture. (`accessibility`)
 - **Augment audio cues with visual cues, especially in games.** Important content may happen offscreen, so when audio guides people toward an action, add visual indicators that point to where you want them to interact. (`accessibility`)
@@ -86,5 +86,5 @@ How to make an app work for everyone, whatever their abilities, language, cultur
 - **Never flip logos or universal marks, and generally don't flip icons of real-world objects.** A flipped logo confuses people and can have legal repercussions, a checkmark and a clock look the same everywhere, and a right-handed tool like a pencil stays as is. (`right-to-left`)
 - **Before flipping a complex custom icon, weigh each component and the overall balance.** SF Symbols keeps the same negation backslash in both directions, a badge depicting real UI flips with it, and a plus badge may move to balance a flipped cart. A tool keeps its handedness. (`right-to-left`)
 
-## Key source pages
+## Key source articles
 `accessibility` · `voiceover` · `inclusion` · `right-to-left`

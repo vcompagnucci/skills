@@ -82,5 +82,5 @@ How an app builds on In-App Purchase, Apple Pay, Wallet, iCloud, and Maps. Apple
 - **Offer a floor picker for venues with several levels, and limit scrolling outside the venue.** Concise floor numbers usually suffice. Keep part of the indoor map onscreen so a hard swipe doesn't get people lost. (`maps`)
 - **Show the surrounding area for context, and support navigation to nearby transit.** Dim noninteractive streets and playgrounds in a distinct color, and route to bus stops, train stations, and parking, or switch to Apple Maps. (`maps`)
 
-## Key source pages
+## Key source articles
 `apple-in-app-purchase` · `apple-pay` · `wallet` · `icloud` · `maps`

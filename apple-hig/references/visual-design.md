@@ -94,5 +94,5 @@ How an app uses color, type, materials, and artwork. Apple's position: color is 
 - **Use the brand's voice and tone in all written communication.** A brand can convey encouragement and optimism with plain words, occasional exclamation marks and emoji, and simple sentence structures. (`branding`)
 - **Keep Apple trademarks out of your app name and images.** Apple's trademark guidelines apply to both. (`branding`)
 
-## Key source pages
+## Key source articles
 `color` · `typography` · `dark-mode` · `materials` · `images` · `branding`

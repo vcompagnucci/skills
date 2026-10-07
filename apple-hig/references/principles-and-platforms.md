@@ -21,7 +21,7 @@ Apple's eight design principles, and what iPhone, iPad, Mac, games, and Mac Cata
 - **(iOS) Limit onscreen controls, keeping secondary details and actions discoverable with minimal interaction.** It helps people concentrate on primary tasks and content. (`designing-for-ios`)
 - **(iOS) Put controls within reach of the hand holding iPhone, and support swiping to go back or act on a row.** The display's middle and bottom are easiest to reach, and people view it from a foot or two away. (`designing-for-ios`)
 - **(iOS) With permission, use device capabilities instead of asking people to enter data.** Accept payments, secure the app with biometric authentication, or offer features that use the device's location. (`designing-for-ios`)
-- **(iOS, iPadOS) Adapt seamlessly to orientation, Dark Mode, Dynamic Type, and on iPad multitasking modes.** People choose the configurations that work best for them, and an iPad app should also transition effortlessly to running in macOS. (`designing-for-ios`, `designing-for-ipados`)
+- **(iOS, iPadOS) Adapt to orientation, Dark Mode, Dynamic Type, and on iPad multitasking modes.** People choose the configurations that work best for them, and an iPad app should also transition effortlessly to running in macOS. (`designing-for-ios`, `designing-for-ipados`)
 - **(iOS, iPadOS) Design for both quick visits and hours-long sessions, with several apps in play.** iPhone sees minute-long check-ins and hour-long sessions with frequent app switching, and iPad sees hours of immersion, several apps onscreen, and drag and drop between them. (`designing-for-ios`, `designing-for-ipados`)
 - **(iOS, iPadOS) Build on the system features that help people use the system and their apps in familiar, consistent ways.** On iPhone: widgets, Home Screen quick actions, Spotlight, Shortcuts, and activity views. On iPad: multitasking, widgets, and drag and drop. (`designing-for-ios`, `designing-for-ipados`)
 - **(iPadOS) Spend the large display on content, minimizing modal interfaces and full-screen transitions.** Put onscreen controls where they're easy to reach but not in the way. (`designing-for-ipados`)
@@ -74,5 +74,5 @@ Apple's eight design principles, and what iPhone, iPad, Mac, games, and Mac Cata
 - **Put every command in the menu bar, and give every object a context menu.** iPad has no persistent menu bar, but Mac users expect all commands there, including those moved to the toolbar, and expect relevant actions on every object. (`mac-catalyst`)
 - **Create a macOS app icon, and limit appearance customizations to standard macOS ones.** Mac icons have the lifelike rendering people expect while staying harmonious across platforms, and not every iPadOS control customization exists on the Mac. (`mac-catalyst`)
 
-## Key source pages
+## Key source articles
 `design-principles` · `designing-for-ios` · `designing-for-ipados` · `designing-for-iphone-duo` · `designing-for-macos` · `designing-for-games` · `mac-catalyst`

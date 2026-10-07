@@ -2,7 +2,7 @@
 
 How people change content, move it, keep it, and send it elsewhere. Apple's position: build on the system edit menu, undo, drag and drop, file browsers, and share sheet people already know, make every change predictable and reversible instead of asking for confirmation, save work automatically, and offer only the actions that apply in the current context. (`edit-menus`, `undo-and-redo`, `drag-and-drop`, `file-management`, `activity-views`)
 
-**Contents:** Undo and redo · Edit menus · Drag and drop · Collaboration and sharing · Activity views and extensions · File management · Printing · Key source pages
+**Contents:** Undo and redo · Edit menus · Drag and drop · Collaboration and sharing · Activity views and extensions · File management · Printing · Key source articles
 
 ## Undo and redo (`undo-and-redo`)
 
@@ -18,7 +18,7 @@ How people change content, move it, keep it, and send it elsewhere. Apple's posi
 ## Edit menus (`edit-menus`)
 
 - **Use the system edit menu, revealed by the interactions people already know.** A custom menu with the same commands is redundant and confusing, and people expect to touch and hold on a touchscreen or secondary click with a trackpad or keyboard, not learn a custom interaction. (`edit-menus`)
-- **Expect edit commands to apply to any selectable content, not just text.** Images, files, contact cards, charts, and map locations can all take them, and in iOS and iPadOS the system can add an action for detected data, like Get Directions for an address. (`edit-menus`)
+- **Expect edit commands to apply to any selectable content, text or not.** Images, files, contact cards, charts, and map locations can all take them, and in iOS and iPadOS the system can add an action for detected data, like Get Directions for an address. (`edit-menus`)
 - **(iOS) Expect a compact, horizontal edit menu when people touch and hold or double-tap to select content.** A chevron on its trailing edge expands it into a context menu. (`edit-menus`)
 - **(iOS, iPadOS) Make the edit menu work in both its compact horizontal and vertical styles.** Multi-Touch gestures reveal the compact style, while a keyboard or pointing device reveals the vertical one, which iPadOS opens directly as a context menu. (`edit-menus`)
 - **(iOS, iPadOS) Move the edit menu if it would cover important content or parts of the interface.** By default it appears above or below the insertion point or selection, with a pointer to the target. You can change its position, but not its shape or pointer. (`edit-menus`)
@@ -121,5 +121,5 @@ How people change content, move it, keep it, and send it elsewhere. Apple's posi
 - **(macOS) Make dependencies between print options clear, and hide advanced ones behind a disclosure control labeled Advanced Options.** When double-sided printing is available, printing on transparencies becomes unavailable, for example. (`printing`)
 - **(macOS) Let people preview a setting's effect, and keep modified settings with the document.** Update a thumbnail when a tone control changes, and at minimum keep settings until the document closes in case people print again. (`printing`)
 
-## Key source pages
+## Key source articles
 `undo-and-redo` · `edit-menus` · `drag-and-drop` · `collaboration-and-sharing` · `activity-views` · `file-management` · `printing`

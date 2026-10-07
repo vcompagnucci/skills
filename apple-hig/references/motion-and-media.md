@@ -60,7 +60,7 @@ How an app moves, sounds, and feels, and how it plays photos, video, and live TV
 - **When the TV app hands you playback, go from a black screen straight into the content.** The TV app fades to black without showing your launch screen, so present your own black screen at once, then the content, with no splash screens, detail screens, or intro animations. (`playing-video`)
 - **Resume playback automatically, without asking, where people left off.** Starting a long clip at its previous end time lets people quickly continue. (`playing-video`)
 - **Avoid loading screens, and if loading takes over two seconds, show a black screen with only a centered activity spinner.** Keep it only until enough content loads for playback to begin, and load the rest in the background. (`playing-video`)
-- **Keep any branding or images on a loading screen minimal, and keep its background black.** The black background makes the transition into playback seamless. (`playing-video`)
+- **Keep any branding or images on a loading screen minimal, and keep its background black.** The black background makes the transition into playback smooth. (`playing-video`)
 - **Play content for the correct viewer.** Switch automatically to the profile the TV app specifies, and if it specifies none, ask the viewer to choose one before playback so it's known next time. (`playing-video`)
 - **When people exit playback, show a contextually relevant screen.** They stay in your app rather than returning to the TV app, so show a detail view of what they watched with a resume option, or else a menu listing it or your main menu. (`playing-video`)
 - **Prepare that exit view as soon as you receive a playback notification.** People may exit right after playback begins, and the view needs to be ready when they do. (`playing-video`)
@@ -92,5 +92,5 @@ How an app moves, sounds, and feels, and how it plays photos, video, and live TV
 - **Allow playback and other content-specific actions in your cloud DVR area.** From a content details view there, people can play or delete content and, if applicable, adjust recording settings. (`live-viewing-apps`)
 - **Consider a control for managing cloud DVR storage.** Let people delete watched recordings or content older than a set number of days, and ideally overwrite the oldest or watched content automatically so they don't run out of space. (`live-viewing-apps`)
 
-## Key source pages
+## Key source articles
 `motion` · `playing-haptics` · `playing-audio` · `playing-video` · `live-photos` · `live-viewing-apps` · `photo-editing`

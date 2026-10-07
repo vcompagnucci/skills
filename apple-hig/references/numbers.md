@@ -1,6 +1,6 @@
 # Numbers at a glance
 
-The HIG numbers a designer reaches for most on iPhone, iPad, and Mac, grouped by question, each with its page. Full tables (every Dynamic Type size, widget and Live Activity sizes per device, keyboard shortcuts, menu bar items) stay on the pages: open them with `scripts/hig_page.py <slug>`.
+The HIG numbers a designer reaches for most on iPhone, iPad, and Mac, grouped by question, each with its page. Full tables (every Dynamic Type size, widget and Live Activity sizes per device, keyboard shortcuts, menu bar items) stay on the pages, and `scripts/hig_page.py <slug>` opens them.
 
 ## iPhone and iPad vs Mac
 
@@ -92,5 +92,5 @@ Sources: sizes (`accessibility`, `typography`, `designing-for-games`), icon canv
 - **Share sheet activity icon:** centered in an area of about 70x70 px. (`activity-views`)
 - **Apple Pay buttons:** at least 100x30 pt (140x30 pt for titled variants like Buy or Check Out), with margins of at least 1/10 of the button's height. (`apple-pay`)
 
-## Key source pages
+## Key source articles
 `accessibility` · `typography` · `buttons` · `layout` · `color` · `app-icons` · `widgets` · `live-activities` · `toolbars` · `alerts`

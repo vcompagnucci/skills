@@ -2,7 +2,7 @@
 
 How people trigger actions and choose options. Apple's position: a button is instantly recognizable and easy to hit, with one prominent style for the likeliest action and never a destructive default, and menus stay familiar, short, and predictable, with every command also reachable somewhere visible (the main interface, or the menu bar on a Mac). (`buttons`, `menus`, `context-menus`, `the-menu-bar`)
 
-**Contents:** Choosing the control · Buttons · Menus · Context menus · Pop-up and pull-down buttons · The menu bar · Dock menus and Home Screen quick actions · Key source pages
+**Contents:** Choosing the control · Buttons · Menus · Context menus · Pop-up and pull-down buttons · The menu bar · Dock menus and Home Screen quick actions · Key source articles
 
 ## Choosing the control
 
@@ -16,7 +16,7 @@ How people trigger actions and choose options. Apple's position: a button is ins
 ## Buttons (`buttons`)
 
 - **Build each button from a style, content, and a role.** Style is its size, color, and shape, content is a symbol or icon, a text label, or both, and the system-defined role states its meaning and can change its appearance. (`buttons`)
-- **Make buttons easy to use: enough space around each one and a hit region of at least 44x44 pt.** Space sets a button apart from nearby components and content, and makes it easy to select with any input, from a fingertip to a pointer. (`buttons`)
+- **Make buttons easy to use: enough space around each one and a hit region of at least 44x44 pt.** Space sets a button apart from nearby components and content, and makes it easy to select with any input, whether a fingertip or a pointer. (`buttons`)
 - **Use the system button styles to communicate a hierarchy of actions.** Each platform defines its own, and they allow customization while building in interaction states, accessibility support, and appearance adaptation. Toggles, pop-up buttons, and segmented controls are button-like components for specific uses. (`buttons`)
 - **Always include a press state in a custom button.** Without one, the button feels unresponsive and people wonder whether it accepted their input. (`buttons`)
 - **Use a prominent style for the most likely action, and keep to one or two prominent buttons per view.** The system puts the accent color behind a prominent button, colored buttons stand out most, and too many raise cognitive load as people weigh options. (`buttons`)
@@ -144,5 +144,5 @@ How people trigger actions and choose options. Apple's position: a button is ins
 - **(iOS, iPadOS) Use a familiar SF Symbol or interface icon for each quick action, never an emoji.** Emojis are full color, while quick action symbols are monochromatic and adapt to Dark Mode to keep their contrast. Draw a custom icon with the Quick Action Icon Template. (`home-screen-quick-actions`)
 - **(iOS, iPadOS) Change dynamic quick actions only in ways people can predict.** Updating them by location, recent activity, time of day, or settings keeps them relevant, as Messages lists recent conversations. (`home-screen-quick-actions`)
 
-## Key source pages
+## Key source articles
 `buttons` · `menus` · `context-menus` · `the-menu-bar` · `pull-down-buttons` · `pop-up-buttons` · `home-screen-quick-actions` · `dock-menus`

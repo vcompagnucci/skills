@@ -2,7 +2,7 @@
 
 How an app reaches people outside its own windows on iPhone, iPad, and Mac, from widgets, Live Activities, and notifications to Siri, App Clips, and Control Center. Apple's position: each surface is a glance or a quick action from the app's main purpose, always current, safe to show on a Lock Screen, and never a bare launcher, an ad, or an interruption people didn't ask for. (`widgets`, `live-activities`, `notifications`, `managing-notifications`)
 
-**Contents:** Choosing the surface · Widgets · Live Activities · Notifications · Controls · Siri, App Shortcuts, and snippets · Always On · App Clips · iMessage apps and stickers · Key source pages
+**Contents:** Choosing the surface · Widgets · Live Activities · Notifications · Controls · Siri, App Shortcuts, and snippets · Always On · App Clips · iMessage apps and stickers · Key source articles
 
 ## Choosing the surface
 
@@ -16,7 +16,7 @@ How an app reaches people outside its own windows on iPhone, iPad, and Mac, from
 - **Weigh each widget's size, context, and rendering mode, and consider a custom design per context rather than the defaults.** Widgets adapt to people's customization and to where they appear: the iPhone and iPad Home Screen and Lock Screen, and the Mac desktop and Notification Center. (`widgets`)
 - **System family widgets come in small, medium, large, and extra large, and can include interactive elements.** On iPhone, small, medium, and large go on the Home Screen and Today View, small also appears in StandBy, and extra large isn't supported. (`widgets`)
 - **(iPadOS, macOS) iPad and Mac support all four system family sizes.** iPad places them on the Home Screen and Today View, with small also on the Lock Screen, and Mac places them on the desktop and in Notification Center. (`widgets`)
-- **(iOS, iPadOS) Make a Lock Screen widget show useful information, not just another way to launch your app.** Accessory widgets there hold very little information and come in three shapes: inline text above the clock, and circular and rectangular shapes below it. (`widgets`)
+- **(iOS, iPadOS) Make a Lock Screen widget show useful information instead of acting as another way to launch your app.** Accessory widgets there hold very little information and come in three shapes: inline text above the clock, and circular and rectangular shapes below it. (`widgets`)
 - **(iOS, iPadOS) Design for the four Home Screen appearances people choose: light, dark, clear, and tinted.** Light and dark show your full-color design. Clear desaturates the widget and adds translucency, highlights, and Liquid Glass, and tinted desaturates it and applies the person's tint color. (`widgets`)
 - **Expect full-color rendering on the iPhone and iPad Home Screen and Today View, in iPhone StandBy, and on the Mac desktop and in Notification Center.** It doesn't change the color of your views, though StandBy removes the background. (`widgets`)
 - **Expect vibrant rendering on the iPhone and iPad Lock Screen, in iPhone StandBy in low light, and on the Mac desktop.** It desaturates text, images, and gauges and colors content for the Lock Screen or desktop background. People can tint the Lock Screen. (`widgets`)
@@ -44,7 +44,7 @@ How an app reaches people outside its own windows on iPhone, iPad, and Mac, from
 - **Use a custom font sparingly, and make sure it's easy to read at a glance.** It often works well for a widget's large text, with SF Pro for the smaller text. (`widgets`)
 - **Keep text at 11 pt or larger, and don't rasterize it.** Smaller text is too hard for many people to read, and real text elements and styles scale well and let VoiceOver speak your content. (`widgets`)
 - **(iOS, iPadOS) Choose fonts through SwiftUI so widget text supports Dynamic Type sizes from Large to AX5.** That works for the system font and for custom fonts. (`widgets`)
-- **Use color to enhance a widget without competing with its content.** Beautiful colors draw the eye but work best when people can still absorb the information at a glance. Your asset catalog can also set the colors of the widget's editing-mode interface. (`widgets`)
+- **Use color in a widget without letting it compete with the content.** Beautiful colors draw the eye but work best when people can still absorb the information at a glance. Your asset catalog can also set the colors of the widget's editing-mode interface. (`widgets`)
 - **Convey meaning without relying on specific colors.** Widgets can appear monochromatic, with or without a custom tint color, so express meaning with text and iconography as well as color. (`widgets`)
 - **Use full-color images judiciously, and consider reserving them for media content like album art.** Tinted and clear appearances desaturate images by default. Keeping full color draws special attention and can look out of place, so make such images smaller than the widget. (`widgets`)
 - **Support light and dark appearances in full-color rendering.** Prefer light backgrounds in the light appearance and dark ones in the dark, and consider semantic system colors for text and backgrounds so they adapt, or color variants in your asset catalog. (`widgets`)
@@ -59,7 +59,7 @@ How an app reaches people outside its own windows on iPhone, iPad, and Mac, from
 - **(iOS) Support the Always-On display on iPhone.** It renders Lock Screen widgets with reduced luminance, so use levels of gray that keep enough contrast and your content legible. (`widgets`)
 - **(iOS, iPadOS) Offer a Live Activity, not a widget, for real-time updates.** Widgets don't show real-time information, so a task or event people track for a limited time with frequent updates suits one. They share frameworks and design, so consider developing both in tandem. (`widgets`)
 - **(iOS) Expect StandBy to show two small widgets side by side, scaled up to fill the Lock Screen with their backgrounds removed.** In low light, the system renders them in a monochromatic look with a red tint. (`widgets`)
-- **(iOS) In StandBy, limit rich images and color for meaning, and use no background color.** Scale up and rearrange text so people can read the widget from a greater distance, and let it blend seamlessly with the black background. (`widgets`)
+- **(iOS) In StandBy, limit rich images and color for meaning, and use no background color.** Scale up and rearrange text so people can read the widget from a greater distance, and let it blend into the black background. (`widgets`)
 - **(iOS) Size iPhone system family widgets for screens from 320x568 pt to 430x932 pt.** Across that range, small grows from 141x141 to 170x170 pt, medium from 292x141 to 364x170 pt, and large from 292x311 to 364x382 pt. (`widgets`)
 - **(iOS) On iPhone, accessory widgets are smallest on a 375x667 pt screen and largest on 430x932 pt, and a 320x568 pt screen has none.** Circular runs from 68x68 to 76x76 pt, rectangular from 153x68 to 172x76 pt, and inline from 225x26 to 257x26 pt. (`widgets`)
 - **(iPadOS) iPadOS renders widgets at a canvas size, then scales them down to a device size.** On a 1024x1366 pt iPad, small goes from 170x170 to 160x160 pt and extra large from 795x378.5 to 748x356 pt, and on 768x1024 pt, small from 141x141 to 120x120 pt. (`widgets`)
@@ -72,7 +72,7 @@ How an app reaches people outside its own windows on iPhone, iPad, and Mac, from
 - **(iOS) Expect the compact presentation in the Dynamic Island when only one Live Activity is active.** It has a leading element and a trailing element on either side of the TrueDepth camera, and shows up-to-date information despite its limited space. (`live-activities`)
 - **(iOS) Expect the minimal presentation when several Live Activities are active.** The Dynamic Island shows two, one attached and one detached that appears circular or oval depending on its content size, and people tap either one to open its app. (`live-activities`)
 - **Give the Lock Screen presentation, a banner at the bottom of the Lock Screen, a layout similar to the expanded presentation.** On devices without the Dynamic Island, an alert briefly shows it as a banner over the Home Screen or other apps. (`live-activities`)
-- **(iOS) Expect StandBy to show your Live Activity in the minimal presentation, then the Lock Screen presentation scaled up 2x to fill the screen when tapped.** A custom Lock Screen background color extends across the whole screen for a seamless, full-screen design. (`live-activities`)
+- **(iOS) Expect StandBy to show your Live Activity in the minimal presentation, then the Lock Screen presentation scaled up 2x to fill the screen when tapped.** A custom Lock Screen background color extends across the whole screen, so the design fills it edge to edge. (`live-activities`)
 - **(macOS) Expect active Live Activities in the menu bar of a paired Mac, in the compact, minimal, and expanded presentations.** Clicking one launches iPhone Mirroring to display your app, and the Mac uses the iOS dimensions. (`live-activities`)
 - **Focus on the important information people need at a glance, not everything.** Prioritize what people find most useful and share it concisely. When people want more, they tap the Live Activity to open your app, where you can provide additional detail. (`live-activities`)
 - **Don't use a Live Activity to display ads or promotions.** It exists to keep people informed about ongoing events and tasks, so show only information related to them. (`live-activities`)
@@ -191,5 +191,5 @@ How an app reaches people outside its own windows on iPhone, iPad, and Mac, from
 - **Put the most-used items in the compact view, and allow text editing only in the expanded view.** The compact view takes about the keyboard's space below the transcript, so typing in the expanded view keeps the app visible. (`imessage-apps-and-stickers`)
 - **Give every sticker a localized description for VoiceOver, and keep each pack to one size and files to 500 KB or less.** Messages arranges small, regular, and large stickers in different grids. (`imessage-apps-and-stickers`)
 
-## Key source pages
+## Key source articles
 `widgets` · `live-activities` · `notifications` · `managing-notifications` · `controls` · `app-shortcuts` · `siri` · `snippets` · `always-on` · `app-clips` · `imessage-apps-and-stickers`

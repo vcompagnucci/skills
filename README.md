@@ -1,6 +1,6 @@
 # skills
 
-Skills for building, measuring and securing your own AI agent, starting from what Anthropic and OpenAI published, and one for designing iPhone, iPad and Mac apps with Apple's Human Interface Guidelines.
+Skills for building, measuring and securing your own AI agent, starting from what Anthropic and OpenAI published. One more covers designing iPhone, iPad and Mac apps with Apple's Human Interface Guidelines.
 
 I built them because models half-remember this stuff. Ask one how Anthropic handles prompt caching or how Codex decides approvals, and you get a confident blend of both with no source. These skills answer from the posts, docs, cookbooks, system cards and code themselves, and every claim cites the one it came from.
 
@@ -10,7 +10,7 @@ I built them because models half-remember this stuff. Ask one how Anthropic hand
 npx skills@latest add vcompagnucci/skills
 ```
 
-## Reference
+## Agents
 
 Two skills hold one vendor each:
 
@@ -27,10 +27,10 @@ Three skills cross sources, Anthropic and OpenAI first:
 
 ## Design
 
-- **[apple-hig](./apple-hig/SKILL.md).** Apple's Human Interface Guidelines for iPhone, iPad and Mac, from the 131 pages that apply to them. The interface pages (layout, navigation, presentation, controls, color, type, icons, accessibility, motion), widgets, notifications, Live Activities, privacy, accounts and AI hold every one of Apple's rules for those platforms, each cited to its page. Apple Watch, Apple TV and Vision Pro are left out, and so are 13 Apple technologies like CarPlay and HealthKit. A bundled script reads any page live from Apple's site, so the full tables and the newest wording are one command away. It isn't affiliated with Apple.
+- **[apple-hig](./apple-hig/SKILL.md).** Apple's Human Interface Guidelines for iPhone, iPad and Mac, from the 131 pages that apply to them. The HIG is too big to open by hand every time, so this keeps it where an agent reads it. Every interface rule for those platforms is in, and so is every rule for widgets, notifications, Live Activities, privacy, accounts and AI, each cited to its page. Apple Watch, Apple TV, Vision Pro and 13 technologies like CarPlay are left out. A script reads any page live from Apple's site when you need the full tables. It isn't affiliated with Apple.
 
 ## When sources disagree
 
-The newest source wins. In the three cross-source skills, when dates don't settle it, Anthropic and OpenAI win over everyone else, and a real tie between the two is reported both ways. The two vendor skills take their vendor's newest source and keep everyone else's apart. In all five agent skills, a source newer than the skill replaces its answer only if the agent can open it (a link, a file, or a page it found), so "I read that OpenAI changed this" gets checked before anything changes. apple-hig has one source, Apple's own pages: when a page changed after the skill was built, the live page wins.
+The newest source wins. In the three cross-source skills, when dates don't settle it, Anthropic and OpenAI win over everyone else, and a real tie between the two is reported both ways. The two vendor skills take their vendor's newest source and keep everyone else's apart. In all five agent skills, a source newer than the skill replaces its answer only if the agent can open it (a link, a file, or a page it found), so "I read that OpenAI changed this" gets checked before anything changes. For apple-hig the only source is Apple's own pages, and when a page changes after the skill was built, the live page wins.
 
 None of them is official. A job checks the agent skills' sources every two weeks and opens a pull request when something new shows up.

@@ -2,7 +2,7 @@
 
 How an app interrupts people, presents a focused task, and manages its windows. Apple's position: present modally only when it clearly helps, keep each modal task short with an obvious way out, show one sheet, popover, or alert at a time, and let people control windows, full screen, and switching away without losing their place. (`modality`, `sheets`, `alerts`, `windows`, `multitasking`)
 
-**Contents:** Choosing the presentation · Modality · Sheets · Alerts and action sheets · Popovers · Windows · Panels · Going full screen and multitasking · Key source pages
+**Contents:** Choosing the presentation · Modality · Sheets · Alerts and action sheets · Popovers · Windows · Panels · Going full screen and multitasking · Key source articles
 
 ## Choosing the presentation
 
@@ -120,5 +120,5 @@ How an app interrupts people, presents a focused task, and manages its windows. 
 - **(iOS, iPadOS) Expect people to keep a video or FaceTime call going in Picture in Picture while they use your app.** On iPad, people also view several apps' windows at once, and an app can have several windows open. (`multitasking`)
 - **(macOS) Don't pause video in one window when people turn to another.** People expect playback they start in one window to continue while they view or work in another. (`multitasking`)
 
-## Key source pages
+## Key source articles
 `sheets` · `alerts` · `modality` · `popovers` · `action-sheets` · `windows` · `multitasking` · `going-full-screen` · `panels`

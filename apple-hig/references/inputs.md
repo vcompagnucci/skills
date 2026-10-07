@@ -82,12 +82,12 @@ How people act on an app, from touch, keyboard, and pointer to Apple Pencil, gam
 
 ## Motion sensors and nearby interactions (`gyro-and-accelerometer`, `nearby-interactions`)
 
-- **Use motion data only for a tangible benefit, and explain why in your own permission copy.** A fitness app gives activity feedback and a game enhances play, but never gather data just to have it. (`gyro-and-accelerometer`)
+- **Use motion data only for a tangible benefit, and explain why in your own permission copy.** A fitness app gives activity feedback and a game uses motion for play, but never gather data just to have it. (`gyro-and-accelerometer`)
 - **Outside active gameplay, never manipulate the interface with the accelerometer or gyroscope.** Motion gestures are hard to repeat precisely, physically hard for some people, and can affect battery life. (`gyro-and-accelerometer`)
 - **Base a nearby interaction on the physical action, with continuous feedback that sharpens as people get closer.** Bringing iPhone near a HomePod mini to transfer a song feels natural, and finding an AirTag turns a directional arrow into a pulsing circle. (`nearby-interactions`)
 - **Never make a nearby interaction the only way to do a task, and mix visual, audible, and haptic feedback.** Not everyone can experience one. Visual feedback suits interaction with the screen, sound and haptics interaction with the surroundings. (`nearby-interactions`)
 - **Design for the sensor's directional field of view and for what blocks it.** Outside it a device reports distance but not direction, and people or objects in between reduce accuracy. (`nearby-interactions`)
 - **Encourage people to hold the device in portrait, with implicit visual feedback rather than explicit instructions.** Landscape can reduce the accuracy and availability of distance and direction information. (`nearby-interactions`)
 
-## Key source pages
+## Key source articles
 `gestures` · `keyboards` · `pointing-devices` · `focus-and-selection` · `apple-pencil-and-scribble` · `game-controls` · `action-button` · `camera-control` · `nearby-interactions` · `gyro-and-accelerometer`

@@ -22,7 +22,7 @@ The words, first-run experience, help, settings, and rating requests through whi
 - **Label the steps of a multistep flow consistently.** Start with "Get Started", move on with a label that hints at the next step or with "Continue" or "Next", whichever you choose throughout, and end with "Done". (`writing`)
 - **Use possessive pronouns sparingly, and never "we".** "Favorites" says the same as "Your Favorites" more succinctly, so keep any pronouns consistent. "We" leaves people unsure who is speaking: "Unable to load content" beats "We're having trouble loading this content." (`writing`)
 - **Write for how people use each device.** Keep language consistent across devices, but describe gestures correctly, saying "tap", not "click", on iPhone and iPad. iPhone invites personalization, but its small screen requires brevity. (`writing`)
-- **Give every empty state a clear next step.** A blank screen, like a finished to-do list, can welcome and teach, but it's daunting when the next action isn't obvious, so offer a button or link. Empty states are usually temporary, so never put crucial information there. (`writing`)
+- **Give every empty state a clear next step.** A blank screen, like a finished to-do list, can welcome and teach, but it's daunting when the next action isn't obvious, so offer a button or link. Empty states are usually temporary, so never put important information there. (`writing`)
 - **Show errors next to the problem, without blame, saying how to fix it.** "Choose a password with at least 8 characters" beats "That password is too short", and "oops!" sounds insincere. If language alone can't fix a common error, rethink the interaction. (`writing`)
 - **Choose the delivery method by the message's urgency and importance.** Consider where people will see it, whether it needs immediate action, and how much supporting information they need, then pick a notification, alert, or action sheet and a fitting tone. (`writing`)
 - **Label settings practically, and describe what a setting does when it's turned on.** People infer the opposite, so the explanation needn't say what happens when it's off. To send people to a setting, give a direct link or button rather than describing where it is. (`writing`)
@@ -77,5 +77,5 @@ The words, first-run experience, help, settings, and rating requests through whi
 - **Prefer the system-provided prompt in iOS, iPadOS, and macOS.** It's consistent and nonintrusive, appears only if people haven't already given feedback, and shows at most three times per app in 365 days. People can opt out for all apps. (`ratings-and-reviews`)
 - **Weigh resetting your summary rating with a new version.** A reset makes ratings reflect the current version, but fewer ratings overall can discourage some people from downloading the app. (`ratings-and-reviews`)
 
-## Key source pages
+## Key source articles
 `writing` · `onboarding` · `offering-help` · `settings` · `ratings-and-reviews`

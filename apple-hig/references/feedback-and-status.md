@@ -2,7 +2,7 @@
 
 How an app tells people what's happening, from status and progress to launch and charts. Apple's position: match the delivery to the information's significance, showing status in place and interrupting only for critical problems, and make waits feel short with immediate content and honest progress. A chart earns its place only by highlighting what people can learn, and every form of feedback must stay accessible. (`feedback`, `loading`, `progress-indicators`, `launching`, `charting-data`, `charts`)
 
-**Contents:** Choosing how to show status, waits, and data · Feedback · Loading · Progress indicators · Launching · Charts · Chart accessibility · Status bars · Gauges and rating indicators · Activity rings · Key source pages
+**Contents:** Choosing how to show status, waits, and data · Feedback · Loading · Progress indicators · Launching · Charts · Chart accessibility · Status bars · Gauges and rating indicators · Activity rings · Key source articles
 
 ## Choosing how to show status, waits, and data
 
@@ -116,5 +116,5 @@ How an app tells people what's happening, from status and progress to launch and
 - **(iOS, iPadOS) Never use Activity rings for decoration or branding.** They inform rather than embellish, so keep them out of labels, background graphics, your app icon, and marketing materials. (`activity-rings`)
 - **(iOS) Expect activity history to mix three-ring and Move-only displays.** With a paired Apple Watch iOS shows all three rings, and without one only the Move ring, estimated from steps and other apps' workouts. (`activity-rings`)
 
-## Key source pages
+## Key source articles
 `feedback` · `loading` · `progress-indicators` · `launching` · `charts` · `charting-data` · `status-bars` · `gauges` · `activity-rings` · `rating-indicators`

@@ -2,7 +2,7 @@
 
 How an app asks for data and permissions, and handles accounts and sign-in, on iPhone, iPad, and Mac. Apple's position: ask only for the data and sign-in a feature needs, when it needs them, through system flows and in plain words, and make leaving as easy as joining. (`privacy`, `managing-accounts`, `sign-in-with-apple`)
 
-**Contents:** Choosing sign-in · Privacy · Managing accounts · Sign in with Apple · ID Verifier · Key source pages
+**Contents:** Choosing sign-in · Privacy · Managing accounts · Sign in with Apple · ID Verifier · Key source articles
 
 ## Choosing sign-in
 
@@ -52,7 +52,7 @@ How an app asks for data and permissions, and handles accounts and sign-in, on i
 - **Always identify the authentication method you offer, and refer only to methods available in the current context.** Title a Face ID button "Sign In with Face ID", not "Sign In", and check the device's capabilities so you never mention Face ID on a device that doesn't offer it. (`managing-accounts`)
 - **Usually skip an in-app switch for turning on biometric authentication.** People already enable biometrics at the system level, so a second switch in the app is redundant and can confuse them. (`managing-accounts`)
 - **Don't call account authentication a "passcode".** People use a passcode to unlock the device and for Apple services, so the word suggests you want that same code in your app or game. (`managing-accounts`)
-- **If you help people create an account in your app or game, also help them delete it, not just deactivate it.** This holds even when they bought their subscription elsewhere, and if they created the account with Sign in with Apple, revoke its associated tokens when they delete it. (`managing-accounts`)
+- **If you help people create an account in your app or game, also help them delete it, rather than only deactivate it.** This holds even when they bought their subscription elsewhere, and if they created the account with Sign in with Apple, revoke its associated tokens when they delete it. (`managing-accounts`)
 - **Comply with your region's legal requirements for account deletion and the right to be forgotten.** If the law compels you to keep certain accounts or information, like digital health records, or to follow a specific deletion process, clearly describe the situation so people understand it. (`managing-accounts`)
 - **Provide a clear way to initiate account deletion within your app or game.** If people can't delete their account in the app, you must link directly to the webpage where they can, and make the link easy to discover, not buried in your Privacy Policy or Terms of Service. (`managing-accounts`)
 - **Provide a consistent account-deletion experience in your app or game and on your website.** Avoid making one version of the deletion flow longer or more complicated than the other. (`managing-accounts`)
@@ -112,5 +112,5 @@ How an app asks for data and permissions, and handles accounts and sign-in, on i
 - **(iOS) Start verification from a button labeled like Verify Age or Verify Identity, never with the Apple logo, and avoid NFC or QR code symbols.** Verify Age fits a simple age check, like at a concert hall, and Verify Identity a detailed match, like a name and birth date at a rental car pickup. (`id-verifier`)
 - **(iOS) In a Display Only request, help the person using your app give feedback on the visual confirmation they perform.** When the reader shows the customer's portrait, buttons like Matches Person and Doesn't Match Person let your app receive an approved or rejected value in the response. (`id-verifier`)
 
-## Key source pages
+## Key source articles
 `privacy` · `managing-accounts` · `sign-in-with-apple` · `id-verifier`

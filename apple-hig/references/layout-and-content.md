@@ -2,7 +2,7 @@
 
 How an app arranges its content and which view holds each kind. Apple's position: put the most important content first, make structure visible through alignment and grouping, adapt to the space actually available without changing what the app can do, and give each view one job (lists and tables for text, collections for images, a label or text view sized to the text). (`layout`, `lists-and-tables`, `collections`, `text-views`)
 
-**Contents:** Choosing the view · Layout · Lists and tables · Outline views and column views · Scroll views · Collections · Split views · Tab views · Labels and text views · Image views and web views · Disclosure controls and boxes · Key source pages
+**Contents:** Choosing the view · Layout · Lists and tables · Outline views and column views · Scroll views · Collections · Split views · Tab views · Labels and text views · Image views and web views · Disclosure controls and boxes · Key source articles
 
 ## Choosing the view
 
@@ -92,7 +92,7 @@ How an app arranges its content and which view holds each kind. Apple's position
 - **Use a split view to show several levels of hierarchy at once, often with a sidebar in the leading pane.** Selecting an item in the primary pane shows its contents in the secondary pane, and a tertiary pane can show more. Rarely, panes supplement the main view, like Keynote's navigator, notes, and inspector in macOS. (`split-views`)
 - **Keep the selection highlighted in every pane that leads to the detail view.** The highlight shows how the panes' contents relate and keeps people oriented. (`split-views`)
 - **Consider letting people drag content between panes.** A split view reaches several hierarchy levels, so dragging items to another pane is a convenient way to move content around the app. (`split-views`)
-- **(iOS) Prefer a split view in a regular environment, not a compact one.** Panes need horizontal space, and on iPhone in portrait they wrap or truncate content, making it less legible and harder to use. (`split-views`)
+- **(iOS) Prefer a split view in a regular environment, not a compact one.** Panes need horizontal space, and on iPhone in portrait they wrap or truncate content, and it gets harder to read and use. (`split-views`)
 - **(iPadOS) Design a split view for narrow, compact, and intermediate window widths.** iPad windows resize fluidly, so navigating between panes must stay logical at every width. A split view can have two vertical panes, like Mail, or three, like Keynote. (`split-views`)
 - **(macOS) Set minimum and maximum pane sizes that keep the divider visible.** People drag dividers to resize panes, which can sit vertically, horizontally, or both, and in a pane that's too small the divider seems to disappear. (`split-views`)
 - **(macOS) Prefer the thin divider, 1 pt wide.** It maximizes space for content while staying easy to use. Use a thicker one only for a specific need, like table rows with strong lines on both sides. (`split-views`)
@@ -116,7 +116,7 @@ How an app arranges its content and which view holds each kind. Apple's position
 - **Make useful text selectable.** People need to copy things like an error message, a location, a serial number, or an IP address to use elsewhere. (`labels`, `text-views`)
 - **Keep text views legible, adopting Dynamic Type and testing with accessibility options like bold text.** Use multiple fonts, colors, and alignments creatively only while the content stays readable, and Dynamic Type keeps text looking good when people change its size. (`text-views`)
 - **Let a text view be any height, scrolling when its content overflows.** By default its text aligns to the leading edge in the system label color. In iOS and iPadOS, an editable text view raises the keyboard when people select it. (`text-views`)
-- **(iOS, iPadOS) Show the keyboard type that fits a text view's content.** Each keyboard type facilitates a different kind of input, so the right one streamlines data entry. (`text-views`)
+- **(iOS, iPadOS) Show the keyboard type that fits a text view's content.** Each keyboard type suits a different kind of input, so the right one streamlines data entry. (`text-views`)
 
 ## Image views and web views (`image-views`, `web-views`)
 
@@ -140,5 +140,5 @@ How an app arranges its content and which view holds each kind. Apple's position
 - **Write a box title as a brief phrase in sentence-style capitalization, without ending punctuation.** The exception is a box in a settings pane, whose title ends with a colon. (`boxes`)
 - **Separate a box's contents with its default border or background color.** iOS and iPadOS use the secondary and tertiary background colors in boxes, and macOS shows a box's title above it. (`boxes`)
 
-## Key source pages
+## Key source articles
 `layout` · `lists-and-tables` · `scroll-views` · `split-views` · `collections` · `labels` · `text-views` · `image-views` · `disclosure-controls` · `outline-views` · `tab-views` · `boxes` · `column-views` · `web-views`

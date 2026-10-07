@@ -2,7 +2,7 @@
 
 How people enter text and set values. Apple's position: minimize typing by gathering data from the system and offering choices, match each field and keyboard to the content expected, and pick the control by the kind of value (a toggle for two opposing states, a segmented control for a few related choices, a slider for a range, a picker for longer ordered lists). (`entering-data`, `text-fields`, `toggles`, `segmented-controls`, `pickers`)
 
-**Contents:** Choosing the control · Text fields and entering data · Virtual keyboards · Toggles · Segmented controls · Pickers · Sliders and steppers · Combo boxes, token fields, color wells, and image wells · Key source pages
+**Contents:** Choosing the control · Text fields and entering data · Virtual keyboards · Toggles · Segmented controls · Pickers · Sliders and steppers · Combo boxes, token fields, color wells, and image wells · Key source articles
 
 ## Choosing the control
 
@@ -111,5 +111,5 @@ How people enter text and set values. Apple's position: minimize typing by gathe
 - **(macOS) Restore an image well's default image when people clear one that requires an image.** An image well is an editable image view: people select it to copy, paste, or delete its image, or drag a new image in without selecting it first. (`image-wells`)
 - **(macOS) If an image well supports copy and paste, make the standard Edit menu items available.** People expect to use those menu items, or the standard keyboard shortcuts, with an image well. (`image-wells`)
 
-## Key source pages
+## Key source articles
 `text-fields` · `entering-data` · `toggles` · `segmented-controls` · `pickers` · `sliders` · `virtual-keyboards` · `steppers` · `combo-boxes` · `token-fields` · `color-wells` · `image-wells`

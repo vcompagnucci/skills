@@ -27,7 +27,7 @@ How an app draws its interface icons and its app icon. Apple's position: an inte
 - **Pick a feedback animation by what happened.** Bounce: an action occurred or is needed. Scale: selection or feedback that persists until it changes. Replace: a state change, with Magic Replace between related symbols. Wiggle: a call to action people might overlook. (`sf-symbols`)
 - **Pick an activity animation by the kind of work.** Pulse and breathe: ongoing activity. Variable color: progress or activity like connecting. Rotate: a task in progress. Draw On and Draw Off: progress like a download, or direction. (`sf-symbols`)
 - **Choose a Replace configuration by the kind of state change.** Down-up signals a change in state, up-up adds forward progression, and off-up emphasizes the next available state or action. Magic Replace, the default, transitions related shapes and falls back to down-up between unrelated ones. (`sf-symbols`)
-- **Choose cumulative or iterative variable color animation.** Cumulative keeps each layer's color until the cycle completes, iterative colors one layer at a time, and closed-loop symbols, like a circular progress indicator, play back seamlessly. (`sf-symbols`)
+- **Choose cumulative or iterative variable color animation.** Cumulative keeps each layer's color until the cycle completes, iterative colors one layer at a time, and closed-loop symbols, like a circular progress indicator, loop without a visible break. (`sf-symbols`)
 - **Set how an animation plays: once from start to finish, or repeating until a condition is met.** You can also change its speed or reverse it before repeating. Animations work on every symbol, rendering mode, weight, and scale, and Appear and Disappear bring a symbol gradually in or out of view. (`sf-symbols`)
 - **Build a custom symbol from the exported template of a similar symbol.** Match the system set's level of detail, optical weight, alignment, position, and perspective, and keep it simple, recognizable, inclusive, and directly related to its action or content. (`sf-symbols`)
 - **Annotate each layer of a custom symbol with a color or a hierarchy level.** Annotation supports the rendering modes, and each instance of the symbol in the app can use a different mode. (`sf-symbols`)
@@ -86,5 +86,5 @@ How an app draws its interface icons and its app icon. Apple's position: an inte
 - **Derive the dark icon from the light one.** Use complementary colors that reflect the default design, avoid excessively bright images, and favor color backgrounds, which give the greatest contrast in dark icons. (`app-icons`)
 - **(iOS, iPadOS) Consider offering alternate app icons, each closely tied to your content.** People choose one in the app's settings, like a sports app's team icons. None should look like another app, and each needs its own dark, clear, and tinted variants and is subject to app review. (`app-icons`)
 
-## Key source pages
+## Key source articles
 `sf-symbols` · `icons` · `app-icons`

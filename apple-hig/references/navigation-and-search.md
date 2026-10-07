@@ -2,7 +2,7 @@
 
 How people move between an app's areas and find things in it. Apple's position: navigation stays visible, stable, and predictable, each component has one job (tab bars move between sections, toolbars hold actions for the current view, sidebars reach top-level areas when there's room), and search lives in one clear place with a visible scope. (`tab-bars`, `toolbars`, `sidebars`, `searching`)
 
-**Contents:** Choosing the component · Tab bars · Sidebars · Toolbars · Page controls and path controls · Search fields · Searching · Key source pages
+**Contents:** Choosing the component · Tab bars · Sidebars · Toolbars · Page controls and path controls · Search fields · Searching · Key source articles
 
 ## Choosing the component
 
@@ -122,5 +122,5 @@ How people move between an app's areas and find things in it. Apple's position: 
 - **Consider Spotlight for advanced file search within the app.** A button can start a Spotlight search based on the current selection, and a custom view can show the results or a filtered subset. (`searching`)
 - **Prefer the system open and save views, and provide Quick Look previews for custom file types.** The system views include a search field for the whole system, and a Quick Look generator lets Spotlight and other apps preview your documents. (`searching`)
 
-## Key source pages
+## Key source articles
 `toolbars` · `tab-bars` · `sidebars` · `search-fields` · `searching` · `page-controls` · `path-controls`

@@ -2,7 +2,7 @@
 
 How to design features built on generative AI and machine learning. Apple's position: use AI only where it adds clear value, keep people in control, say when AI is involved, and design for its mistakes, its latency, and models that change. (`generative-ai`, `machine-learning`)
 
-**Contents:** When to use AI · Generative AI · Machine learning · Key source pages
+**Contents:** When to use AI · Generative AI · Machine learning · Key source articles
 
 ## When to use AI
 
@@ -10,7 +10,7 @@ How to design features built on generative AI and machine learning. Apple's posi
 
 ## Generative AI (`generative-ai`)
 
-- **Offer generative features only when and where they provide clear, specific value, like time savings, better communication, or enhanced creativity.** Generative AI isn't the right solution for every situation. It can help people edit text, create stories and images, or interact with a game character through AI-generated dialog. (`generative-ai`)
+- **Offer generative features only when and where they provide clear, specific value, like time savings, better communication, or more creativity.** Generative AI isn't the right solution for every situation. It can help people edit text, create stories and images, or interact with a game character through AI-generated dialog. (`generative-ai`)
 - **Ensure a great experience even when generative features aren't available or people opt not to use them.** Where AI only complements the core, offer a non-AI fallback when possible, as people can use regular emoji instead of Genmoji, or read notifications without Apple Intelligence summaries. (`generative-ai`)
 - **Design your experience responsibly, considering its direct and indirect impacts on people, systems, and society.** Prototyping is easy but robustness is hard: the same input can produce very different outcomes, and you can't anticipate every request. Aim for experiences that are inclusive, designed with care, and protect privacy. (`generative-ai`)
 - **Keep people in control of decision making and the overall experience.** Honor requests that are in scope with a clear expected output, and handle sensitive content carefully. Let people dismiss new content they don't want, and revert or retry transformations or other actions they disagree with. (`generative-ai`)
@@ -88,7 +88,7 @@ How to design features built on generative AI and machine learning. Apple's posi
 - **Understand the significance of a mistake's consequences, and show empathy with corrective tools that match its seriousness.** Incorrect keyboard suggestions might annoy people, but a suggested travel route that makes them miss a flight is a serious inconvenience. (`machine-learning`)
 - **Make it easy for people to correct frequent or predictable mistakes.** Without an easy way to fix mistakes, people can lose trust in your app. (`machine-learning`)
 - **Continuously update the feature to reflect people's evolving interests and preferences, and to help avoid mistakes.** Use implicit feedback to discover changes in tastes and habits, and add domain-specific information, like current trends in popular entertainment. Ideally, people benefit from improvements without doing any work. (`machine-learning`)
-- **When possible, address mistakes without complicating the UI, weighing each pattern's effect on the UI against its risk of compounding the mistake.** Corrections and limitations tend to integrate seamlessly, but attributions are harder: an attribution that turns out to be wrong magnifies the original mistake. (`machine-learning`)
+- **When possible, address mistakes without complicating the UI, weighing each pattern's effect on the UI against its risk of compounding the mistake.** Corrections and limitations tend to fit into the UI easily, but attributions are harder: an attribution that turns out to be wrong magnifies the original mistake. (`machine-learning`)
 - **Be especially careful to avoid mistakes in proactive features.** People don't request a proactive feature, like a suggestion based on their behavior, so they have less patience with its mistakes, which can also make them feel they have less control. (`machine-learning`)
 - **As you reduce mistakes in one area, consider the effect on other areas and on overall accuracy.** Improving how an image-recognition app recognizes dogs might reduce its ability to recognize cats. Use people's preferences to choose what to work on, and expect mistakes to evolve with your models. (`machine-learning`)
 - **Give people familiar, easy ways to make corrections by showing the steps your app takes as it automates a task.** Photos highlights the controls it used to auto-crop a photo, so people aren't confused and can refine or undo the result with those same controls. (`machine-learning`)
@@ -127,5 +127,5 @@ How to design features built on generative AI and machine learning. Apple's posi
 - **Explain how limitations can cause unsatisfactory results, so the feature doesn't seem to work intermittently.** Ideally, the feature recognizes and describes the reasons for poor results so people can adjust their expectations, as Memoji says it doesn't work well in the dark with a "Low light" message. (`machine-learning`)
 - **Consider telling people when you resolve a limitation.** Frequent users learn to avoid interactions that fail because of a limitation, so a notice after an update lets them adjust their mental model and return to interactions they'd avoided. (`machine-learning`)
 
-## Key source pages
+## Key source articles
 `generative-ai` · `machine-learning`
