@@ -27,7 +27,7 @@ Three skills cross sources, Anthropic and OpenAI first:
 
 ## Design
 
-- **[apple-hig](./apple-hig/SKILL.md).** Apple's Human Interface Guidelines for iPhone, iPad and Mac, from the 131 pages that apply to them. The HIG is too big to open by hand every time, so this keeps it where an agent reads it. Every interface rule for those platforms is in, and so is every rule for widgets, notifications, Live Activities, privacy, accounts and AI, each cited to its page. Apple Watch, Apple TV, Vision Pro and 13 technologies like CarPlay are left out. A script reads any page live from Apple's site when you need the full tables. It isn't affiliated with Apple.
+- **[apple-hig](./apple-hig/SKILL.md).** Apple's Human Interface Guidelines on designing app interfaces for iPhone, iPad and Mac, from 119 of its pages. The HIG is too big to open by hand every time, so this keeps it where an agent reads it. Every interface rule for those platforms is in, and so is every rule for widgets, notifications, Live Activities, privacy, accounts and AI, each cited to its page. Apple Watch, Apple TV and Vision Pro are left out, and so are Apple's services like Apple Pay, integrations like Siri and App Clips, and 13 technologies like CarPlay. A script reads any page live from Apple's site when you need the full tables. It isn't affiliated with Apple.
 
 ## When sources disagree
 

@@ -1,17 +1,17 @@
 ---
 name: apple-hig
-description: The complete Apple Human Interface Guidelines for iPhone, iPad, and Mac, distilled from all 131 HIG pages that apply to them. Covers layout, navigation, modal views, controls, color and type, icons, accessibility, widgets and notifications, privacy, and AI features. Use when designing or reviewing UI for iOS, iPadOS, macOS, or Apple-style web, or for what Apple, the HIG, or the Human Interface Guidelines say.
+description: Apple's Human Interface Guidelines on designing app interfaces for iPhone, iPad, and Mac, distilled from 119 HIG pages. Covers layout, navigation, modal views, controls, color and type, icons, accessibility, widgets and notifications, privacy, and AI features. Use when designing or reviewing UI for iOS, iPadOS, macOS, or Apple-style web, or for what Apple, the HIG, or the Human Interface Guidelines say.
 ---
 
 # Apple Human Interface Guidelines
 
-This skill encodes the body of work published at [developer.apple.com/design/human-interface-guidelines](https://developer.apple.com/design/human-interface-guidelines/) by **Apple**, the design guidance for its own platforms. It is distilled from all 131 pages that apply to iPhone, iPad, and Mac, read on 2026-10-07, from the oldest change-log entry ("Action button", September 2022) through the newest ("Apple In-App Purchase", September 2026). Every claim cites its page by slug.
+This skill encodes the body of work published at [developer.apple.com/design/human-interface-guidelines](https://developer.apple.com/design/human-interface-guidelines/) by **Apple**, the design guidance for its own platforms. It is distilled from the 119 pages on designing app interfaces for iPhone, iPad, and Mac, read on 2026-10-07, from the oldest change-log entry ("Action button", September 2022) through the newest ("Designing for iPhone Duo", September 2026). Every claim cites its page by slug.
 
 ## What this is for
 
 Use this skill to answer questions the way the HIG would: which component fits a job, how to lay out a screen and move between its parts, how to present and dismiss things, how to use color, type, icons, and materials, how to make an interface accessible and word it, and how widgets, notifications, privacy prompts, and AI features should behave on iPhone, iPad, and Mac.
 
-When the user asks a broad question, answer from the **core philosophy** below plus the relevant reference file. When they ask about a specific page or term, open the matching reference file and cite the page by slug, e.g. (`buttons`) → `https://developer.apple.com/design/human-interface-guidelines/buttons`. `references/article-index.md` lists all 131 pages with one-line theses, and `references/glossary.md` defines every named concept.
+When the user asks a broad question, answer from the **core philosophy** below plus the relevant reference file. When they ask about a specific page or term, open the matching reference file and cite the page by slug, e.g. (`buttons`) → `https://developer.apple.com/design/human-interface-guidelines/buttons`. `references/article-index.md` lists all 119 pages with one-line theses, and `references/glossary.md` defines every named concept.
 
 **Before you finalize a specific component, or whenever an exact value or table matters, read the full page:** `python3 scripts/hig_page.py <slug>` (add `--section "Best practices"` for one section). The interface files, plus widgets, notifications, Live Activities, privacy, accounts, and AI, hold every Apple rule for these platforms. The other files keep the rules that change decisions. The page has every table and example, and it's always current.
 
@@ -50,7 +50,7 @@ Everything else is a corollary of this.
 8. **Design every state**, from loading and progress to empty and error, with feedback in proportion. (`feedback`, `loading`)
 9. **Check accessibility and inclusion**: sizes, contrast, VoiceOver, right-to-left, reduced motion. (`accessibility`, `right-to-left`)
 10. **Shape the first run** with an instant launch, optional onboarding, and permissions in context. (`launching`, `onboarding`, `privacy`)
-11. **Extend into the system** where it helps, with widgets, notifications, Live Activities, and shortcuts. (`widgets`, `notifications`)
+11. **Extend into the system** where it helps, with widgets, Live Activities, and notifications. (`widgets`, `live-activities`, `notifications`)
 12. **Test on real devices** at the largest and smallest sizes, text sizes, and localizations, then keep iterating. Shipping isn't the finish line. (`layout`, `design-principles`)
 
 ## Reference files
@@ -69,13 +69,12 @@ Everything else is a corollary of this.
 - **`accessibility-and-inclusion.md`**: accessibility, VoiceOver, inclusion, right to left.
 - **`motion-and-media.md`**: motion, haptics, audio, video, live-viewing apps, Live Photos, photo editing.
 - **`inputs.md`**: gestures, keyboards, pointing devices, Apple Pencil and Scribble, game controls, Action button, Camera Control, motion sensors, nearby interactions, focus.
-- **`system-experiences.md`**: widgets, Live Activities, notifications and their interruption levels, Control Center controls, Always On, App Shortcuts, Siri, snippets, App Clips, iMessage apps.
+- **`system-experiences.md`**: widgets, Live Activities, and notifications with their interruption levels.
 - **`privacy-and-accounts.md`**: asking for data and permissions, accounts, sign-in and deletion, Sign in with Apple, ID Verifier.
 - **`ai-and-machine-learning.md`**: generative AI and machine learning features, from control and disclosure to mistakes, feedback, latency, and privacy.
-- **`apple-services.md`**: Apple Pay, Wallet, In-App Purchase, iCloud, Maps.
 - **`numbers.md`**: the specs people reach for most on iPhone, iPad, and Mac (sizes, type, contrast, spacing, counts, timing, icon canvases), each with its page.
-- **`glossary.md`**: 503 named concepts, each with the pages that define it. Grep it instead of reading it whole.
-- **`article-index.md`**: all 131 pages by theme with slug, date, platforms, and a one-line thesis, plus the 27 left out. Grep it instead of reading it whole.
+- **`glossary.md`**: 441 named concepts, each with the pages that define it. Grep it instead of reading it whole.
+- **`article-index.md`**: all 119 pages by theme with slug, date, platforms, and a one-line thesis, plus the 39 left out. Grep it instead of reading it whole.
 
 ## How to answer
 
@@ -87,10 +86,10 @@ Everything else is a corollary of this.
 - **Every example, exception, number, and reason you attribute to Apple comes from a reference file or the page, never from memory.** The core above is a summary, so open the reference for details. If you add an inference of your own, such as why Apple might want this, label it as yours.
 - **For the web**, carry the principle over and say plainly when a rule depends on an Apple control or system feature the web doesn't have.
 - **A newer page wins.** If the live page differs from this skill, answer from the page and say what changed.
-- If the HIG doesn't cover the question, say so, and don't answer in Apple's voice from outside the HIG. For Apple Watch, Apple TV, Vision Pro, or a technology this skill leaves out, say so and open the page with the script.
+- If the HIG doesn't cover the question, say so, and don't answer in Apple's voice from outside the HIG. For a page this skill leaves out, like Apple Watch, Apple TV, Vision Pro, Apple Pay, In-App Purchase, Siri, or App Clips, say so, then read the page with the script and answer from it, never from memory.
 
 ## Scope
 
-This skill holds only what Apple published in the HIG, for iPhone, iPad, and Mac. It leaves out watchOS, tvOS, visionOS, and 13 Apple technologies, all listed at the end of the article index. It doesn't cover WWDC sessions, developer API documentation, the App Store Review Guidelines, or web implementation. The `apple-design` skill covers Apple's WWDC talks on fluid motion, translated for the web, while this one is the HIG. The user's own design decisions and a project's design system override this skill when they disagree.
+This skill holds only what Apple published in the HIG, for iPhone, iPad, and Mac. It leaves out watchOS, tvOS, and visionOS, 13 Apple technologies like CarPlay, Apple's services (Apple Pay, Wallet, In-App Purchase, iCloud, Maps), and system integrations (Siri, App Shortcuts, App Clips, Control Center controls, iMessage apps, Always On), all listed at the end of the article index. It doesn't cover WWDC sessions, developer API documentation, the App Store Review Guidelines, or web implementation. The `apple-design` skill covers Apple's WWDC talks on fluid motion, translated for the web, while this one is the HIG. The user's own design decisions and a project's design system override this skill when they disagree.
 
 It isn't affiliated with or endorsed by Apple, and the Human Interface Guidelines are © Apple Inc. Each rule links back to its page, and `scripts/hig_page.py` reads Apple's public pages without storing them.

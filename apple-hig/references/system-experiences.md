@@ -1,15 +1,12 @@
-# Widgets, notifications, and system experiences
+# Widgets, Live Activities, and notifications
 
-How an app reaches people outside its own windows on iPhone, iPad, and Mac, from widgets, Live Activities, and notifications to Siri, App Clips, and Control Center. Apple's position: each surface is a glance or a quick action from the app's main purpose, always current, safe to show on a Lock Screen, and never a bare launcher, an ad, or an interruption people didn't ask for. (`widgets`, `live-activities`, `notifications`, `managing-notifications`)
+How an app reaches people outside its own windows on iPhone, iPad, and Mac, through widgets, Live Activities, and notifications. Apple's position is that each surface is a glance or a quick action from the app's main purpose, always current, safe to show on a Lock Screen, and never a bare launcher, an ad, or an interruption people didn't ask for. (`widgets`, `live-activities`, `notifications`, `managing-notifications`)
 
-**Contents:** Choosing the surface · Widgets · Live Activities · Notifications · Controls · Siri, App Shortcuts, and snippets · Always On · App Clips · iMessage apps and stickers · Key source articles
+**Contents:** Choosing the surface · Widgets · Live Activities · Notifications · Key source articles
 
 ## Choosing the surface
 
 - **Use a widget for content that changes through the day, and a Live Activity for a task with a clear start and end.** Widgets never update in real time, so track a delivery or match of up to eight hours in a Live Activity. (`widgets`, `live-activities`)
-- **Answer an App Shortcut with a snippet for static information or options, and a Live Activity for information that changes over time.** The weather or an order confirmation suits a snippet, a timer or countdown a Live Activity. (`app-shortcuts`)
-- **Adopt app schemas for common kinds of functionality, and App Shortcuts for what schemas don't cover.** Schemas let Apple Intelligence and Siri surface common-domain features in context, while App Shortcuts cover unique features or custom content. (`app-shortcuts`, `siri`)
-- **Offer a control for an action that's most useful without launching your app.** Controls live in Control Center, on the Lock Screen, and on the Action button, and one can launch a Live Activity that reports progress. (`controls`)
 
 ## Widgets (`widgets`)
 
@@ -154,42 +151,5 @@ How an app reaches people outside its own windows on iPhone, iPad, and Mac, from
 - **Keep your badge up to date, updating it as soon as people open the corresponding notifications.** Otherwise people think new ones are waiting when they've seen them all. Reducing the count to zero also removes all related notifications from Notification Center. (`notifications`)
 - **Never rely on a badge alone for essential information, and don't mimic one with a custom image or component.** People can turn badges off, so they'd miss the message, and a look-alike frustrates those who turned them off. Surface important information as soon as your app opens. (`notifications`)
 
-## Controls (`controls`)
-
-- **Give a control a symbol that conveys its action alone, and a toggle one symbol per state.** The Lock Screen shows only the symbol, so a garage door control uses open and closed garage door symbols. (`controls`)
-- **Keep a control's state accurate, and animate its changes.** Update it when people interact, when an action completes, or by push. Animate a toggle between states, and a slow button until its action finishes. (`controls`)
-- **On a locked device, redact sensitive information and require authentication for actions that affect security.** People must unlock the device to unlock their house door or start their car. (`controls`)
-- **Ask for any configuration a control needs when people first add it, and give it a placeholder when its title or value varies.** A light control needs to know which light to switch, and a placeholder says what the control does. (`controls`)
-
-## Siri, App Shortcuts, and snippets (`siri`, `app-shortcuts`, `snippets`)
-
-- **Offer App Shortcuts for your most common and important tasks, up to 10 per app.** Tasks people finish without leaving their context work best, and occasional in-app tips make the shortcuts discoverable. (`app-shortcuts`)
-- **Write brief, memorable activation phrases that include your app name, with at most one optional parameter.** Keynote accepts "Create a Keynote" and "Add a new presentation in Keynote." Keep parameter values predictable, like "Start [morning, daily, sleep] meditation," because people can't see the options. (`app-shortcuts`)
-- **Put all critical information in the full dialogue text, and make every response work spoken alone.** People also hear responses on AirPods and HomePod, and a request can start on one device and finish on another, so avoid device-specific wording. (`app-shortcuts`, `siri`)
-- **Expose your most popular actions first, named in words people already use.** Call an audio file a track, song, or podcast, whichever people recognize, and give Spotlight content from their personal context, like favorites. (`siri`)
-- **Prefer built-in responses, and make custom dialogue specific and succinct, without your app name.** "Which soup?" beats "Which one?" People hear responses many times, so skip filler and humor, and the system already attributes your app. (`siri`)
-- **Never put ads, marketing, or purchase pitches in content Siri delivers, and never impersonate Siri.** Don't reproduce its functionality, make a response seem to come from Apple, or use reserved phrases like "Call 911" or "Hey Siri". (`siri`)
-- **Use a confirmation snippet when people must confirm or cancel, and a result snippet when nothing more is needed.** Label the primary button with the action, like "Order" for a coffee order instead of "OK", since the default is "Continue." (`snippets`)
-- **Keep a snippet's custom view no taller than 400 pt, and let it carry the purpose instead of repeating the dialogue.** Snippets are for quick interactions, so deep-link to your app for more detail. (`snippets`)
-
-## Always On (`always-on`)
-
-- **In Always On, redact sensitive information and dim everything nonessential.** Casual observers can see a bank balance or health data on the Lock Screen or in a notification, so keep only what matters legible, as a to-do app dims each item's details. (`always-on`)
-- **In Always On, keep the layout stable and updates rare and subtle, and ease motion to rest.** Make an interactive component look unavailable instead of removing it, and finish motion smoothly so people don't think something broke. (`always-on`)
-
-## App Clips (`app-clips`)
-
-- **Let people finish the whole task inside the App Clip, the moment it opens.** Include every asset, skip the splash screen and tab bars, land on the most relevant part, and keep it small so it launches fast. (`app-clips`)
-- **Give an App Clip real, native value: no ads, no marketing-only clip, and no web views.** Don't require an account before people benefit, and use Apple Pay and Sign in with Apple to spare them typing. (`app-clips`)
-- **Suggest the full app politely after a task or at a natural pause, never mid-task, repeatedly, or by notification.** The App Clip card and banner already link to the App Store, and the installed app must not make people log in again. (`app-clips`)
-- **Send App Clip notifications only to help finish the task.** App Clips can notify for up to 8 hours after launch, and must explicitly request permission only if the task spans more than a day, like returning a rented car. (`app-clips`)
-- **Always use the generated App Clip Code, unmodified, and size it for the distance.** Filters, glows, or rotation hurt scanning. Print it at least 3/4 inch across, and keep the scanning distance within 20 times its size. (`app-clips`)
-
-## iMessage apps and stickers (`imessage-apps-and-stickers`)
-
-- **Offer one primary experience per iMessage app, easy to grasp mid-conversation.** Give each distinct function or content collection its own app, and consider shareable content or simple shared decisions, like where to eat. (`imessage-apps-and-stickers`)
-- **Put the most-used items in the compact view, and allow text editing only in the expanded view.** The compact view takes about the keyboard's space below the transcript, so typing in the expanded view keeps the app visible. (`imessage-apps-and-stickers`)
-- **Give every sticker a localized description for VoiceOver, and keep each pack to one size and files to 500 KB or less.** Messages arranges small, regular, and large stickers in different grids. (`imessage-apps-and-stickers`)
-
 ## Key source articles
-`widgets` · `live-activities` · `notifications` · `managing-notifications` · `controls` · `app-shortcuts` · `siri` · `snippets` · `always-on` · `app-clips` · `imessage-apps-and-stickers`
+`widgets` · `live-activities` · `notifications` · `managing-notifications`

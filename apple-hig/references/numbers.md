@@ -69,7 +69,7 @@ Sources: sizes (`accessibility`, `typography`, `designing-for-games`), icon canv
 - **Menus:** a pull-down menu needs at least three items; context-menu submenus go one level deep, with about three separator groups at most. (`pull-down-buttons`, `context-menus`)
 - **Page control:** about 10 dots at most. (`page-controls`)
 - **Sidebar:** two levels of hierarchy at most. Disclosure buttons: one per view. (`sidebars`, `disclosure-controls`)
-- **Shortcuts:** four Home Screen quick actions at most; up to 10 App Shortcuts per app. (`home-screen-quick-actions`, `app-shortcuts`)
+- **Home Screen quick actions:** four at most. (`home-screen-quick-actions`)
 - **Notifications:** up to four action buttons. (`notifications`)
 - **Help:** tooltips of 60 to 75 characters at most; tips of one or two sentences, about one every 24 hours when there are several. (`offering-help`)
 - **Rating prompts:** the system shows at most three per app in 365 days; wait at least a week or two between requests. (`ratings-and-reviews`)
@@ -90,7 +90,6 @@ Sources: sizes (`accessibility`, `typography`, `designing-for-games`), icon canv
 - **macOS document icons:** shown as small as 16x16 px, with background fills at 512, 256, 128, 32, and 16 px @1x. (`icons`)
 - **SF Symbols:** 9 weights matching San Francisco, 3 scales, 4 rendering modes (monochrome, hierarchical, palette, multicolor). (`sf-symbols`)
 - **Share sheet activity icon:** centered in an area of about 70x70 px. (`activity-views`)
-- **Apple Pay buttons:** at least 100x30 pt (140x30 pt for titled variants like Buy or Check Out), with margins of at least 1/10 of the button's height. (`apple-pay`)
 
 ## Key source articles
 `accessibility` · `typography` · `buttons` · `layout` · `color` · `app-icons` · `widgets` · `live-activities` · `toolbars` · `alerts`
