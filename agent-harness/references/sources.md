@@ -4,7 +4,7 @@ Checked on 2026-10-01; the deep pass of 2026-10-05 is in sources-deep-pass.md.
 
 ## Anthropic and OpenAI
 
-Most rules come from the harness, architecture, context, and tool files of the claude-agents (124 sources, commit `95acdd1`) and openai-agents (130 sources, commit `6ab9dc2`) skills in this repo. Their `references/article-index.md` lists each source with its link and date. The main ones:
+Most rules come from Anthropic's and OpenAI's own posts, docs, cookbooks and code: 124 Anthropic and 130 OpenAI sources, read up to September 2026. The main ones:
 
 - Anthropic: [Building effective agents](https://www.anthropic.com/engineering/building-effective-agents) (2024-12-19), [Effective context engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) (2025-09-29), [Writing tools for agents](https://www.anthropic.com/engineering/writing-tools-for-agents) (2025-09-11), [Managed Agents](https://www.anthropic.com/engineering/managed-agents) (2026-04-08), [When to use multi-agent systems](https://claude.com/blog/building-multi-agent-systems-when-and-how-to-use-them) (2026-01-23), the hosting, compaction, memory, and prompt-versioning cookbooks, [Sonnet 5.5](https://claude.dev/blog/building-with-claude-sonnet-5-5/) (2026-09-28), and [Agents you can coach](https://claude.com/blog/agents-you-can-coach-how-asana-builds-human-agent-teams-with-claude) from Asana (2026-09-29).
 - OpenAI: [A practical guide to building agents](https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf) (2025-04-17), [Unrolling the Codex agent loop](https://openai.com/index/unrolling-the-codex-agent-loop) (2026-01-23), [Harness engineering](https://openai.com/index/harness-engineering) (2026-02-11), the Agents SDK docs on running agents, handoffs, tools, sessions, and human-in-the-loop, the Agents API docs (2026-09-10), and the Codex repo's protocol, goal, context, memory, and tool specs (snapshot 2026-09-29).
@@ -15,7 +15,7 @@ Most rules come from the harness, architecture, context, and tool files of the c
 - OpenAI: Agents API [functions](https://developers.openai.com/api/docs/guides/agents-api/tools/functions), [sessions](https://developers.openai.com/api/docs/guides/agents-api/sessions), and [multi-agent](https://developers.openai.com/api/docs/guides/agents-api/multi-agent) (2026-09-10), [openai-agents-python #5240](https://github.com/openai/openai-agents-python/pull/5240) (2026-09-29, sibling results on resume), and Codex PRs [#49441](https://github.com/openai/codex/pull/49441) and [#49880](https://github.com/openai/codex/pull/49880) (2026-09-30 and 10-01, terminal errors, turn-scoped approvals).
 
 - Cost and caching: Anthropic's prompt-caching posts and cookbooks (static first, compaction that keeps the cache) and OpenAI's spend-controller cookbook (per-run budgets), both in the sibling skills.
-- OpenAI tooling change used in build-or-buy.md: the visual workflow builder winds down by 2026-11-30 (`agentkit` in openai-agents, [deprecations](https://developers.openai.com/api/docs/deprecations)).
+- OpenAI tooling change used in build-or-buy.md: the visual workflow builder winds down by 2026-11-30 ([deprecations](https://developers.openai.com/api/docs/deprecations)).
 
 ## Corrected and added on 2026-10-05
 
@@ -52,7 +52,7 @@ Most rules come from the harness, architecture, context, and tool files of the c
 
 ## Resolved conflicts
 
-- **Changing tools mid-conversation.** The claude-agents skill says tools are part of the cache prefix and must not change mid-session. Anthropic's 2026-09-22 docs allow it on Claude 5.x through a system message. Newest wins for those models; the old rule still holds elsewhere.
+- **Changing tools mid-conversation.** Anthropic's earlier guidance says tools are part of the cache prefix and must not change mid-session. Anthropic's 2026-09-22 docs allow it on Claude 5.x through a system message. Newest wins for those models; the old rule still holds elsewhere.
 - **Multi-agent.** Cognition's "Don't build multi-agents" (2025-06-12) is superseded by its 2026-04-22 post, which allows advisor agents but keeps one writer, in line with Anthropic and OpenAI.
 - **Own harness or hosted.** Ronacher's "build your own abstraction" (2025-11), Anthropic's "use the API directly" (2024-12), and OpenAI's list of tradeoffs (2026-04-15) are older than Anthropic's case for hosted harnesses (2026-06-10) and OpenAI's own hosted Agents API (2026-09-10), whose [guide](https://developers.openai.com/api/docs/guides/agents) presents the SDK beside it for agents whose deployment, storage, and approvals stay in your application. Newest wins: hosted by default, unless data or the loop must stay inside your perimeter.
 - **Reasoning across turns.** Ronacher halved tool-schema failures by stripping thinking blocks (2026-07-04). OpenAI's ARC-AGI-3 result for keeping reasoning (2026-07-29) is newer and matches Anthropic's append-only history, so the skill keeps reasoning.
