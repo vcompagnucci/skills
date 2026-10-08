@@ -1,6 +1,6 @@
 # skills
 
-Skills for building, measuring and securing AI agents, plus one for Apple's design guidelines. Models half-remember this stuff, so these answer from the sources themselves and cite each one.
+Skills I build to get more out of my own work, from building AI agents to designing apps. Models half-remember the details, so each skill holds what the sources actually say and cites every claim.
 
 ## Install
 
