@@ -18,7 +18,7 @@ npx skills@latest add vcompagnucci/skills
 
 ## Design
 
-- **[apple-hig](./apple-hig/SKILL.md).** Apple's Human Interface Guidelines for iPhone, iPad and Mac apps. 119 pages. Not affiliated with Apple.
+- **[apple-hig](./apple-hig/SKILL.md).** Apple's Human Interface Guidelines for iPhone, iPad and Mac apps. 119 pages.
 
 ## Sources
 
