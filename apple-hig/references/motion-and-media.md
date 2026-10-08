@@ -1,6 +1,6 @@
 # Motion, sound, haptics, and media
 
-How an app moves, sounds, and feels, and how it plays photos, video, and live TV. Apple's position: motion, sound, and haptics earn their place only when they carry meaning, stay brief and consistent with their cause, can be turned off, and never carry important information alone, while playback defers to the content and to the controls people already use. (`motion`, `playing-haptics`, `playing-audio`, `playing-video`)
+How an app moves, sounds, and feels, and how it plays photos, video, and live TV. For Apple, motion, sound, and haptics earn their place only when they carry meaning, stay brief and consistent with their cause, can be turned off, and never carry important information alone, while playback defers to the content and to the controls people already use. (`motion`, `playing-haptics`, `playing-audio`, `playing-video`)
 
 ## Choosing the feedback channel
 

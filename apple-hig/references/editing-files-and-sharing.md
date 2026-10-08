@@ -1,6 +1,6 @@
 # Editing, files, and sharing
 
-How people change content, move it, keep it, and send it elsewhere. Apple's position: build on the system edit menu, undo, drag and drop, file browsers, and share sheet people already know, make every change predictable and reversible instead of asking for confirmation, save work automatically, and offer only the actions that apply in the current context. (`edit-menus`, `undo-and-redo`, `drag-and-drop`, `file-management`, `activity-views`)
+How people change content, move it, keep it, and send it elsewhere. Apple says to build on the system edit menu, undo, drag and drop, file browsers, and share sheet people already know, make every change predictable and reversible instead of asking for confirmation, save work automatically, and offer only the actions that apply in the current context. (`edit-menus`, `undo-and-redo`, `drag-and-drop`, `file-management`, `activity-views`)
 
 **Contents:** Undo and redo · Edit menus · Drag and drop · Collaboration and sharing · Activity views and extensions · File management · Printing · Key source articles
 

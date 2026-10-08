@@ -1,6 +1,6 @@
 # Widgets, Live Activities, and notifications
 
-How an app reaches people outside its own windows on iPhone, iPad, and Mac, through widgets, Live Activities, and notifications. Apple's position is that each surface is a glance or a quick action from the app's main purpose, always current, safe to show on a Lock Screen, and never a bare launcher, an ad, or an interruption people didn't ask for. (`widgets`, `live-activities`, `notifications`, `managing-notifications`)
+How an app reaches people outside its own windows on iPhone, iPad, and Mac, through widgets, Live Activities, and notifications. For Apple, each surface is a glance or a quick action from the app's main purpose, always current, safe to show on a Lock Screen, and never a bare launcher, an ad, or an interruption people didn't ask for. (`widgets`, `live-activities`, `notifications`, `managing-notifications`)
 
 **Contents:** Choosing the surface · Widgets · Live Activities · Notifications · Key source articles
 

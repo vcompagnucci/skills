@@ -1,6 +1,6 @@
 # Icons and symbols
 
-How an app draws its interface icons and its app icon. Apple's position: an interface icon is a simple, familiar metaphor that matches adjacent text, ideally an SF Symbol whose rendering, variant, and animation each carry meaning. The app icon expresses one concept in layers that the system masks, lights, and adapts to every appearance. (`icons`, `sf-symbols`, `app-icons`)
+How an app draws its interface icons and its app icon. For Apple, an interface icon is a simple, familiar metaphor that matches adjacent text, ideally an SF Symbol whose rendering, variant, and animation each carry meaning. The app icon expresses one concept in layers that the system masks, lights, and adapts to every appearance. (`icons`, `sf-symbols`, `app-icons`)
 
 ## Choosing symbols, custom icons, and variants
 
@@ -8,7 +8,7 @@ How an app draws its interface icons and its app icon. Apple's position: an inte
 - **Keep an interface icon, or glyph, to streamlined shapes and touches of color, and save rich detail for the app icon.** An interface icon communicates one straightforward idea, while an app icon can use shading, texture, and highlights to evoke personality. Both icons and symbols draw shapes in black and clear, so the system can recolor them. (`icons`)
 - **Use the standard symbol for a common action in menus, toolbars, and buttons.** People then recognize Share (square with up arrow), Delete (trash can), More (ellipsis), Done (checkmark), and Close (X) everywhere. The full mapping is under Interface icons. (`icons`)
 - **Make a custom interface icon a vector (PDF or SVG), or a custom SF Symbol.** The system scales vectors for high-resolution displays, while PNG doesn't scale and needs multiple versions. A custom symbol can take a scale that matches adjacent text. (`icons`)
-- **Never use SF Symbols, or look-alikes, in app icons, logos, or other trademarked uses.** The terms prohibit it. Never replicate or customize the symbols for Apple products, which are copyrighted: the SF Symbols app marks noncustomizable symbols with an Info icon. (`sf-symbols`)
+- **Never use SF Symbols, or look-alikes, in app icons, logos, or other trademarked uses.** The terms prohibit it. Never replicate or customize the symbols for Apple products, which are copyrighted. The SF Symbols app marks noncustomizable symbols with an Info icon. (`sf-symbols`)
 - **Variable color to show change, the hierarchical rendering mode to show depth.** Variable color fills layers as a value crosses thresholds from 0 to 100%, like the three-wave speaker showing three sound ranges plus silence. Unchanging layers, like the speaker, opt out. (`sf-symbols`)
 - **Pick the design variant by state and context.** A slash shows something is unavailable and fill shows selection. Outline suits toolbars, lists, and symbols beside text, fill adds emphasis in iOS tab bars and swipe actions, and enclosures help at small sizes. (`sf-symbols`)
 

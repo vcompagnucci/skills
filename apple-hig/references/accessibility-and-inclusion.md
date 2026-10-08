@@ -1,6 +1,6 @@
 # Accessibility and inclusion
 
-How to make an app work for everyone, whatever their abilities, language, culture, or reading direction. Apple's position: an accessible interface is intuitive, perceivable, and adaptable, so text enlarges, contrast holds, nothing depends on color or sound alone, every gesture has an alternative, and system settings like Reduce Motion are respected. And an inoffensive app isn't necessarily an inclusive one. (`accessibility`, `inclusion`)
+How to make an app work for everyone, whatever their abilities, language, culture, or reading direction. For Apple, an accessible interface is intuitive, perceivable, and adaptable, so text enlarges, contrast holds, nothing depends on color or sound alone, every gesture has an alternative, and system settings like Reduce Motion are respected. And an inoffensive app isn't necessarily an inclusive one. (`accessibility`, `inclusion`)
 
 ## Accessibility (`accessibility`)
 

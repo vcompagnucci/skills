@@ -1,6 +1,6 @@
 # Privacy and accounts
 
-How an app asks for data and permissions, and handles accounts and sign-in, on iPhone, iPad, and Mac. Apple's position: ask only for the data and sign-in a feature needs, when it needs them, through system flows and in plain words, and make leaving as easy as joining. (`privacy`, `managing-accounts`, `sign-in-with-apple`)
+How an app asks for data and permissions, and handles accounts and sign-in, on iPhone, iPad, and Mac. Apple says to ask only for the data and sign-in a feature needs, when it needs them, through system flows and in plain words, and make leaving as easy as joining. (`privacy`, `managing-accounts`, `sign-in-with-apple`)
 
 **Contents:** Choosing sign-in · Privacy · Managing accounts · Sign in with Apple · ID Verifier · Key source articles
 
@@ -48,7 +48,7 @@ How an app asks for data and permissions, and handles accounts and sign-in, on i
 - **Require an account only when core functionality depends on it.** Otherwise people should be able to use the app or game without one. When an account is required, consider Sign in with Apple: one trusted sign-in, and no extra credentials to remember. (`managing-accounts`)
 - **Ask people to sign in only in exchange for value, and explain the benefits of an account and how to sign up.** In your sign-in view, give a brief, friendly description of why you need an account and its benefits, like personalization, more features, or synced data. (`managing-accounts`, `sign-in-with-apple`)
 - **Delay sign-in for as long as possible.** People often abandon apps that force sign-in before anything useful, so let them get a sense of the app first, as a shopping app lets people browse until they're ready to buy and a live-streaming app lets them explore content before streaming. (`managing-accounts`, `sign-in-with-apple`)
-- **If you don't use Sign in with Apple, prefer a passkey.** Passkeys simplify account creation and authentication without passwords: people simply provide their user name to create an account or sign in. If you must keep passwords, require two-factor authentication. (`managing-accounts`)
+- **If you don't use Sign in with Apple, prefer a passkey.** Passkeys simplify account creation and authentication without passwords, since people provide only their user name to create an account or sign in. If you must keep passwords, require two-factor authentication. (`managing-accounts`)
 - **Always identify the authentication method you offer, and refer only to methods available in the current context.** Title a Face ID button "Sign In with Face ID", not "Sign In", and check the device's capabilities so you never mention Face ID on a device that doesn't offer it. (`managing-accounts`)
 - **Usually skip an in-app switch for turning on biometric authentication.** People already enable biometrics at the system level, so a second switch in the app is redundant and can confuse them. (`managing-accounts`)
 - **Don't call account authentication a "passcode".** People use a passcode to unlock the device and for Apple services, so the word suggests you want that same code in your app or game. (`managing-accounts`)

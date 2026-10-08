@@ -1,6 +1,6 @@
 # Navigation and search
 
-How people move between an app's areas and find things in it. Apple's position: navigation stays visible, stable, and predictable, each component has one job (tab bars move between sections, toolbars hold actions for the current view, sidebars reach top-level areas when there's room), and search lives in one clear place with a visible scope. (`tab-bars`, `toolbars`, `sidebars`, `searching`)
+How people move between an app's areas and find things in it. For Apple, navigation stays visible, stable, and predictable, each component has one job (tab bars move between sections, toolbars hold actions for the current view, sidebars reach top-level areas when there's room), and search lives in one clear place with a visible scope. (`tab-bars`, `toolbars`, `sidebars`, `searching`)
 
 **Contents:** Choosing the component · Tab bars · Sidebars · Toolbars · Page controls and path controls · Search fields · Searching · Key source articles
 

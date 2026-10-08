@@ -1,6 +1,6 @@
 # Color, type, materials, and images
 
-How an app uses color, type, materials, and artwork. Apple's position: color is sparing, consistent, never the only carrier of meaning, and works in light, dark, and increased contrast. Type favors legibility and scales with Dynamic Type, Liquid Glass is a layer for controls and never for content, and the brand defers to content. (`color`, `dark-mode`, `typography`, `materials`, `images`, `branding`)
+How an app uses color, type, materials, and artwork. For Apple, color is sparing, consistent, never the only carrier of meaning, and works in light, dark, and increased contrast. Type favors legibility and scales with Dynamic Type, Liquid Glass is a layer for controls and never for content, and the brand defers to content. (`color`, `dark-mode`, `typography`, `materials`, `images`, `branding`)
 
 ## Choosing materials, accent color, and fonts
 
@@ -50,7 +50,7 @@ How an app uses color, type, materials, and artwork. Apple's position: color is 
 - **Restructure the layout at large text sizes.** When glyphs, timestamps, and container edges crowd inline text, stack the text above secondary items, and use fewer columns. (`typography`)
 - **Minimize truncation as text grows.** Show as much useful text at the largest accessibility size as at the largest standard size. Let labels wrap as needed, and truncate scrollable text only if people can open the rest. (`typography`)
 - **Scale meaningful icons along with the text.** Icons that carry important information must stay easy to see at large sizes, and SF Symbols scale with Dynamic Type automatically. (`typography`)
-- **(macOS) Match standard controls with the dynamic system font variants, since macOS has no Dynamic Type.** Variants cover control content, labels, menus, the menu bar, messages, palettes, titles, tooltips, and document text, giving text the look of system controls. (`typography`)
+- **(macOS) Match standard controls with the dynamic system font variants, since macOS has no Dynamic Type.** Variants cover control content, labels, menus, the menu bar, messages, palettes, titles, tooltips, and document text, so text looks consistent with other apps on the platform. (`typography`)
 
 ## Dark Mode (`dark-mode`)
 

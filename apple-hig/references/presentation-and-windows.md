@@ -1,6 +1,6 @@
 # Presentation, modality, and windows
 
-How an app interrupts people, presents a focused task, and manages its windows. Apple's position: present modally only when it clearly helps, keep each modal task short with an obvious way out, show one sheet, popover, or alert at a time, and let people control windows, full screen, and switching away without losing their place. (`modality`, `sheets`, `alerts`, `windows`, `multitasking`)
+How an app interrupts people, presents a focused task, and manages its windows. Apple says to present modally only when it clearly helps, keep each modal task short with an obvious way out, show one sheet, popover, or alert at a time, and let people control windows, full screen, and switching away without losing their place. (`modality`, `sheets`, `alerts`, `windows`, `multitasking`)
 
 **Contents:** Choosing the presentation · Modality · Sheets · Alerts and action sheets · Popovers · Windows · Panels · Going full screen and multitasking · Key source articles
 
@@ -38,7 +38,7 @@ How an app interrupts people, presents a focused task, and manages its windows. 
 - **(iOS, iPadOS) Support swiping down to dismiss a sheet.** People expect it instead of tapping a dismiss button. If they start swiping away unsaved changes, let them confirm with an action sheet. (`sheets`)
 - **(iPadOS) Prefer the page or form sheet presentation styles.** Each uses a default size and centers the sheet's content over a dimmed background, giving a consistent experience. (`sheets`)
 - **(macOS) Present a sheet at a reasonable default size, and support resizing when people need a clearer view.** People don't generally expect to resize sheets, so the default size must suit the content. (`sheets`)
-- **(macOS) Let people use other app windows without first dismissing a sheet.** A macOS sheet is always modal: a cardlike view that floats on its parent window and dims it. Opening one brings the parent window, and a document's panels, to the front. (`sheets`)
+- **(macOS) Let people use other app windows without first dismissing a sheet.** A macOS sheet is always modal, a cardlike view that floats on its parent window and dims it. Opening one brings the parent window, and a document's panels, to the front. (`sheets`)
 - **(macOS) Use a panel instead of a sheet when people repeatedly provide input and observe results.** A find and replace panel lets people run replacements one at a time and check each result. (`sheets`)
 
 ## Alerts and action sheets (`alerts`, `action-sheets`)

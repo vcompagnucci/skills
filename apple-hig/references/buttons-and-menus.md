@@ -1,6 +1,6 @@
 # Buttons and menus
 
-How people trigger actions and choose options. Apple's position: a button is instantly recognizable and easy to hit, with one prominent style for the likeliest action and never a destructive default, and menus stay familiar, short, and predictable, with every command also reachable somewhere visible (the main interface, or the menu bar on a Mac). (`buttons`, `menus`, `context-menus`, `the-menu-bar`)
+How people trigger actions and choose options. For Apple, a button is instantly recognizable and easy to hit, with one prominent style for the likeliest action and never a destructive default, and menus stay familiar, short, and predictable, with every command also reachable somewhere visible (the main interface, or the menu bar on a Mac). (`buttons`, `menus`, `context-menus`, `the-menu-bar`)
 
 **Contents:** Choosing the control · Buttons · Menus · Context menus · Pop-up and pull-down buttons · The menu bar · Dock menus and Home Screen quick actions · Key source articles
 

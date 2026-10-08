@@ -1,6 +1,6 @@
 # Principles and platforms
 
-Apple's eight design principles, and what iPhone, iPad, Mac, games, and Mac Catalyst ask of a design. Apple's position: the principles are tools for weighing competing priorities, not one right way, and each device's viewing distance, inputs, and session length should shape the layout. An app must feel at home wherever it runs, never a straight port from another device. (`design-principles`, `designing-for-ios`, `designing-for-macos`, `designing-for-games`, `mac-catalyst`)
+Apple's eight design principles, and what iPhone, iPad, Mac, games, and Mac Catalyst ask of a design. For Apple, the principles are tools for weighing competing priorities, not one right way, and each device's viewing distance, inputs, and session length should shape the layout. An app must feel at home wherever it runs, never a straight port from another device. (`design-principles`, `designing-for-ios`, `designing-for-macos`, `designing-for-games`, `mac-catalyst`)
 
 ## The eight principles
 
@@ -44,7 +44,7 @@ Apple's eight design principles, and what iPhone, iPad, Mac, games, and Mac Cata
 
 ## macOS (`designing-for-macos`)
 
-- **Use the large display to show more content in fewer nested levels, with less modality.** Keep density comfortable: people sit about 1 to 3 feet away, often with extra displays. (`designing-for-macos`)
+- **Use the large display to show more content in fewer nested levels, with less modality.** Keep density comfortable, since people sit about 1 to 3 feet away, often with extra displays. (`designing-for-macos`)
 - **Let people resize, hide, show, and move windows, support full-screen mode, and allow personalization.** Windows should fit each work style and setup. Let people customize toolbars, configure windows, and choose interface colors and fonts. (`designing-for-macos`)
 - **Put every command people need in the menu bar.** It's how people get easy access to everything an app can do. (`designing-for-macos`)
 - **Support high-precision pointing and keyboard shortcuts.** People expect pixel-perfect selections and edits, shortcuts that speed up actions and allow keyboard-only work, and combinations of keyboard, pointing device, game controls, and Siri. (`designing-for-macos`)

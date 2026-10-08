@@ -1,6 +1,6 @@
 # Feedback, status, and data display
 
-How an app tells people what's happening, from status and progress to launch and charts. Apple's position: match the delivery to the information's significance, showing status in place and interrupting only for critical problems, and make waits feel short with immediate content and honest progress. A chart earns its place only by highlighting what people can learn, and every form of feedback must stay accessible. (`feedback`, `loading`, `progress-indicators`, `launching`, `charting-data`, `charts`)
+How an app tells people what's happening, from status and progress to launch and charts. Apple says to match the delivery to the information's significance, showing status in place and interrupting only for critical problems, and make waits feel short with immediate content and honest progress. A chart earns its place only by highlighting what people can learn, and every form of feedback must stay accessible. (`feedback`, `loading`, `progress-indicators`, `launching`, `charting-data`, `charts`)
 
 **Contents:** Choosing how to show status, waits, and data · Feedback · Loading · Progress indicators · Launching · Charts · Chart accessibility · Status bars · Gauges and rating indicators · Activity rings · Key source articles
 

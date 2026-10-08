@@ -48,10 +48,10 @@ Everything else is a corollary of this.
 6. **Apply system color, materials, and type** with Dynamic Type, in light, dark, and increased contrast. (`color`, `materials`, `typography`)
 7. **Write the words** in one voice. (`writing`)
 8. **Design every state**, from loading and progress to empty and error, with feedback in proportion. (`feedback`, `loading`)
-9. **Check accessibility and inclusion**: sizes, contrast, VoiceOver, right-to-left, reduced motion. (`accessibility`, `right-to-left`)
+9. **Check accessibility and inclusion** for sizes, contrast, VoiceOver, right-to-left, and reduced motion. (`accessibility`, `right-to-left`)
 10. **Shape the first run** with an instant launch, optional onboarding, and permissions in context. (`launching`, `onboarding`, `privacy`)
 11. **Extend into the system** where it helps, with widgets, Live Activities, and notifications. (`widgets`, `live-activities`, `notifications`)
-12. **Test on real devices** at the largest and smallest sizes, text sizes, and localizations, then keep iterating. Shipping isn't the finish line. (`layout`, `design-principles`)
+12. **Test on real devices** at the largest and smallest sizes, text sizes, and localizations, and keep iterating after launch. (`layout`, `design-principles`)
 
 ## Reference files
 
@@ -78,8 +78,8 @@ Everything else is a corollary of this.
 
 ## How to answer
 
-- **Write like the HIG**: lead with the rule as a plain imperative ("Use alerts sparingly."), give the reason in terms of what people do ("people can miss a popover or close it by accident"), point to Apple's own apps ("Mail displays an indicator"), and tag platform differences (**(iOS)**, **(iPadOS)**, **(macOS)**).
-- **Prefer the concrete**: Apple's numbers (44x44 pt, 4.5:1, under 15 characters) and its own apps as examples (Mail, Notes, Music, Weather). (`buttons`, `accessibility`, `toolbars`)
+- **Write like the HIG.** Lead with the rule as a plain imperative ("Use alerts sparingly."), give the reason in terms of what people do ("people can miss a popover or close it by accident"), point to Apple's own apps ("Mail displays an indicator"), and tag platform differences (**(iOS)**, **(iPadOS)**, **(macOS)**).
+- **Prefer the concrete.** Use Apple's numbers (44x44 pt, 4.5:1, under 15 characters) and its own apps as examples (Mail, Notes, Music, Weather). (`buttons`, `accessibility`, `toolbars`)
 - **Always cite** the page slug, so the user can open the original.
 - If the user asks about a specific page, check `references/article-index.md` first, then the theme file.
 - These are Apple's guidelines, distilled faithfully, including the ones people push back on: no in-app Dark Mode switch, no branded launch screen, no hidden or disabled tabs. Present them as Apple's, with Apple's reasoning, and don't soften them. (`dark-mode`, `launching`, `tab-bars`)

@@ -1,6 +1,6 @@
 # Controls and data entry
 
-How people enter text and set values. Apple's position: minimize typing by gathering data from the system and offering choices, match each field and keyboard to the content expected, and pick the control by the kind of value (a toggle for two opposing states, a segmented control for a few related choices, a slider for a range, a picker for longer ordered lists). (`entering-data`, `text-fields`, `toggles`, `segmented-controls`, `pickers`)
+How people enter text and set values. Apple says to minimize typing by gathering data from the system and offering choices, match each field and keyboard to the content expected, and pick the control by the kind of value (a toggle for two opposing states, a segmented control for a few related choices, a slider for a range, a picker for longer ordered lists). (`entering-data`, `text-fields`, `toggles`, `segmented-controls`, `pickers`)
 
 **Contents:** Choosing the control · Text fields and entering data · Virtual keyboards · Toggles · Segmented controls · Pickers · Sliders and steppers · Combo boxes, token fields, color wells, and image wells · Key source articles
 

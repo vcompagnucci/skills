@@ -1,6 +1,6 @@
 # AI and machine learning
 
-How to design features built on generative AI and machine learning. Apple's position: use AI only where it adds clear value, keep people in control, say when AI is involved, and design for its mistakes, its latency, and models that change. (`generative-ai`, `machine-learning`)
+How to design features built on generative AI and machine learning. Apple says to use AI only where it adds clear value, keep people in control, say when AI is involved, and design for its mistakes, its latency, and models that change. (`generative-ai`, `machine-learning`)
 
 **Contents:** When to use AI · Generative AI · Machine learning · Key source articles
 
@@ -88,7 +88,7 @@ How to design features built on generative AI and machine learning. Apple's posi
 - **Understand the significance of a mistake's consequences, and show empathy with corrective tools that match its seriousness.** Incorrect keyboard suggestions might annoy people, but a suggested travel route that makes them miss a flight is a serious inconvenience. (`machine-learning`)
 - **Make it easy for people to correct frequent or predictable mistakes.** Without an easy way to fix mistakes, people can lose trust in your app. (`machine-learning`)
 - **Continuously update the feature to reflect people's evolving interests and preferences, and to help avoid mistakes.** Use implicit feedback to discover changes in tastes and habits, and add domain-specific information, like current trends in popular entertainment. Ideally, people benefit from improvements without doing any work. (`machine-learning`)
-- **When possible, address mistakes without complicating the UI, weighing each pattern's effect on the UI against its risk of compounding the mistake.** Corrections and limitations tend to fit into the UI easily, but attributions are harder: an attribution that turns out to be wrong magnifies the original mistake. (`machine-learning`)
+- **When possible, address mistakes without complicating the UI, weighing each pattern's effect on the UI against its risk of compounding the mistake.** Corrections and limitations tend to fit into the UI easily, but attributions are harder, because an attribution that turns out to be wrong magnifies the original mistake. (`machine-learning`)
 - **Be especially careful to avoid mistakes in proactive features.** People don't request a proactive feature, like a suggestion based on their behavior, so they have less patience with its mistakes, which can also make them feel they have less control. (`machine-learning`)
 - **As you reduce mistakes in one area, consider the effect on other areas and on overall accuracy.** Improving how an image-recognition app recognizes dogs might reduce its ability to recognize cats. Use people's preferences to choose what to work on, and expect mistakes to evolve with your models. (`machine-learning`)
 - **Give people familiar, easy ways to make corrections by showing the steps your app takes as it automates a task.** Photos highlights the controls it used to auto-crop a photo, so people aren't confused and can refine or undo the result with those same controls. (`machine-learning`)

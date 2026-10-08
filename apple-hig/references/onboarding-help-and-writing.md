@@ -1,6 +1,6 @@
 # Onboarding, help, settings, and writing
 
-The words, first-run experience, help, settings, and rating requests through which an app talks to people. Apple's position: write in one clear, consistent voice, let people learn by doing rather than through long onboarding, and offer help in context and in proportion to the task. Strong defaults should make settings nearly unnecessary, and rating requests wait for real engagement. (`writing`, `onboarding`, `offering-help`, `settings`, `ratings-and-reviews`)
+The words, first-run experience, help, settings, and rating requests through which an app talks to people. Apple says to write in one clear, consistent voice, let people learn by doing rather than through long onboarding, and offer help in context and in proportion to the task. Strong defaults should make settings nearly unnecessary, and rating requests wait for real engagement. (`writing`, `onboarding`, `offering-help`, `settings`, `ratings-and-reviews`)
 
 ## Choosing how to teach and where settings live
 
