@@ -19,7 +19,3 @@ npx skills@latest add vcompagnucci/skills
 ## Design
 
 - **[apple-hig](./apple-hig/SKILL.md).** Apple's Human Interface Guidelines for iPhone, iPad and Mac apps. 119 pages.
-
-## Sources
-
-The newest source wins, and Anthropic and OpenAI break ties. A source newer than a skill counts only if the agent can open it, and for apple-hig Apple's live page wins. None of these skills is official. A job checks the agent skills' sources every two weeks.
