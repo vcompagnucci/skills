@@ -1,6 +1,6 @@
 # Sandboxes and network egress
 
-For agents that run code, drive a browser or fetch URLs. A customer-facing support agent that only calls your own tools needs the first bullet and none of the rest. What it may touch is permissions.md.
+For agents that run code, drive a browser or fetch URLs. An agent that only calls your own tools (a customer-facing support agent, say) needs the first bullet and none of the rest. What it may touch is permissions.md.
 
 ## Isolation for agents that run code
 

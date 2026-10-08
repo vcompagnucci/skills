@@ -1,11 +1,11 @@
 ---
 name: agent-evals
-description: Build and run evals for an AI agent, with extra checks for customer-support agents. Use when designing test cases, reading traces for failure modes, writing or validating an LLM judge, grading tool calls and account state, improving the agent against the eval, gating a release, auditing an eval setup, measuring a live agent, simulating customers, red-teaming the agent, or sizing samples and comparing versions.
+description: Build and run evals for any AI agent (coding, browser, data, assistant or customer-facing), with extra checks for customer-facing agents. Use when designing test cases, reading traces for failure modes, writing or validating an LLM judge, grading tool calls and account state, improving the agent against the eval, gating a release, auditing an eval setup, measuring a live agent, simulating users, red-teaming the agent, or sizing samples and comparing versions.
 ---
 
 # Agent evals
 
-A process for evaluating an AI agent that talks to people, looks things up, and takes actions, with examples from customer support, where the method was tested hardest. It merges Hamel Husain and Shreya Shankar's method with what labs, support teams, and eval vendors published up to early October 2026.
+A process for evaluating any AI agent that looks things up, decides and takes actions: a coding agent, a browser or data agent, an assistant, a support agent. Most examples come from customer support, where the method was tested hardest, and the rules hold for the rest. It merges Hamel Husain and Shreya Shankar's method with what labs, eval vendors and support teams published up to early October 2026.
 
 ## Where are you?
 
@@ -17,10 +17,10 @@ First eval ever? 20 to 50 real cases with the expected end state from data or po
   "Reading traces"). Judges, statistics, and panels come later.
 Is there an agent yet?
 ├── No → references/discover.md, "Before reading anything" and "Where cases come from" only:
-│   use old tickets to write the spec and the cases. Error analysis reads the
+│   use past tickets, logs or tasks to write the spec and the cases. Error analysis reads the
 │   agent's answers, so it starts once the agent runs on those cases.
 └── Yes ↓
-Do you have real conversations or tickets to read?
+Do you have real traces (conversations, tickets, task logs) to read?
 ├── No → references/discover.md (sourcing cases, synthetic data)
 └── Yes → Have you read them and named the failure modes?
     ├── No → references/discover.md
@@ -39,7 +39,7 @@ Improving the agent against the eval (what to fix first, prompt or tool or harne
   on accuracy and cost)? → references/improve.md
 Shipping any change (prompt, model, tools), live or not? → references/testing.md, "Release gates"
 Computing an interval, sizing a sample, or comparing two versions? → references/statistics.md
-Simulated customers, replaying real conversations, forecasting a version on live traffic? → references/simulation.md
+Simulated users, replaying real conversations, forecasting a version on live traffic? → references/simulation.md
 Red teaming the agent (injection, exfiltration, attack success rates)? → references/red-team.md
 Customer-facing agent? Before a check touches handoffs, language, sensitive data, tools and account state, multi-turn, policy, voice, or customers who are themselves AI agents → references/support-checks.md
 ```
@@ -69,7 +69,7 @@ Inside the skill this order already ran, and the losing position is gone, so nev
 2. **Failure modes come from real traces, never from brainstorming.** Brainstormed categories produce evaluators for problems the agent doesn't have and miss the ones it does.
 3. **Use the cheapest grader that fits.** Code for anything objective (account state, tool arguments, schema, forbidden text). An LLM judge only where interpretation is needed, and a judge never overrides a failed code check. Code is free to run and never drifts.
 4. **Grade against ground truth from data or policy, never against the model's own answer.** "Your refund is on its way" fails if the tool only opened a review case.
-5. **Gate on the outcome, diagnose with the path.** A case passes when the system state ended exactly as intended (for a support agent, the account and ledger) and every step compliance requires happened (identity verified, customer confirmed, no forbidden or unrequested action). Tool order and other path details explain failures but never gate, because many valid paths reach the same state.
+5. **Gate on the outcome, diagnose with the path.** A case passes when the system state ended exactly as intended (for a support agent, the account and ledger) and every step compliance requires happened (identity verified, user confirmed, no forbidden or unrequested action). Tool order and other path details explain failures but never gate, because many valid paths reach the same state.
 6. **Every case that gates a decision runs 15 times and gates on pass^k (every run passes), never pass@k.** Agents are nondeterministic. A case that fails 1 run in 20 passes 3 of 3 86% of the time but 15 of 15 only 46%.
 7. **Score a held-out test set once per frozen version, and never change anything because of what it showed.** This holds for the agent's test cases and for each judge's test labels. Tune only on development cases. A change made after reading test results needs a new test set.
 8. **Fix the cause in the right place.** Behavior the prompt never asked for goes into the prompt. A policy, safety, or authorization rule goes into tool code with a test. Appending "never do X" to the prompt after an incident degrades the prompt and doesn't stop X.
@@ -94,7 +94,7 @@ Inside the skill this order already ran, and the losing position is gone, so nev
 | First eval for a tool, skill, or specialist the agent must choose | 10 to 20 cases |
 | Repeats per validation trace to measure a judge's flip rate | 4 |
 | Cases to detect a 3-point difference between two versions | about 1,000 (statistics.md) |
-| Clean conversations to claim a failure rate under 0.1% with zero failures seen | about 3,840 |
+| Clean cases or conversations to claim a failure rate under 0.1% with zero failures seen | about 3,840 |
 | Production judges | a random sample sized from the interval, capped per run |
 | Monitor threshold | set at a 1% false-positive rate on benign twins |
 | Shadow, then canary | shadow 4+ hours (pause above 2% deviation), then about 1% of live traffic |

@@ -1,6 +1,6 @@
 # Support checks
 
-Eight things a support agent needs that generic eval methods skip. Apply them at whatever stage you're in.
+Eight things a customer-facing agent, such as a support agent, needs that generic eval methods skip. Apply them at whatever stage you're in.
 
 ## Handoffs to a human
 

@@ -105,7 +105,7 @@ Terms the references use in a source's own sense, one line each with the source 
 - **Safety identifier.** A stable, hashed per-end-user string sent with each model request so the provider can attribute and block abuse at the user level. (`openai-safety-checks-guide`)
 - **Safety margin.** The band of benign requests near the prohibited line that a classifier deliberately blocks to catch the harmful ones, set per band in a four-band scheme (prohibited, high-risk dual use, low-risk dual use, benign). (`anthropic-fable-safeguards-jailbreak-framework`)
 - **Scope of autonomy.** The agreed sub-goals, acceptable side effects and pause points that bound what an agent may do without asking, with an ending condition. (`openai-model-spec-2026-08-18`)
-- **Screenshot attack.** Getting a support bot to say something off-topic, humorous or disparaging for a screenshot. (`beurer-kellner-design-patterns`)
+- **Screenshot attack.** Getting a company's agent to say something off-topic, humorous or disparaging for a screenshot. (`beurer-kellner-design-patterns`)
 - **Security by incompetence.** Attacks failing because the agent is too unreliable to complete the attacker's goal, not because it resists. (`wasp-web-agent-injection`)
 - **Session hijack prompt injection.** Injecting events into a shared queue under a stolen session ID so the legitimate client receives and acts on them. (`mcp-spec-security-best-practices`)
 - **Shade.** Gray Swan's adaptive red-teaming attacker, trained on test scenarios against earlier models and then run unchanged against newer ones. (`anthropic-system-card-sonnet-5-5`)

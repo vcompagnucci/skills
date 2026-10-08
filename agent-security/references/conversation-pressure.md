@@ -1,6 +1,6 @@
 # Conversation: pressure, jokes and requests the agent can't grant
 
-The case map and the rule that code decides what the agent may do are in conversation.md. Each bullet here names the code control. Where nothing is at stake, it says the words are the whole answer.
+This file is for customer-facing agents. The case map and the rule that code decides what the agent may do are in conversation.md. Each bullet here names the code control. Where nothing is at stake, it says the words are the whole answer.
 
 ## Prices, refunds and promises come from tools
 

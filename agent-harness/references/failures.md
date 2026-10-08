@@ -31,13 +31,13 @@
 
 ## Streams
 
-- **History holds what the customer actually saw.** If you stream and a check on the output fires late, cancel the reply, cut the history at what was delivered, and tell the model which check fired so it answers again.
+- **History holds what the user actually saw.** If you stream and a check on the output fires late, cancel the reply, cut the history at what was delivered, and tell the model which check fired so it answers again.
 - **Recover a failed model call by how far the response got, not by whether bytes streamed:**
   - Nothing completed: re-issue and discard the partial.
   - Reasoning done but no text or tool call yet: re-issue, at most twice.
   - A text block or tool call completed: keep it and continue from it (newer Claude models continue from a user message quoting the partial output). A partial tool call or reasoning block can't be resumed.
   - Finished: keep it.
-- **Text already delivered to a customer through a channel counts as completed,** because it can't be rewound. When you retry a step that streamed to a client you control, send a reset event so the client drops the partial instead of appending the retry to it.
+- **Text already delivered to a user through a channel counts as completed,** because it can't be rewound. When you retry a step that streamed to a client you control, send a reset event so the client drops the partial instead of appending the retry to it.
 - **Detect a dead stream with a first-byte deadline and a no-bytes watchdog, not the whole-request timeout.** Claude Code allows 180 s to the first byte on the direct API and 180 s of byte silence, against a 600 s whole-request timeout. Re-issue a stalled request at most once. Every re-issue in this section spends the call's one retry budget (Failures and retries).
 - **A dropped connection is not a cancel** (an explicit stop is in humans.md). Keep the run going when a tab closes or a phone drops, let the client reconnect by run id and stream cursor, and treat a stream that ends without a finish event as interrupted. Never rerun the work, and never pass the HTTP abort signal into the model call, because it kills the work a reconnect expects to find.
 - **Reconnect with a buffer and a snapshot.** Open the stream before sending work. After a drop, open a new stream and buffer its events, fetch the session's saved items or full event history, rebuild local state keyed by item id, apply the buffered events while skipping ids already seen or final, then resume. Rebuild pending approvals from the session's pending-actions list, never from history, and never resend the task or earlier approvals.
