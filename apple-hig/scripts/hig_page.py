@@ -101,9 +101,12 @@ if __name__ == "__main__":
         i = args.index("--section"); want = args[i + 1]; del args[i:i + 2]
     if not args:
         sys.exit(__doc__)
+    failed = False
     for slug in args:
         try:
             md = render(slug)
             print(section(md, want) if want else md)
         except Exception as e:
-            print(f"Could not fetch '{slug}' ({e}). Open {SITE}/design/human-interface-guidelines/{slug} in a browser.")
+            failed = True
+            print(f"Could not fetch '{slug}' ({e}). Open {SITE}/design/human-interface-guidelines/{slug} in a browser.", file=sys.stderr)
+    sys.exit(1 if failed else 0)
