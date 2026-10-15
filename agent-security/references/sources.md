@@ -1,6 +1,6 @@
 # Sources
 
-312 sources read in full on 2026-10-06: 97 from Anthropic (docs, engineering and research posts, the constitution, system cards from Opus 4.5 to Opus 5.5 and Sonnet 5.5, threat reports), 72 from OpenAI (docs, the Model Spec, the Guardrails library, the Agents SDK, cookbooks, system cards from Operator to GPT-6.1 Sol), 25 from Cognition (Devin and Windsurf docs, blog posts, release notes) and 118 from labs, standards bodies, support vendors, security researchers and incident reports, dated 2023-02-23 to 2026-10-05. Every one is listed by slug in `article-index.md`.
+316 sources read in full, 312 on 2026-10-06 and 4 on 2026-10-15: 97 from Anthropic (docs, engineering and research posts, the constitution, system cards from Opus 4.5 to Opus 5.5 and Sonnet 5.5, threat reports), 75 from OpenAI (docs, the Model Spec, the Guardrails library, the Agents SDK, cookbooks, system cards from Operator to GPT-6.1 Sol), 25 from Cognition (Devin and Windsurf docs, blog posts, release notes) and 119 from labs, standards bodies, support vendors, security researchers and incident reports, dated 2023-02-23 to 2026-10-14. Every one is listed by slug in `article-index.md`.
 
 ## How the claims were chosen
 
@@ -17,13 +17,13 @@ The updater checks these on the 1st and 15th of each month and opens a PR when s
 | Source | Last checked |
 |---|---|
 | OpenAI Model Spec (`openai/model_spec`) | `7f1cf79fcb65` |
-| OpenAI Guardrails (`openai/openai-guardrails-python`) | `4e3f3717017c` |
+| OpenAI Guardrails (`openai/openai-guardrails-python`) | `1af4d0a5ae05` |
 | AgentDojo (`ethz-spylab/agentdojo`) | `089ed468cf3e` |
-| Simon Willison, prompt-injection tag | 2026-10-06 |
-| Embrace The Red (Johann Rehberger) | 2026-10-06 |
-| OpenAI news, security and safety posts | 2026-10-06 |
-| Anthropic news, research and engineering, security posts | 2026-10-06 |
-| Cognition blog (Devin, Windsurf) | 2026-10-06 |
+| Simon Willison, prompt-injection tag | 2026-10-15 |
+| Embrace The Red (Johann Rehberger) | 2026-10-15 |
+| OpenAI news, security and safety posts | 2026-10-15 |
+| Anthropic news, research and engineering, security posts | 2026-10-15 |
+| Cognition blog (Devin, Windsurf) | 2026-10-15 |
 
 ## Use of the sources
 
