@@ -21,6 +21,12 @@ Agreement with expert labels (evaluators.md) shows a judge was right on past tra
 - **Mark Fail when at least n judges say Fail, with n chosen on dev labels, never by majority.** With 14 agreeable judges, a majority of 8 had a worst-case error of 14.8% and a veto by 4 had 2.8%. The ensemble is a new judge, scored on test once. Use it to catch failures, never to break a close tie between two versions.
 - **A panel never replaces the expert.** It may sort which traces the expert labels first, and a human resolves every split, but its labels never validate a judge (SKILL.md rule 1).
 
+## A cheaper judge in front (cascade)
+
+- **A cascade is a new judge.** A cheaper proxy model runs the frozen judge prompt plus one instruction to state its confidence from 0 to 1. At or above a threshold its verdict stands; below it, the validated judge (the oracle) decides. It copies the oracle's mistakes, so report its agreement with the human labels as well as with the oracle.
+- **Set the lowest agreement with the oracle you'll accept (such as 0.95) before computing anything.** Then sweep thresholds on the dev labels, recording for each the agreement with the oracle and with the human labels, the share the proxy handles, and the cost per 1,000 verdicts. Choose the lowest threshold that meets the floor, because a lower threshold sends more cases to the proxy.
+- **Check that threshold once on the test labels and never change it afterwards.** Below the floor, reject the cascade and keep the oracle. Report the number of disagreements next to the rate: on a small test set one or two disagreements move the rate a lot.
+
 ## Pairwise judges
 
 - **Run both orders, and count a win only when both agree.** A flip counts as a tie. Randomize which answer comes first per case, let judges and labelers answer tie or both bad, treat both answers as untrusted data, and keep compared answers similar in length or check the winner isn't just the longer one.
