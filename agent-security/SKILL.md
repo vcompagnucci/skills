@@ -5,7 +5,7 @@ description: Secure any AI agent that reads untrusted text and calls tools: codi
 
 # Agent security
 
-How to keep an agent that reads untrusted text and calls tools from being turned against its users or its company. The rules hold for any such agent. Most examples come from customer support, where an agent meets strangers all day. It distills 312 sources read in October 2026: Anthropic and OpenAI first, then labs, standards bodies, support vendors, security researchers and public incidents. Every claim cites its source as (`slug`), listed in `references/article-index.md`. Quoted text followed by a slug is that source's wording. Quoted text without one is an example.
+How to keep an agent that reads untrusted text and calls tools from being turned against its users or its company. The rules hold for any such agent. Most examples come from customer support, where an agent meets strangers all day. It distills 316 sources read in October 2026: Anthropic and OpenAI first, then labs, standards bodies, support vendors, security researchers and public incidents. Every claim cites its source as (`slug`), listed in `references/article-index.md`. Quoted text followed by a slug is that source's wording. Quoted text without one is an example.
 
 > The model will eventually be talked into something, so security is deciding in code what a talked-into agent can still reach.
 
