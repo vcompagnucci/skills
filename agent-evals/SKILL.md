@@ -35,8 +35,8 @@ Do you have real traces (conversations, tickets, task logs) to read?
 Jumping in at a specific task?
 Inheriting an eval setup, or unsure you can trust it? → references/audit.md first
 Improving the agent against the eval (what to fix first, prompt or tool or harness, an
-  automated prompt optimizer such as GEPA, keep or revert, when to stop, comparing models
-  on accuracy and cost)? → references/improve.md
+  automated prompt optimizer such as GEPA, keep or revert, when to stop, cutting cost, comparing
+  models on accuracy and cost)? → references/improve.md
 Shipping any change (prompt, model, tools), live or not? → references/testing.md, "Release gates"
 Computing an interval, sizing a sample, or comparing two versions? → references/statistics.md
 Simulated users, replaying real conversations, forecasting a version on live traffic? → references/simulation.md
