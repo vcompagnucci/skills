@@ -101,4 +101,4 @@ Inside the skill this order already ran, and the losing position is gone, so nev
 
 ## Scope
 
-This skill covers evaluation only. It doesn't cover how to build the agent, write its tone, or secure it, except where a check needs it. Company-specific material (the behavior spec, policies, the failure taxonomy from real conversations) belongs in a private skill, never in this one. Sources and licenses: `references/sources.md` and `references/sources-deep-pass.md`.
+This skill covers evaluation only. It doesn't cover how to build the agent, write its system prompt and tone (agent-prompts), or secure it, except where a check needs it. Company-specific material (the behavior spec, policies, the failure taxonomy from real conversations) belongs in a private skill, never in this one. Sources and licenses: `references/sources.md` and `references/sources-deep-pass.md`.

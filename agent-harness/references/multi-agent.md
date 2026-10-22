@@ -32,11 +32,10 @@ Does one agent with good tools and a clear prompt fail at this?
 
 ## Briefing a subagent
 
-- **Give a full brief:** the objective, the output format, the tools and sources it may use, and where to stop. A one-line task produced duplicated and off-target work in Anthropic's research system.
 - **Pass references, not summaries.** When one agent's finding matters to another, write it to a shared store and pass the path. The orchestrator summarizes details away when they pass through it.
 - **Fork or start fresh.** A fresh subagent gets only your brief and pays for its own prefix. A fork inherits the system prompt, tools, model, and history, so it starts from the parent's cache with nothing to re-explain. Fork when a fresh agent would need too much background; start fresh for a clean-context verifier. A fork copies the conversation, not the world: anything it changes outside the transcript is real for every branch.
 - **Cap depth, concurrency, total count, and shared spend in code, counting the whole tree.** Platforms leave some of these open: OpenAI's Responses multi-agent runs 3 subagents at once by default, grandchildren included, with no limit on depth or total. At a limit, refuse the spawn with an error that tells the model not to retry, so it does the work itself.
-- **Tell each subagent whether it may spawn agents of its own;** without a rule, recursion has no floor. Bound a clean-context grader's loop too (Anthropic's stops after 3 rounds by default).
+- **What to write in a subagent's brief, including whether it may spawn agents of its own, is agent-prompts, multi-agent.md.** The caps themselves live in code, above.
 
 ## Failures between agents
 

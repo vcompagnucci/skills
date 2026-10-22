@@ -7,7 +7,7 @@ description: Build the harness around an AI agent: own or vendor, the loop, tool
 
 The harness is everything around the model that makes it an agent: the loop, what the model sees each turn, the tools and what they return, the state that survives a crash or a pause, and the log. The rules hold for any agent, from a coding or back-office agent to an assistant. Many examples come from customer support, where a harness meets strangers, money and handoffs at once.
 
-Out of scope: who may approve what and prompt injection (security), measuring the agent (agent-evals), and writing the system prompt.
+Out of scope: who may approve what and prompt injection (security), measuring the agent (agent-evals), and writing the system prompt (agent-prompts).
 
 ## Where are you?
 
