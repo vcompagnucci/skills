@@ -1,0 +1,3 @@
+interface:
+  display_name: "System prompts"
+  short_description: "Write, review and migrate an AI agent's system prompt"

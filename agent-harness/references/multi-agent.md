@@ -35,7 +35,7 @@ Does one agent with good tools and a clear prompt fail at this?
 - **Pass references, not summaries.** When one agent's finding matters to another, write it to a shared store and pass the path. The orchestrator summarizes details away when they pass through it.
 - **Fork or start fresh.** A fresh subagent gets only your brief and pays for its own prefix. A fork inherits the system prompt, tools, model, and history, so it starts from the parent's cache with nothing to re-explain. Fork when a fresh agent would need too much background; start fresh for a clean-context verifier. A fork copies the conversation, not the world: anything it changes outside the transcript is real for every branch.
 - **Cap depth, concurrency, total count, and shared spend in code, counting the whole tree.** Platforms leave some of these open: OpenAI's Responses multi-agent runs 3 subagents at once by default, grandchildren included, with no limit on depth or total. At a limit, refuse the spawn with an error that tells the model not to retry, so it does the work itself.
-- **What to write in a subagent's brief, including whether it may spawn agents of its own, is agent-prompts, multi-agent.md.** The caps themselves live in code, above.
+- **What to write in a subagent's brief, including whether it may spawn agents of its own, is system-prompts, multi-agent.md.** The caps themselves live in code, above.
 
 ## Failures between agents
 
