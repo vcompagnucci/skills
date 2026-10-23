@@ -20,7 +20,26 @@ Both folders use the same layout. `recipe/` holds the steps and shared modules. 
 3. Fill in `recipe/photos.py` by hand. Replace `PHOTO_A` with one entry per photo, keyed by the file name without its extension. The docstring explains every field. Empty `REFS` in `recipe/references.py` the same way: its entries are the earlier projects' references, examples of the format, and this project's go there at SKILL.md step 4. The styles in `STYLES` and `LOOKS` of `recipe/styles.py` name those entries in `ref`: point a style the project keeps at one of its own references before `tools/look_fit.py` reads it. `wall` comes first: a photo without it develops on the camera's own white balance, so develop once, read the neutral patches on that base with `tools/grid.py`, fill `wall` and develop again. Measure the fields on the developed image, using the sheets that `tools/grid.py`, `tools/check_faces.py`, `recipe/spots.py` and `recipe/wall.py` write to `proceso/`. `EXPOSURE`, `CURVE`, `CHROMA` and `SKIN_HUE` at the top of `recipe/grade.py` are the earlier session's values (one flash, one camera, its skin): set them for this session: `tools/color_check.py` tries `CHROMA` and `SKIN_HUE` variants and reports lit-skin L* (its docstring), and `EXPOSURE` and `CURVE` are read on that L* and on the clip % of step 5.
 4. Run the steps in order, one photo per process: `recipe/develop.py`, then `recipe/retouch.py`, then `recipe/grade.py`, which writes the master `editadas/<photo>.tif` and the camera original `<photo>-antes.png` that SKILL.md step 4 measures. Stop there: `recipe/styles.py <photo>` (optional backdrop styles; `--seed` writes them as editor versions) renders at SKILL.md step 6, once the references, the `respaldos/` clones and `esperado.txt` exist. For an editor ([editor.md](../references/editor.md)), after that render (it reads the backdrop layers of `styles.py <photo> --layers`), run `recipe/viewer.py` and open `Abrir editor.command`; for group photos, first give each face id a label in `FACE_NAMES` in `recipe/viewer_template.html` (`{ "face-id": "Label" }`): saved versions key the per-face controls by those labels.
 
-`portrait-qa/` is a second reference, not a second pipeline. Copy the tools you need with the `recipe/` modules they import. `common.py`, `masks.py`, `matte.py`, `photos.py` and `styles.py` exist in both `recipe/` folders: merge them, never overwrite.
+### Porting
+
+Read this when copying `pipeline/` into a project or porting a tool from `portrait-qa/`.
+
+- `portrait-qa/` is a second reference, not a second pipeline, and its tools were written for square avatars. Port each QA tool a SKILL.md step names when that step comes up, with the `recipe/` modules it imports. `common.py`, `masks.py`, `matte.py`, `photos.py` and `styles.py` exist in both `recipe/` folders: merge them, never overwrite.
+- **`proceso/` subfolders.** The pipeline tools still write `proceso/<group>/` subfolders, and SKILL.md > Where things go wants none. Port `process_file` (`portrait-qa/recipe/output.py`) into `recipe/common.py` and turn every path under `PROCESS` that has a subfolder into `process_file("<group>", name)` (`grep -n 'PROCESS /' tools recipe`: most bind it to a constant like `OUT`, some nest two levels).
+- **`antes_despues.py`** (SKILL.md step 8): copy it from `portrait-qa/tools/` into `tools/`; it imports no `recipe/` module and runs under `.sin-jpg`; usage: the tool's docstring. A master with no pixel over dE 1.5 gets no sheet, only a line saying so (`sin cambios`); one with no before (a style rendered for the first time) gets a `nuevo` line.
+
+### Counting clipped pixels
+
+SKILL.md step 1 counts clipped pixels where the develop is still 16-bit integers, since the float base can't show a clip. In this template that is the `raw.postprocess` output inside `develop.py`'s `demosaic()`, in its first call, the one with the wall white balance (LibRaw clips at 65535 there): `100 * np.mean((rgb >= 65535).any(axis=-1))`. `develop.py` doesn't print it.
+
+### Other photos
+
+Read this for photos without a seamless wall, faces or black clothing, or from another camera (SKILL.md > Which branch > Other photos). Use the parts of the templates that don't assume a studio wall: develop, measurement, iteration and QA. The parts that do are calls inside the scripts:
+
+- **Develop.** rawpy reads any RAW (step 1 above). An iPhone ProRAW DNG arrives already demosaiced and linear, so it only needs white balance and tone. `wall` in `recipe/photos.py` holds the patches of the confirmed neutral, whatever it is.
+- **No seamless wall:** leave `wall_marks` empty in `recipe/photos.py` and skip `neutral_stains` in `recipe/retouch.py`. **No black clothing:** skip the three lint calls there. **No faces:** `"faces": []` is required.
+- **No seamless wall or no faces:** use `np.ones(img.shape[:2], np.float32)` for `evening_gain` in `recipe/grade.py` and `tools/color_check.py`: it evens the wall toward the light at the faces, and with no faces it returns NaN.
+- Set grade.py's `EXPOSURE`, `CURVE`, `CHROMA` and `SKIN_HUE` per session (step 3 above); `SKIN_HUE` also turns wood.
 
 ### Tests
 

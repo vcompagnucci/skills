@@ -6,6 +6,10 @@
 - **Face shadow is measured on skin only.** An ellipse picks up glasses and hair: it read 28 against 47 L* on one portrait.
 - **A small reference shows no fine detail:** compare local contrast only in the bands it can show; never copy its softness, which blurs the photo. A ~400 px avatar has no fine bands; matching them removes the subject's skin texture.
 
+## Finding references
+
+Read this at SKILL.md step 4 when the photographer names a brand or page, or gave fewer than three references. Find published photos of the same kind and subject (a team page, a press portrait, a pet on a beach, a product) by photographers or brands known for photo craft: press kits, newsrooms, photographers' portfolios and editorial sites, at the highest resolution offered. A brand or page the photographer names counts as their reference: import its photos, from its press kit when it has one.
+
 ## Building a style
 
 - **A style is global light settings plus background-only ones; temperature and tint stay off people.** Global tints turned black shirts brown and tanned the skin.
@@ -27,5 +31,9 @@ The exit of step 5. Each comes from a correction or a measured failure.
 | Neutral wall | a*, b* about 0 unless the style colors it | `ref_measure.py` (`Pared L* a* b*`: each wall box's median, averaged) |
 | Fine skin texture | at least 80 % of the base's (SKILL.md step 3) | `band_energy` (`portrait-qa/recipe/measure.py`) |
 | Between photos of one set | skin under ΔE 2 apart when they are shown together | `color_check.py <photo> <photo> ...` (ΔE76 between the lit-skin medians of faces with the same `faces[].id` in both photos, and the maximum; on the base grade, before any style) |
+
+For other photos (SKILL.md > Which branch > Other photos), the rows here and the SKILL.md Done-when clauses that name skin, a face or the wall apply only where one exists, while Frame clipping and the gradual-corrections gate ([qa.md](qa.md)) apply to every photo. Where no number is left for what the request changes, the bar's hand-edited test decides.
+
+When the graded master clips (Frame clipping), the lever is `EXPOSURE` in `recipe/grade.py`; the editor's exposure can't bring back what the 16-bit master clipped.
 
 `ref_measure.py` measures a style master as `<photo>-<style>` and the camera original as `<photo>-antes`, besides `<photo>`.
