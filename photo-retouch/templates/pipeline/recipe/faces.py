@@ -32,11 +32,15 @@ def window(face: dict, shape: tuple[int, int], pad: float = 0.15) -> tuple[slice
     return slice(y0, y1), slice(x0, x1)
 
 
-def skin_mask(crop: np.ndarray, face: dict, origin: tuple[int, int], fence: int = 0) -> np.ndarray:
+def skin_mask(crop: np.ndarray, face: dict, origin: tuple[int, int], fence: int = 0, kept=()) -> np.ndarray:
     """Piel: adentro del ovalo, sin rasgos, y con color de piel (calida, no oscura). Suave, 0..1.
 
     fence: cuantos pixeles se aleja la mascara del borde de la piel (pelo, vello facial, pared). El
     retoque usa 12: asi nunca toca el contorno de la cara, que queda igual que en el RAW.
+    kept: lo que se deja a proposito (photos.py `kept`, (x, y, radio) en la foto entera): queda afuera
+    como los rasgos, despues del cierre (que si no rellena un lunar chico como un hueco). Se saca con
+    2 sigmas de margen antes del suavizado y se pone en 0 exacto adentro del radio despues: el
+    suavizado no llega a meter retoque en el lunar y el borde sigue suave.
     """
     oval = ellipse_mask(crop.shape[:2], [face["oval"]], origin)
     # la piel de esta cara define su propio rango de brillo y color
@@ -58,4 +62,10 @@ def skin_mask(crop: np.ndarray, face: dict, origin: tuple[int, int], fence: int 
         disc = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * fence + 1,) * 2)
         m = np.minimum(m, cv2.erode((m > 0.5).astype(np.uint8), disc).astype(np.float32))
     keep = 1 - ellipse_mask(crop.shape[:2], face.get("features", []), origin, grow=1.15)
-    return blur(m * keep, 3.0 if fence else 1.5).astype(np.float32)
+    sigma = 3.0 if fence else 1.5
+    if not kept:
+        return blur(m * keep, sigma).astype(np.float32)
+    pad = 2 * sigma
+    keep *= 1 - ellipse_mask(crop.shape[:2], [(x, y, r + pad, r + pad) for x, y, r in kept], origin)
+    inside = ellipse_mask(crop.shape[:2], [(x, y, r, r) for x, y, r in kept], origin)
+    return (blur(m * keep, sigma) * (1 - inside)).astype(np.float32)

@@ -1,6 +1,7 @@
 """Retoque sobre la base lineal, en este orden:
 
-1. Granos (photos.py `spots`): pincel corrector, uno por uno. Lunares y pecas no se tocan.
+1. Granos (photos.py `spots`): pincel corrector, uno por uno. Lunares y pecas no se tocan: los de
+   `kept` quedan afuera del retoque de piel del paso 4.
 2. Pixeles calientes (`hot`).
 3. Manchas de la pared (`wall_marks`): las chicas se curan como un grano, las grandes se aclaran.
    Despues, las manchas de color (salpicaduras amarillas): la pared toma su color promedio.
@@ -55,7 +56,7 @@ def retouch(name: str) -> dict:
     neutral_stains(img, name)
     faces, layers = {}, {}
     for f in p["faces"]:
-        faces[f["id"]], layers[f["id"]] = retouch_face(img, f)
+        faces[f["id"]], layers[f["id"]] = retouch_face(img, f, kept=p.get("kept", []))
     save_under_eyes(name, layers)
     del layers
     before = img.copy()

@@ -76,8 +76,10 @@ def develop(name: str) -> None:
     path = str(ROOT / "originales" / f"{name}.RAF")
     with rawpy.imread(path) as raw:
         matrix = rgb_cam(raw)
-        wb = wall_white_balance(raw, name)
         shot = list(np.array(raw.camera_whitebalance[:3]) / raw.camera_whitebalance[1]) + [1.0]
+        # sin `wall` en photos.py (la primera pasada, antes de poder leer la pared sobre un revelado), el balance de la
+        # camara: sirve para leer los parches en tools/grid.py; despues se llena `wall` y se revela de nuevo
+        wb = wall_white_balance(raw, name) if PHOTOS.get(name, {}).get("wall") else shot
         base = demosaic(raw, wb) @ matrix.T
     with rawpy.imread(path) as raw:
         before = demosaic(raw, shot) @ matrix.T
@@ -90,7 +92,7 @@ def develop(name: str) -> None:
     y = luminance(base)
     out_of_gamut = ((base < -0.002) | (base > 1)).any(axis=2).mean() * 100
     print(
-        f"{name}: {base.shape[1]}x{base.shape[0]}  balance pared R {wb[0]:.3f} B {wb[2]:.3f} "
+        f"{name}: {base.shape[1]}x{base.shape[0]}  balance {'pared' if wb is not shot else 'de la camara (falta wall)'} R {wb[0]:.3f} B {wb[2]:.3f} "
         f"(camara R {shot[0]:.3f} B {shot[2]:.3f})  luminancia p50 {np.percentile(y, 50):.3f} "
         f"p99.9 {np.percentile(y, 99.9):.3f}  fuera de sRGB {out_of_gamut:.3f}%  antes x{gain:.2f}"
     )

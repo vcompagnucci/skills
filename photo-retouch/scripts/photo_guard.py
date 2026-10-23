@@ -8,7 +8,8 @@ PreToolUse denies:
   - writing anything of a photo project to /tmp. macOS clears /tmp and process images were lost
     there; they go to <project>/proceso/ (images) or work/ (regenerable scratch).
   - producing a JPEG in a project whose root holds the marker file .sin-jpg (the brief said
-    "no JPG": no JPEG at any step, previews included).
+    "no JPG": no JPEG at any step, previews included). A plain call of tools/ref_import.py passes: it
+    converts a JPEG reference in memory and writes PNG.
 PostToolUse warns the agent, once per file, about a JPEG in a .sin-jpg project, a non-image or a
 subfolder inside proceso/ (the photographer browses it in Finder's gallery, which shows images
 only and does not open subfolders; notes and numbers go to proceso-notas/).
@@ -87,15 +88,28 @@ def writes_tmp(segment: str) -> bool:
     return not reads_only(segment)
 
 
+def runs_ref_import(segment: str) -> bool:
+    """One plain call `[VAR=x] [nice -n N] python tools/ref_import.py ...`: it reads a JPEG reference in memory and
+    writes PNG only. A command substitution, a process substitution or a background `&` would run a second command
+    inside the same segment, so any of them loses the exemption (`2>&1` keeps it)."""
+    if re.search(r"\$\(|`|<\(|>\(", segment) or "&" in re.sub(r"\d*>&\d+", "", segment):
+        return False
+    words = [w.lstrip("({") for w in segment.split()]
+    while words and (re.match(r"^\w+=", words[0]) or words[0] in PREFIX | {"", "nice", "-n", "env", "exec"}
+                     or words[0].isdigit()):
+        words.pop(0)
+    return len(words) > 1 and os.path.basename(words[0]).startswith("python") and words[1].endswith("tools/ref_import.py")
+
+
 def writes_jpeg(segment: str) -> bool:
-    """A segment that mentions JPEG (not counting the .sin-jpg marker name) and is not read-only,
-    or redirects into a .jpg."""
+    """A segment that mentions JPEG (not counting the .sin-jpg marker name) and is not read-only
+    or tools/ref_import.py, or redirects into a .jpg."""
     segment = segment.replace(".sin-jpg", "")
     if not JPEG_RE.search(segment):
         return False
     if re.search(r">>?\s*\S*\.jpe?g\b", segment, re.I):
         return True
-    return not reads_only(segment)
+    return not (reads_only(segment) or runs_ref_import(segment))
 
 
 def deny(reason: str) -> None:

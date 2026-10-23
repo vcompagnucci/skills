@@ -1,7 +1,9 @@
 """Dos intermedios lado a lado (por defecto base y retocada), mismo recorte y exposicion, a PNG.
 
 Uso: .venv/bin/python tools/compare.py <foto> x0 y0 x1 y1 salida.png [--a base] [--b retocada] [--zoom 2] [--ev 1.2] [--diff]
---diff agrega un tercer panel con la diferencia de luminancia x8 (gris = sin cambio).
+--diff agrega un tercer panel con la diferencia de luminancia x8 (gris = sin cambio) e imprime "contorno": lo
+maximo que cambia esa diferencia de un pixel al vecino en el recorte, en EV/px (el tope de qa.md es 0,09). Medir
+sobre el borde de la correccion, sin granos curados en el recorte: un grano curado cambia la textura y sube el numero.
 """
 
 import argparse
@@ -34,6 +36,8 @@ def main() -> None:
     if a.diff:
         d = np.log2(np.maximum(luminance(B), 1e-6) / np.maximum(luminance(A), 1e-6))
         panels.append(np.dstack([np.clip(0.5 + 8 * d, 0, 1)] * 3).astype(np.float32))
+        step = max(float(np.abs(np.diff(d, axis=0)).max(initial=0)), float(np.abs(np.diff(d, axis=1)).max(initial=0)))
+        print(f"contorno {step:.4f} EV/px")
     ims = []
     for im in panels:
         if a.zoom != 1:

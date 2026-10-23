@@ -10,6 +10,7 @@
 
 - **A style is global light settings plus background-only ones; temperature and tint stay off people.** Global tints turned black shirts brown and tanned the skin.
 - **From a reference take the background and direction, never its light.** Copying its light clipped 12–16 % of the frame and looked washed out or muddy ("no es poner el filtro y ya"). Exposure and blacks are then fitted per photo (`tools/look_fit.py`).
+- **Write the skin histogram match yourself, with its slope capped at 2.5.** Uncapped, it matched exactly and left dark islands. The 3.0 of `MAX_SLOPE` in `portrait-qa/recipe/tone.py` caps fitted tone curves, a different operation.
 
 ## Tolerances
 
@@ -20,12 +21,11 @@ The exit of step 5. Each comes from a correction or a measured failure.
 | Exposure | skin light toward the reference's, at most ±0.3 EV per photo | `look_fit.py` |
 | Blacks | black clothing at L* 5–10, p1 not crushed | `look_fit.py` |
 | Face clipping | 0 % of the face clipped in any channel, unless the photographer approved it in that style (`look_fit.py` only reports it); pull Highlights and Whites first (−20 and −8 cost 1.5 L* of skin) | `look_fit.py` |
-| Frame clipping | 0.12 % of the frame at most, as the approved looks measured | `ref_measure.py` |
+| Frame clipping | 0.12 % of the frame at most, as the approved looks measured | `ref_measure.py` (`clip %`) |
 | Skin hue | 120–126° on the vectorscope, on the skin line (~123°), checked before and after every color step: the develop left 115° (pink), +12° turned a face yellow | `color_check.py` |
 | Skin color by band | shadow, mid and light each toward the reference's a*, b* and C*, on skin only; C* at most 1.25× natural skin chroma | `ref_measure.py` |
-| Skin histogram match | slope capped at 2.5; uncapped it matched exactly and left dark islands | `ref_measure.py` |
-| Neutral wall | a*, b* about 0 unless the style colors it | `wall_measure.py` |
+| Neutral wall | a*, b* about 0 unless the style colors it | `ref_measure.py` (`Pared L* a* b*`: each wall box's median, averaged) |
 | Fine skin texture | at least 80 % of the base's (SKILL.md step 3) | `band_energy` (`portrait-qa/recipe/measure.py`) |
-| Between photos of one set | skin under ΔE 2 apart when they are shown together | `color_check.py` |
+| Between photos of one set | skin under ΔE 2 apart when they are shown together | `color_check.py <photo> <photo> ...` (ΔE76 between the lit-skin medians of faces with the same `faces[].id` in both photos, and the maximum; on the base grade, before any style) |
 
-A number outside its tolerance is fixed, or written in the README's pending list with the reason it stays.
+`ref_measure.py` measures a style master as `<photo>-<style>` and the camera original as `<photo>-antes`, besides `<photo>`.

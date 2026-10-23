@@ -8,7 +8,10 @@ Todo en CIELAB (D65) sobre el sRGB de cada imagen:
   brillo (a*, b*, croma y matiz). La piel real es mas roja en la sombra y mas amarilla en la luz, y un
   promedio solo esconde una sombra de otro color;
 - ropa negra: el negro de verdad (L* p5 y p50) y su tinte (a*, b*);
-- grano: el desvio de L* menos su desenfoque, sobre la pared.
+- grano: el desvio de L* menos su desenfoque, sobre la pared;
+- recorte: clip %, el % de pixeles con algun canal en el codigo maximo del archivo (65535 en 16 bits, 255 en 8),
+  contado sobre el archivo entero antes de achicarlo (achicar promedia el recorte y lo esconde). Se imprime por
+  imagen y va a la hoja y al JSON.
 
 Las referencias van en recipe/references.py, con sus caras, pared y ropa negra marcadas a mano; mis
 fotos usan photos.py. Para comparar, mi foto se achica hasta que sus caras tengan el alto de las de la
@@ -16,7 +19,9 @@ referencia: una referencia chica no tiene detalle fino, y medir mas fino mediria
 estilo.
 
 Uso: .venv/bin/python tools/ref_measure.py <ref> [fotos...]
-     -> proceso/estilos-medida-<ref>.png y proceso-notas/estilos/medida-<ref>.json
+     cada foto es <foto> (la maestra), <foto>-<estilo> (la maestra de un estilo) o <foto>-antes (el revelado de la
+     camara que escribe grade.py, la referencia de todo lo que un estilo no cambia)
+     -> proceso/estilos-medida-<ref>.png y proceso-notas/estilos/medida-<ref>.json; imprime "clip % <imagen>: <valor>" por imagen
 """
 
 import json
@@ -34,7 +39,7 @@ from adjust import adjust  # noqa: E402
 from common import EDITED, NOTES, PHOTO_NAMES, PROCESS, lab, linear_to_srgb, srgb_to_linear, to_uint8  # noqa: E402
 from develop import frac_box  # noqa: E402
 from photos import PHOTOS  # noqa: E402
-from references import REFS, load_reference  # noqa: E402
+from references import REFS, load_reference, ref_path  # noqa: E402
 
 SKIN_BANDS = [(20, 40), (40, 55), (55, 65), (65, 75), (75, 85), (85, 97)]
 MIN_BAND_PX = 60
@@ -59,8 +64,18 @@ class Regions:
         return float(np.mean([f[3] for f in self.faces]))
 
 
+def photo_key(name: str) -> str:
+    """La clave de photos.py de <foto>, <foto>-<estilo> o <foto>-antes: la mas larga que calce (hay claves con guiones)."""
+    if name in PHOTOS:
+        return name
+    keys = [k for k in PHOTOS if name.startswith(k + "-")]
+    if not keys:
+        raise SystemExit(f"{name}: no es <foto>, <foto>-<estilo> ni <foto>-antes de una foto de recipe/photos.py")
+    return max(keys, key=len)
+
+
 def mine_regions(name: str, shape: tuple[int, int]) -> Regions:
-    p = PHOTOS[name]
+    p = PHOTOS[photo_key(name)]
     walls = []
     for box in p["wall"]:
         sy, sx = frac_box(box, shape)
@@ -152,10 +167,32 @@ def measure(lin: np.ndarray, reg: Regions) -> dict:
     return out
 
 
-def at_scale(name: str, target_face_h: float, params: dict | None = None) -> tuple[np.ndarray, Regions]:
+def clip_percent(codes: np.ndarray) -> float:
+    """% de pixeles con algun canal en el codigo maximo de su formato (65535 en 16 bits, 255 en 8)."""
+    top = np.iinfo(codes.dtype).max
+    hit = codes >= top
+    return 100 * float(np.mean(hit.any(axis=-1) if codes.ndim == 3 else hit))
+
+
+def read_master(name: str) -> np.ndarray:
+    """La maestra tal cual esta en el archivo: sRGB de 16 bits. <foto>-antes es un PNG de 8 bits (grade.py)."""
+    if name.endswith("-antes") and not (EDITED / f"{name}.tif").exists():
+        return cv2.cvtColor(cv2.imread(str(EDITED / f"{name}.png"), cv2.IMREAD_UNCHANGED)[..., :3], cv2.COLOR_BGR2RGB)
+    return tifffile.imread(EDITED / f"{name}.tif")
+
+
+def read_reference_codes(ref: str) -> np.ndarray:
+    """La referencia con sus codigos y su profundidad de archivo, sin el canal alfa."""
+    codes = cv2.imread(str(ref_path(ref)), cv2.IMREAD_UNCHANGED)
+    return codes[..., :3] if codes.ndim == 3 else codes
+
+
+def at_scale(name: str, target_face_h: float, params: dict | None = None, srgb: np.ndarray | None = None) -> tuple[np.ndarray, Regions]:
     """La maestra (la entrega, ojeras al 70 %) achicada en luz lineal hasta que sus caras tengan el alto
-    pedido (nunca agrandada), con los ajustes si los hay, y sus regiones a esa escala."""
-    srgb = tifffile.imread(EDITED / f"{name}.tif")
+    pedido (nunca agrandada), con los ajustes si los hay, y sus regiones a esa escala. `srgb`: la maestra ya
+    leida con read_master, para no leerla dos veces."""
+    if srgb is None:
+        srgb = read_master(name)
     shape = srgb.shape[:2]
     reg = mine_regions(name, shape)
     lin = srgb_to_linear(srgb.astype(np.float32) / 65535)
@@ -202,6 +239,8 @@ def rows(m: dict) -> list[tuple[str, str]]:
     if "black" in m:
         b = m["black"]
         out.append(("Negro p5 p50, a* b*", f"{b['p5']:.1f}  {b['p50']:.1f},  {b['a']:+.1f}  {b['b']:+.1f}"))
+    if "clip" in m:
+        out.append(("Recorte (clip %)", f"{m['clip']:.3f}"))
     return out
 
 
@@ -231,10 +270,20 @@ def sheet(ref: str, ref_img: Image.Image, ref_m: dict, mine: list[tuple[str, Ima
 def main(ref: str, names: list[str]) -> None:
     ref_lin, ref_reg = load_reference(ref), ref_regions(ref)
     ref_m = measure(ref_lin, ref_reg)
+    ref_m["clip"] = clip_percent(read_reference_codes(ref))
+    print(f"clip % {ref}: {ref_m['clip']:.3f}", flush=True)
     mine = []
     for name in names:
-        lin, reg = at_scale(name, ref_reg.face_height())
-        mine.append((name, overlay(lin, reg, SHEET_H), measure(lin, reg)))
+        srgb = read_master(name)
+        clip = clip_percent(srgb)  # sobre el codigo maximo de su propio formato
+        print(f"clip % {name}: {clip:.3f}", flush=True)
+        if srgb.dtype == np.uint8:
+            srgb = srgb.astype(np.uint16) * 257  # at_scale lee 16 bits
+        lin, reg = at_scale(name, ref_reg.face_height(), srgb=srgb)
+        del srgb
+        m = measure(lin, reg)
+        m["clip"] = clip
+        mine.append((name, overlay(lin, reg, SHEET_H), m))
     out = PROCESS / f"estilos-medida-{ref}.png"
     sheet(ref, overlay(ref_lin, ref_reg, SHEET_H), ref_m, mine, out)
     notes = NOTES / "estilos" / f"medida-{ref}.json"

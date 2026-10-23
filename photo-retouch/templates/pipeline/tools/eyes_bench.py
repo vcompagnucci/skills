@@ -50,7 +50,11 @@ TOP = "200 %"
 
 
 def v2_module():
+    """La v2 archivada del proyecto original, si esta. Sin ella la columna v2 repite el antes (rotulada asi): el
+    contorno y los demas numeros de la v3 no dependen de ella."""
     path = NOTES / "31-ojeras" / "undereye-v2-suave.py.txt"
+    if not path.exists():
+        return None
     sys.dont_write_bytecode = True  # sin __pycache__ al lado del codigo archivado
     spec = importlib.util.spec_from_loader("undereye_v2", importlib.machinery.SourceFileLoader("undereye_v2", str(path)))
     mod = importlib.util.module_from_spec(spec)
@@ -153,12 +157,12 @@ def sheet(name: str, face: dict, v2) -> dict:
     z = np.load(CACHE / f"{name}-{face['id']}.npz")
     crop, origin, w, gain = z["crop"], tuple(int(v) for v in z["origin"]), z["w"], z["gain"]
     rx = face["oval"][2]
-    out_v2, _ = v2.correct(crop, face, origin)
+    out_v2 = v2.correct(crop, face, origin)[0] if v2 else crop
     maps = undereye.eye_maps(crop, face, origin)
     layer = undereye.layers(maps)
     outs = [undereye.apply(crop, layer, t) for t in LEVELS] + [undereye.apply(crop, undereye.layers(maps, top=True))]
     views = [graded(c, w, gain, rx) for c in (crop, out_v2, *outs)]
-    names = ["v2", *(f"v3 {pct(t)}" for t in LEVELS), f"v3 {TOP}"]
+    names = ["v2" if v2 else "v2 (no esta: = antes)", *(f"v3 {pct(t)}" for t in LEVELS), f"v3 {TOP}"]
     lift_total = sum(m["lift"] for m in maps)
     lift_v2 = np.log2(np.maximum(luminance(out_v2), 1e-7) / np.maximum(luminance(crop), 1e-7))
     rows, report = [], []

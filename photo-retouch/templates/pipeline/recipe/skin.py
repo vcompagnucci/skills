@@ -91,13 +91,15 @@ def clean_teeth(crop: np.ndarray, m: np.ndarray) -> np.ndarray:
     return y + (crop - y) * (1 - TEETH * m)[..., None]
 
 
-def retouch_face(img: np.ndarray, face: dict) -> tuple[dict, dict]:
+def retouch_face(img: np.ndarray, face: dict, kept=()) -> tuple[dict, dict]:
     """Retoca una cara en el lugar. Devuelve cuanta piel toco (para el editor) y las capas de las
-    ojeras al 100 y al 200 % con su origen en la foto (para las puntas del control del editor)."""
+    ojeras al 100 y al 200 % con su origen en la foto (para las puntas del control del editor).
+    kept: los lunares y pecas que quedan (photos.py), afuera de la mascara de piel. Las ojeras usan
+    su propia mascara (undereye.skin_weight) y no los ven."""
     sy, sx = window(face, img.shape[:2])
     crop = img[sy, sx].copy()
     origin = (sy.start, sx.start)
-    w = skin_mask(crop, face, origin, fence=EDGE_FENCE)
+    w = skin_mask(crop, face, origin, fence=EDGE_FENCE, kept=kept)
     rx = face["oval"][2]
     crop = even_redness(crop, w, rx / 12)
     crop = even_tone(crop, w)

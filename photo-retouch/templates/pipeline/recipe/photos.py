@@ -24,7 +24,8 @@ o 4170 x 6246, ya rotada), salvo `wall`, que va en fracciones del alto y el anch
   sombra (25-36 L*) contra la pared (40-58).
 
 - spots / kept / hot: granos y marcas a curar (x, y, radio), lo que se deja a proposito (pecas, lunares: anotado
-  para no curarlo por error en otra pasada) y pixeles calientes del sensor (x, y).
+  para no curarlo por error en otra pasada, y afuera de la mascara del retoque de piel, que asi no lo toca) y pixeles
+  calientes del sensor (x, y).
 - wall_marks: manchas de la pared a curar (x, y, radio), leidas en proceso/21-pared. lint_keep: recuadros
   (x, y, ancho, alto) que la busqueda de pelusas no toca (un raspon del banco no es ropa).
 - faces[].id: una etiqueta libre por persona, la misma en todas las fotos donde aparece (asi copiar las ojeras

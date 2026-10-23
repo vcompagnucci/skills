@@ -4,10 +4,16 @@ Mide, por cara, la piel iluminada (mediana de L*, a*, b*, croma y tono) y su ang
 vectorscopio (Rec. 709, la linea de piel esta en ~123 grados), y en la pared el color que queda.
 Las variantes son (croma, giro de la piel): sin paso de color, el actual y las que se pasen.
 
+Con dos fotos o mas, ademas, el dE76 entre las medianas de piel iluminada (L*, a*, b*) de cada par de fotos, por
+variante, y el maximo: solo entre las caras con el mismo id (faces[].id, la misma persona). Un par que no comparte
+ninguna se salta y se avisa: la piel de dos personas distintas difiere aunque la edicion sea la misma. Las fotos de un
+mismo juego que se muestran juntas: piel a menos de dE 2. Mide el grado base (retocada con el paso de color), no un
+estilo.
+
 Hojas en proceso/40-color/: <foto>-piel-variantes.png (cada cara al 100 %, una columna por
 variante) y <foto>-variantes.png (la foto entera chica).
 
-Uso: .venv/bin/python tools/color_check.py <foto> [...] [--var 1.10,5 ...]
+Uso: .venv/bin/python tools/color_check.py <foto> [...] [--var 1.10,5 ...]   (con dos fotos o mas, tambien el dE76 entre fotos)
 """
 
 import sys
@@ -54,13 +60,20 @@ def skin_pixels(crop: np.ndarray, face: dict, origin) -> np.ndarray:
     return inner & ~feats & (L > 50) & (L < 88) & (c > 8) & (h > 15) & (h < 85)
 
 
-def stats(lin: np.ndarray, m: np.ndarray) -> str:
+def medians(lin: np.ndarray, m: np.ndarray) -> tuple[float, float, float]:
+    """Mediana de L*, a* y b* en la mascara."""
     L, a, b = (np.median(v[m]) for v in np.moveaxis(lab(lin), -1, 0))
+    return float(L), float(a), float(b)
+
+
+def stats(lin: np.ndarray, m: np.ndarray) -> str:
+    L, a, b = medians(lin, m)
     ang = np.median(scope_angle(linear_to_srgb(lin))[m])
     return f"L {L:4.1f}  a {a:4.1f}  b {b:4.1f}  C {np.hypot(a, b):4.1f}  h {np.degrees(np.arctan2(b, a)):4.1f}  scope {ang:5.1f}"
 
 
-def main(name: str, variants: list[tuple[float, float]]) -> None:
+def main(name: str, variants: list[tuple[float, float]]) -> dict[tuple[float, float], dict[str, tuple[float, float, float]]]:
+    """Imprime y guarda las hojas; devuelve, por variante, la mediana (L*, a*, b*) de piel iluminada de cada cara."""
     img = load_linear(name, "retocada")
     img *= evening_gain(img, name)[..., None]
     img *= grade.EXPOSURE
@@ -70,6 +83,7 @@ def main(name: str, variants: list[tuple[float, float]]) -> None:
     sheet = Image.new("RGB", (len(variants) * (CROP + 8) + 8, len(faces) * (CROP + 28) + 8), (16, 16, 16))
     d = ImageDraw.Draw(sheet)
     print(name)
+    lit = {v: {} for v in variants}
     for i, face in enumerate(faces):
         cx, cy, rx, ry = face["oval"]
         y0, x0 = max(cy - ry, 0), max(cx - rx, 0)
@@ -78,6 +92,7 @@ def main(name: str, variants: list[tuple[float, float]]) -> None:
         for j, (ch, hu) in enumerate(variants):
             out = graded(crop, ch, hu)
             print(f"  {face['id']:<11} {ch:.2f}/{hu:<3.0f} {stats(out, m)}")
+            lit[(ch, hu)][face["id"]] = medians(out, m)
             # el recorte: la mejilla y la nariz, al 100 %
             ty, tx = min(max(cy - y0 - CROP // 4, 0), out.shape[0] - CROP), min(max(cx - x0 - CROP // 2, 0), out.shape[1] - CROP)
             tile = to_uint8(linear_to_srgb(out[ty : ty + CROP, tx : tx + CROP]), dither=False)
@@ -98,11 +113,36 @@ def main(name: str, variants: list[tuple[float, float]]) -> None:
         whole.paste(Image.fromarray(to_uint8(linear_to_srgb(graded(small, ch, hu)), dither=False)), (8 + j * (SMALL + 8), 8))
         dw.text((8 + j * (SMALL + 8), small.shape[0] + 14), f"croma x{ch:.2f}, piel +{hu:.0f}", fill=(220, 220, 220), font=font)
     whole.save(OUT / f"{name}-variantes.png")
+    return lit
+
+
+def between_photos(lit: dict[str, dict], variants: list[tuple[float, float]]) -> None:
+    """dE76 entre las medianas de piel iluminada de cada par de fotos, por variante, y el maximo."""
+    print("dE76 piel iluminada entre fotos (mediana L*, a*, b* por cara; solo caras con el mismo id)")
+    names = list(lit)
+    for i, n1 in enumerate(names):
+        for n2 in names[i + 1 :]:
+            if not set(lit[n1][variants[0]]) & set(lit[n2][variants[0]]):
+                print(f"  {n1} - {n2}: sin caras con el mismo id, se salta")
+    for v in variants:
+        worst, compared = 0.0, 0
+        for i, n1 in enumerate(names):
+            for n2 in names[i + 1 :]:
+                f1, f2 = lit[n1][v], lit[n2][v]
+                shared = [f for f in f1 if f in f2]
+                for f in shared:
+                    compared += 1
+                    de = float(np.linalg.norm(np.subtract(f1[f], f2[f])))
+                    worst = de if np.isnan(de) else max(worst, de)  # una cara sin piel (nan) no se esconde en el maximo
+                    print(f"  {v[0]:.2f}/{v[1]:<3.0f} {n1} {f} - {n2} {f}  {de:5.2f}")
+        print(f"  {v[0]:.2f}/{v[1]:<3.0f} maximo {worst:5.2f}" if compared else f"  {v[0]:.2f}/{v[1]:<3.0f} maximo: sin pares con el mismo id")
 
 
 if __name__ == "__main__":
     args = sys.argv[1:]
     extra = [tuple(float(v) for v in a.split(",")) for a in args[args.index("--var") + 1 :]] if "--var" in args else []
     names = args[: args.index("--var")] if "--var" in args else args
-    for n in names:
-        main(n, [(1.0, 0.0), (grade.CHROMA, grade.SKIN_HUE), *extra])
+    variants = [(1.0, 0.0), (grade.CHROMA, grade.SKIN_HUE), *extra]
+    lit = {n: main(n, variants) for n in names}
+    if len(names) >= 2:
+        between_photos(lit, variants)
