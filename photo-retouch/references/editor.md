@@ -18,7 +18,6 @@ The promise is that the file downloaded is what the screen showed. Each rule bel
 - **Start the panel at the master.** Styles made with curves, local light and grain can't be written as panel values (mean error 1.7–4.2 L*). So the starting values are the panel settings closest to the master, solved per photo and style by least squares and rounded to each control's step, and the editor applies only the difference from that start over the untouched master.
 - **Versions store absolute values.** When starting values are recomputed, check the saved versions: each one now applies a different difference.
 - **Feed the browser rounded 8-bit copies of 16-bit PNG layers.** Chrome reads 16-bit PNG as `v>>8` without rounding, which biased the wall layers.
-- **Before keeping a refactor of the shader, the server or the renderer,** run it on a fixed set of saved cases and keep it only if the outputs are pixel-identical or differ exactly where expected. That is how the performance and export rewrites were kept: preview identical at Fit, 100 % and 50 %, 7 export cases, 36 of 36 checks.
 
 Done when `tools/export_check.py` passes and `tools/download_parity.mjs` shows no region over 1 level.
 
@@ -31,15 +30,14 @@ Done when `tools/export_check.py` passes and `tools/download_parity.mjs` shows n
 
 ## Server
 
-- **The page detects a server older than its features** and shows "reopen the launcher" in place of the export summary. An old server can't export adjustments and can overwrite the versions file. The user's running server is theirs: never kill it.
+- **The page detects a server older than its features** and shows "reopen the launcher" in place of the export summary. An old server can't export adjustments and can overwrite the versions file. The photographer's running server is theirs: ask before stopping it (practices.md > Shared machine).
 - **Re-ask for the master list when the window regains focus**, and when a master is being rewritten, wait and retry. A master re-rendered by the pipeline reloads without rebuilding the page.
 - **Imports** accept any RAW LibRaw reads and any image macOS opens, refuse JPEG in a `.sin-jpg` project, and convert to 16-bit sRGB with ColorSync (`sips` dropped to 8 bits). Features that depend on the hand inventory (retouch, under-eyes) stay off until it's done.
 - **Heavy work started from the editor** runs as a child of the server, one photo at a time, with `MallocLargeCache=0 nice -n 19`, waiting while the machine is saturated. One RAW import reaches 2.8 GB.
 
 ## Tests
 
-- **Each suite starts its own server on its own port** with a copy of the versions file passed by environment variable, so tests run while the photographer's editor is open and never write their versions.
-- **One test per feature that goes red when that feature breaks**, then the existing suites once. Per-feature checks (per-face under-eyes, `apply_version` 41 of 41, `export_check` 36 of 36) caught what the general suite missed.
+- Proof, refactors and shared-machine rules: [practices.md](practices.md) > Every change (step 4) and > Shared machine. Here, each suite gets a copy of the versions file through `EDITOR_VERSIONS`. Per-feature checks (per-face under-eyes, `apply_version` 41 of 41, `export_check` 36 of 36) caught what the general suite missed; the performance and export rewrites were kept on preview identical at Fit, 100 % and 50 %, 7 export cases and 36 of 36 checks.
 - Chrome, WebKit and Firefox at several viewports, plus reduced motion: `tools/editor_test/browsers.mjs`.
 - **The suites are the spec of this version:** one check per feature, from zoom and the before/after divider to export crop and per-face controls. A rebuilt or changed editor is this version when they all pass.
 
@@ -47,4 +45,4 @@ Done when every suite in `tools/editor_test/` passes and the new feature's own t
 
 ## Interface
 
-The rest of the interface (zoom, before/after divider, export panel and crop, version menu, tooltips, Sonner notices, offline libraries) is in the template's code, and how each detail was reached is in [HISTORY.md](../HISTORY.md). Change those by the photographer's taste, and follow the project's UI conventions.
+The rest of the interface (zoom, before/after divider, export panel and crop, version menu, tooltips, Sonner notices, offline libraries) is in the template's code. Change it by the photographer's taste, and follow the project's UI conventions.

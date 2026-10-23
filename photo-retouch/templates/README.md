@@ -11,17 +11,16 @@ Code comments are in Spanish. They explain why each number is what it is, and th
 | `pipeline/` | The full RAW-to-editor pipeline: develop, retouch (spots, hot pixels, wall marks, lint, under-eyes, skin), grade, wall matting and backdrop styles, plus the local editor (`recipe/editor_server.py` + `recipe/viewer_template.html`) and its tests (`tools/editor_test/`). |
 | `portrait-qa/` | The QA tools from an earlier square-avatar project: edge gate and montage, alpha check, color zones, before/after sheets, frequency-band skin retouch (`recipe/skin_retouch.py`, `recipe/measure.py` `band_energy`), the matte it was validated on, and a film-grain renderer. It has its own `recipe/`, which is not the same as `pipeline/recipe/`. |
 
-Both folders use the same layout. `recipe/` holds the steps and shared modules. `tools/` holds the one-off measurements and contact sheets you read before changing a number.
+Both folders use the same layout. `recipe/` holds the steps and shared modules. `tools/` holds the measurements and contact sheets you rerun, read before changing a number.
 
 ## How to start
 
-1. Copy `pipeline/` into a new project folder. Put the RAWs in `originales/` (`develop.py` expects `<photo>.RAF`, so change the extension there for other cameras).
+1. Copy `pipeline/` into a new project folder. Put the RAWs in `originales/` (`develop.py` expects `<photo>.RAF`, so change the extension there for other cameras). Keep `.sin-jpg` only if the brief says no JPG. While it exists, JPEG leaves the editor only as an in-memory download.
 2. Create a venv: `python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt`.
-3. Fill in `recipe/photos.py` by hand. Replace `PHOTO_A` with one entry per photo, keyed by the file name without its extension. The docstring explains every field. For group photos, also give each face id a label in `FACE_NAMES` in `recipe/viewer_template.html` (`{ "face-id": "Label" }`): saved versions key the per-face controls by those labels. Measure the fields on the developed image, using the sheets that `tools/grid.py`, `tools/check_faces.py`, `recipe/spots.py` and `recipe/wall.py` write to `proceso/`.
-4. Run the steps in order, one photo per process: `recipe/develop.py`, then `recipe/retouch.py`, then `recipe/grade.py`, then `recipe/styles.py <photo>` (optional backdrop styles; `--seed` writes them as editor versions), and, only if an editor is wanted ([editor.md](../references/editor.md)), `recipe/viewer.py` and `Abrir editor.command`.
-5. Delete `.sin-jpg` unless the brief says no JPG. While it exists, the editor only produces JPEG as a download.
+3. Fill in `recipe/photos.py` by hand. Replace `PHOTO_A` with one entry per photo, keyed by the file name without its extension. The docstring explains every field. Measure the fields on the developed image, using the sheets that `tools/grid.py`, `tools/check_faces.py`, `recipe/spots.py` and `recipe/wall.py` write to `proceso/`.
+4. Run the steps in order, one photo per process: `recipe/develop.py`, then `recipe/retouch.py`, then `recipe/grade.py`, then `recipe/styles.py <photo>` (optional backdrop styles; `--seed` writes them as editor versions), and for an editor ([editor.md](../references/editor.md)) `recipe/viewer.py` and `Abrir editor.command`; for group photos, first give each face id a label in `FACE_NAMES` in `recipe/viewer_template.html` (`{ "face-id": "Label" }`): saved versions key the per-face controls by those labels.
 
-`portrait-qa/` is a second reference, not a second pipeline. Copy the tools you need, together with the `recipe/` modules they import.
+`portrait-qa/` is a second reference, not a second pipeline. Copy the tools you need with the `recipe/` modules they import. `common.py`, `masks.py`, `matte.py`, `photos.py` and `styles.py` exist in both `recipe/` folders: merge them, never overwrite.
 
 ### Tests
 
@@ -40,7 +39,7 @@ The pipeline is built for macOS:
 
 ### Requirements
 
-Python 3.12. The dependencies are whatever the code imports: `numpy`, `opencv-python-headless` (cv2), `pillow` (PIL), `tifffile`, `rawpy`, `scipy` and `pymatting`, which brings `numba` and `llvmlite`. They are pinned in `pipeline/requirements.txt`. `portrait-qa/` uses the same set.
+Python 3.12, with `numpy`, `opencv-python-headless`, `pillow`, `tifffile`, `rawpy`, `scipy` and `pymatting` (which brings `numba` and `llvmlite`), pinned in `pipeline/requirements.txt`, which `portrait-qa/` shares.
 
 ## Vendored code and licenses
 
