@@ -17,7 +17,7 @@ Both folders use the same layout. `recipe/` holds the steps and shared modules. 
 
 1. Copy `pipeline/` into a new project folder. Put the RAWs in `originales/` (`develop.py` expects `<photo>.RAF`, so change the extension there for other cameras).
 2. Create a venv: `python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt`.
-3. Fill in `recipe/photos.py` by hand. Replace `PHOTO_A` with one entry per photo, keyed by the file name without its extension. The docstring explains every field. Measure the fields on the developed image, using the sheets that `tools/grid.py`, `tools/check_faces.py`, `recipe/spots.py` and `recipe/wall.py` write to `proceso/`.
+3. Fill in `recipe/photos.py` by hand. Replace `PHOTO_A` with one entry per photo, keyed by the file name without its extension. The docstring explains every field. For group photos, also give each face id a label in `FACE_NAMES` in `recipe/viewer_template.html` (`{ "face-id": "Label" }`): saved versions key the per-face controls by those labels. Measure the fields on the developed image, using the sheets that `tools/grid.py`, `tools/check_faces.py`, `recipe/spots.py` and `recipe/wall.py` write to `proceso/`.
 4. Run the steps in order, one photo per process: `recipe/develop.py`, then `recipe/retouch.py`, then `recipe/grade.py`, then `recipe/styles.py <photo>` (optional backdrop styles; `--seed` writes them as editor versions), and, only if an editor is wanted ([editor.md](../references/editor.md)), `recipe/viewer.py` and `Abrir editor.command`.
 5. Delete `.sin-jpg` unless the brief says no JPG. While it exists, the editor only produces JPEG as a download.
 

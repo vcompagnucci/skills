@@ -41,6 +41,7 @@ Done when `tools/export_check.py` passes and `tools/download_parity.mjs` shows n
 - **Each suite starts its own server on its own port** with a copy of the versions file passed by environment variable, so tests run while the photographer's editor is open and never write their versions.
 - **One test per feature that goes red when that feature breaks**, then the existing suites once. Per-feature checks (per-face under-eyes, `apply_version` 41 of 41, `export_check` 36 of 36) caught what the general suite missed.
 - Chrome, WebKit and Firefox at several viewports, plus reduced motion: `tools/editor_test/browsers.mjs`.
+- **The suites are the spec of this version:** one check per feature, from zoom and the before/after divider to export crop and per-face controls. A rebuilt or changed editor is this version when they all pass.
 
 Done when every suite in `tools/editor_test/` passes and the new feature's own test is among them.
 

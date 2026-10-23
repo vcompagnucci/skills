@@ -18,7 +18,7 @@ Both ended with a local photo editor: a page served by a small server on the sam
   - Compare by measuring, "una arriba de la otra". The same code measures the reference and the edit, on the same crop at the same face width.
   - Pimples go, freckles stay ("si son pecas no, si son granos sí").
   - The bar for edges: "como si edito yo la foto a mano".
-- Automatic blemish detection failed on his face. Spots were inventoried by hand on 100-200 % sheets with coordinate grids, one verdict per candidate, written into a hand-edited file.
+- Automatic blemish detection failed on the photographer's own face. Spots were inventoried by hand on 100-200 % sheets with coordinate grids, one verdict per candidate, written into a hand-edited file.
 - Problems in v4 that shaped the method:
   - Semi-transparent hair left a light aura of +1.5 to +3 L* around the head. Estimating the wall light without the person and a margin around them brought it to ±0.6.
   - Lit skin reached 91-94 L*, merged with the wall and lost a freckle and a mole. A tone curve with three anchors, applied to face light with the fine texture added back on top (never under 80 %), fixed it.
@@ -28,7 +28,7 @@ Both ended with a local photo editor: a page served by a small server on the sam
 
 ## 2026-10-12. v7 approved: edges and camera color (project 1)
 
-- The photographer approved v7. Edges were rebuilt so contours match the camera original. For the color style he chose the camera's own look ("prefiero original"): the tone and color of the camera JPEG, with only the wall and the spots changed.
+- The photographer approved v7. Edges were rebuilt so contours match the camera original. For the color style they chose the camera's own look ("prefiero original"): the tone and color of the camera JPEG, with only the wall and the spots changed.
 - Wall brightening became additive by the wall's share of each pixel: I' = I + (1-α)(g-1)B. Multiplying the whole pixel had left a light rim on skin and a dark one on hair and clothing.
 - The color master of the photo with glasses got a grey cap on the crown. The wall share inside an edge pixel had to be measured after the camera curve, which multiplies dark hair by about 0.14 and the wall by about 1.2. Hair went from 14.5 to 12.6 L* (camera: 8.0).
 - A luminance clamp on the wall share let blue and green through and greyed brown hair. It became a per-channel clamp.
@@ -80,8 +80,8 @@ Both ended with a local photo editor: a page served by a small server on the sam
 
 ## 2026-10-15. The 200 % end and editor v2 (project 2)
 
-- He asked for an end that cleans them more. The 100 % layer doubled was barely distinguishable, because the darkest part sits right under the lashes, where the 100 % layer does not reach. So 200 % became its own layer: a finer filter, measured closer to the lashes, keeping a 0.35 EV lid shadow, with wrinkle grooves brought toward the skin around them. Stronger tries drew lines and color seams on one portrait. The chosen one was approved ("S4 está bien").
-- He asked for a real editor: a right panel with no text, only the real DialKit; versions he can save, listed on the left; the M marks gone; Space as the only shortcut; and a clean, instant photo switch.
+- They asked for an end that cleans them more. The 100 % layer doubled was barely distinguishable, because the darkest part sits right under the lashes, where the 100 % layer does not reach. So 200 % became its own layer: a finer filter, measured closer to the lashes, keeping a 0.35 EV lid shadow, with wrinkle grooves brought toward the skin around them. Stronger tries drew lines and color seams on one portrait. The chosen one was approved ("S4 está bien").
+- They asked for a real editor: a right panel with no text, only the real DialKit; versions they can save, listed on the left; the M marks gone; Space as the only shortcut; and a clean, instant photo switch.
 - Editor v2:
   - WebGL2. One shader draws the base, the under-eye patches and the adjustments, with under half a level of dither at the end.
   - Display images of every photo at 2560 px, downscaled in linear light and preloaded. A photo switch takes one frame (about 5 ms), with no black flash. Full resolution loads when the view stays on a photo or zooms.
@@ -99,7 +99,7 @@ Both ended with a local photo editor: a page served by a small server on the sam
 - Request: three styles "para una foto en una nota", referenced on companies known for photo craft: warm beige (Stripe), bright white (Ramp), dark falloff (Apple Newsroom).
 - First try: global tints. Stripe's beige over the whole photo turned black shirts brown and tanned the skin ("no son naturales esos colores").
 - Second try: the background only.
-- Third, after he asked for light edited "como si la editara una persona" and a background made from parameters: global light settings with no temperature or tint on people, plus a Background folder (exposure, evenness, falloff, temperature, tint, saturation) applied only to the wall through a closed-form alpha matte.
+- Third, after they asked for light edited "como si la editara una persona" and a background made from parameters: global light settings with no temperature or tint on people, plus a Background folder (exposure, evenness, falloff, temperature, tint, saturation) applied only to the wall through a closed-form alpha matte.
 - "Está cortando la zapatilla": the matte called a white sneaker wall, and two styles painted it (10,321 pixels over dE 2). Hand-drawn keep polygons fed into the matting solve made the nearby wall go to 0.4-0.8 alpha and flipped a lace tip. Applied after the matting, they gave 0 pixels with alpha under 1 inside (from 88,674), and the people stayed pixel-identical.
 - Chrome reads a 16-bit PNG by dropping the low byte without rounding, so the editor got rounded 8-bit copies.
 - "Armame versiones solo tocando estos parámetros": a first batch of invented looks recolored or flattened the wall and was rejected ("no random, son horribles"). Published Lightroom recipes, with their numbers and sources, replaced them.
@@ -110,16 +110,16 @@ Both ended with a local photo editor: a page served by a small server on the sam
   - The grain stage took 341 of 474 s: its OpenMP pragmas had been compiled without OpenMP. It was rebuilt with 4 threads.
   - The scene is built once per photo. Two photos run at a time when memory pressure is normal.
   - Originals are re-exported only when the fingerprint of their inputs changes. An existence check had left exports stale after a framing edit.
-  - `taskpolicy -b` pinned the work to the efficiency cores and made each photo 3.8x slower. He chose the fastest option.
+  - `taskpolicy -b` pinned the work to the efficiency cores and made each photo 3.8x slower. They chose the fastest option.
   - Grain got a fixed seed per channel, so any re-render can be proven identical.
   - Result: one photo in four styles from about 14 min to 1 min 52 s; all 16 masters from 61 min to 8 min 14 s. 116 of 136 files were pixel-identical; only the grain style changed, by its new seed.
 - Agent time, measured over the day: the model thinking and writing was 69-85 % of the work, renders 8-18 %. Audits were 34 % of 29 hours. Hence effort high, mechanical steps on a low-effort subagent, one auditor per deliverable, and crops instead of whole sheets.
-- He said he does not read the process, only the images. Replies became 1-3 lines plus the file to open.
+- They said they do not read the process, only the images. Replies became 1-3 lines plus the file to open.
 - Finder's gallery does not open subfolders, so `proceso/` was flattened with group prefixes. 867 plain zooms went to the Trash. 659 images that lived only in `work/`, the project root, `/tmp` or the agent's own folders were gathered in. Crops left in `/tmp` between the 10th and the 12th were already gone, emptied by macOS.
-- The "exact" version: he asked that every number in the color report match each reference.
+- The "exact" version: they asked that every number in the color report match each reference.
   - The old report compared different anatomy: a reference ellipse took cheek, chin and a jacket collar. Now skin is compared with skin.
   - Rebuilding parameters from their saved dictionary dropped one field, and skin came out 16 L* darker than the approved master. Everything built before the fix was redone.
-  - Matching the skin histogram with no limit came out exact, with large dark islands. A slope cap of 2.5 kept it natural. He chose per style which light to keep.
+  - Matching the skin histogram with no limit came out exact, with large dark islands. A slope cap of 2.5 kept it natural. They chose per style which light to keep.
   - A highlight shoulder stopped forehead and cheek from burning. One cheek edge still showed a white line ("mal") until the shoulder compressed the edge pixel too.
 - The first version of this skill was written that day from 63 candidate rules, with a hook that blocks `/tmp` and JPEG writes in no-JPEG projects.
 
@@ -139,14 +139,14 @@ Both ended with a local photo editor: a page served by a small server on the sam
   - With the skin raised, forehead and cheekbones clipped red on 2-10 % of the face. The light versions got Highlights -20 and Whites -8: 0 % clipped, for 1.5 L* less skin. The fitting tool now reports the clipped share of the face.
   - A line in the wall was the paper's own vertical stripes, made visible by the contrast. A new Smoothing control flattens paper differences up to 8 % and keeps anything from 20 % up, which is a shadow of the people.
   - Re-seeding replaces only the versions a photo still has, so deleted versions stay deleted.
-- Versions are named by what they are, without the company (his request). One reference with no wall to compare was dropped.
+- Versions are named by what they are, without the company (the photographer's request). One reference with no wall to compare was dropped.
 
 ## 2026-10-18 to 10-19. The editor, request by request (project 2)
 
 Before each change below, the files it touched were copied as `<file>.antes-<change>.<ext>`. Each change closed with its own test.
 
 - 10-18: no "Version 1". The library's base version no longer shows while saved versions exist.
-- Export became Format, Size and Crop, with no presets, explanation lines or Reset (he removed them). JPEG was added at his request, built in memory for the download only, so the project stays JPEG-free. Crop works like the one in Apple Photos. A check script tests 4 formats × 3 sizes × 3 crops against the server: 36 of 36.
+- Export became Format, Size and Crop, with no presets, explanation lines or Reset (the photographer removed them). JPEG was added at their request, built in memory for the download only, so the project stays JPEG-free. Crop works like the one in Apple Photos. A check script tests 4 formats × 3 sizes × 3 crops against the server: 36 of 36.
 - "Tal cual como se ve en el preview así se exporte": the export preview got zoom, drawn at the smaller of the zoom and the file size, so it never shows more detail than the file will have.
 - Performance audit: 0 frames per second at rest; each gesture costs 1-2 ms of main thread. Dragging the crop frame went from 2.3 to 1.7 ms, with old and new measured interleaved. Panning went from 1.8 to 1.2 ms, inside the noise, and was reported that way.
 - Holding Space shows the RAW only over a version. In the RAW and before/after views it does nothing.
