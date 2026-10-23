@@ -53,7 +53,7 @@ Every branch that edits a file follows [references/practices.md](references/prac
 ## Steps
 
 1. **Develop** linear 16-bit, white balance from the neutral wall.
-   Done when clipped pixels, counted on the linear develop, are under 0.005 % (hot pixels only) and the count is in `proceso-notas/`.
+   Done when clipped pixels are under 0.005 % (hot pixels only) and the count is in `proceso-notas/`. `develop.py` doesn't count them: on the 16-bit develop, `np.mean((img >= 65535).any(axis=-1))`.
 2. **Inventory** at 100–200 % with coordinate grids, one candidate sheet per face, each candidate called pimple or mole one by one. Automatic detection failed on the first face it met.
    Done when every candidate has a verdict in `recipe/photos.py` and the sheet is in `proceso/`.
 3. **Retouch**: details in [references/skin.md](references/skin.md). For wall and light, prefer smooth global gains without a mask. When a mask is unavoidable, follow [references/compositing.md](references/compositing.md).
