@@ -2,7 +2,7 @@
 
 Apple's eight design principles, and what iPhone, iPad, Mac, games, and Mac Catalyst ask of a design. For Apple, the principles are tools for weighing competing priorities, not one right way, and each device's viewing distance, inputs, and session length should shape the layout. An app must feel at home wherever it runs, never a straight port from another device. (`design-principles`, `designing-for-ios`, `designing-for-macos`, `designing-for-games`, `mac-catalyst`)
 
-## The eight principles
+## The eight principles (`design-principles`)
 
 - **Purpose: focus on the features that matter most, and make them great.** Align them with how people want to use the product, because a product with a clear use is more effective at helping people meet their goals. (`design-principles`)
 - **Create value, and find new ways to solve the problem.** At every stage, ask what the product is for and whether the design serves it. Investigate existing solutions instead of re-creating them, and define what sets your product apart. (`design-principles`)

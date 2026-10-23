@@ -20,7 +20,7 @@
 
 - **Put a compact index of what memory holds in the first message,** so the agent knows what it can look up. In a randomized test it cut memory-related dissatisfaction by 6.9%.
 - **Date every remembered fact, link it to the conversation it came from, and say when an answer comes from memory.** A stale fact stated as current is worse than asking again. Store an `expires_at` on each note, set per note type, and push it back when a later conversation reinforces the fact. Before a consequential action the agent checks the source conversation.
-- Memory is read back into context, so it's an injection path. How to sanitize it belongs to the security skill.
+- Memory is read back into context, so it's an injection path. How to sanitize it is agent-security, data.md, "Memory outlives the conversation".
 
 ## Forgetting
 

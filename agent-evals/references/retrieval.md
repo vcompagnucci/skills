@@ -13,7 +13,7 @@ Evaluate retrieval apart from the answer. A wrong answer from the right article 
 - **Read the failure off the metrics.** Low context relevance: fix retrieval (filters, chunking, query). Good context with an unfaithful answer: fix generation. Faithful but not answering: the model used the wrong section.
 - **Chunk size and overlap are parameters.** Grid-search them against recall@k, and prepend the title and section heading to each chunk.
 - **Search again when the conversation changes topic,** and test that the agent does.
-- Never grade answers with ROUGE, BERTScore, or cosine similarity. They reward wording, not correctness.
+- Grade answers on correctness, with code checks and the claim-by-claim faithfulness check above, never with ROUGE, BERTScore, or cosine similarity, which reward wording.
 
 ## Abstention
 

@@ -1,13 +1,13 @@
 # Audit an existing eval setup
 
-Inspect the actual artifacts: traces, judge prompts, labels, CI config, dashboards. Never answer from this list alone. Report one block per problem, most harmful to users first, and omit areas with no problem:
+Inspect the actual artifacts: traces, judge prompts, labels, CI config, dashboards. Never answer from this list alone. Run every numbered check below unless check 1 stops the audit. Write one block for each check whose status is exists or can't tell, most harmful to users first:
 
     ### <problem>
-    Status: exists | OK | can't tell
+    Status: exists | can't tell
     <one or two sentences on what you found, naming the artifact>
     Fix: <action, and the reference that covers it>
 
-Check:
+End with one line listing every check number under exists, can't tell, or OK. The audit is done when every check number you ran appears in that line. The checks:
 
 1. Failure modes came from read traces. Generic labels ("helpfulness", "hallucination score", "toxicity") mean they were brainstormed. If there's no error analysis, stop here and start with discover.md. Recommend no judges or dashboards before it, only code tests for rules already known.
 2. Every judge is Pass/Fail, checks one mode, and does nothing code could check (format, schema, keywords, resulting state).

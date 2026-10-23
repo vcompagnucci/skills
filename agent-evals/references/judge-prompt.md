@@ -30,7 +30,7 @@ Enforce the JSON with the provider's structured output as well as the prompt. A 
 
 ## If dev agreement stalls
 
-Each fix below except the first and third counts toward the two manual revisions allowed against dev (evaluators.md). A new model, a new cutoff, or a split mode makes a new judge with a fresh count of two, tuned on dev and scored on test once.
+Each fix below counts toward the two manual revisions allowed against dev (evaluators.md "Label"), except a stronger judge model and a split mode. A new model, a new cutoff, or a split mode makes a new judge with a fresh count of two, tuned on dev and scored on test once.
 
 - Both TPR and TNR low: try the stronger judge model.
 - One low: read only the disagreements behind that one.

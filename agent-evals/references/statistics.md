@@ -18,13 +18,13 @@ Every formula the skill uses, each with a check value. Copy the formula, run its
 
 - **Estimate pass@k and pass^k from n runs, never by rerunning k times.** With c passes in n runs: pass@k = 1 - C(n-c, k) / C(n, k), and pass^k = C(c, k) / C(n, k). Check: 6 of 8 gives pass@2 = 0.964 and pass^4 = 0.214.
 - **The noise band ±1/√(cases × runs) answers one question: is this change bigger than rerunning the same cases?** Check: 25 cases × 2 runs moves about ±14 points by chance. It's the special case where all variance sits within cases, so it's too narrow for whether a gain holds on new traffic whenever per-case pass rates spread (some cases always pass, some always fail). Answer that one with an interval over cases.
-- **Add cases, not runs, once rerun noise is small.** Runs shrink only the within-case variance. With binary scores and uniform case difficulty, K runs scale total variance by (1 + 2/K)/3. Check: K = 2 cuts it by 1/3, K = 4 by 1/2, K = 6 by 5/9, and no K cuts more than 2/3. This sizes estimates. A case that gates a release still runs 15 times (rule 6).
-- **Never lower the agent's temperature to cut eval noise.** It moves variance into the between-case term or biases the score: rounding uniform case difficulty to temperature 0 tripled the irreducible variance, from 1/12 to 1/4.
+- **Add cases, not runs, once rerun noise is small.** Runs shrink only the within-case variance. With binary scores and uniform case difficulty, K runs scale total variance by (1 + 2/K)/3. Check: K = 2 cuts it by 1/3, K = 4 by 1/2, K = 6 by 5/9, and no K cuts more than 2/3. This sizes estimates. A case that gates a release still runs 15 times (SKILL.md rule 6).
+- **Keep the agent at its production temperature; cut noise with more cases (above), never a lower temperature.** A lower temperature moves variance into the between-case term or biases the score: rounding uniform case difficulty to temperature 0 tripled the irreducible variance, from 1/12 to 1/4.
 
 ## Size a comparison before running it
 
 - **Cases needed for the smallest difference you'd act on:** n = (z_α/2 + z_β)² × (ω² + σ_A²/K_A + σ_B²/K_B) / δ². ω² = Var(x_A) + Var(x_B) - 2Cov(x_A, x_B) is the between-case variance of the difference, σ² the mean within-case variance, K the runs per case, δ the difference. Check: z_α/2 = 1.96, z_β = 0.8416 (power 0.80), ω² = 1/9, σ² = 0, δ = 0.03 gives about 969 cases.
-- **Smallest difference your cases can detect:** δ = (z_α/2 + z_β) × √((ω² + σ_A²/K_A + σ_B²/K_B) / n). Check: the same z values, n = 198, ω² = 1/9, and σ² = 1/6 give 0.1327 at K = 1 and 0.0757 at K = 10. A gain smaller than δ is invisible to the eval. K here sizes the estimate; a gating case still runs 15 times (rule 6).
+- **Smallest difference your cases can detect:** δ = (z_α/2 + z_β) × √((ω² + σ_A²/K_A + σ_B²/K_B) / n). Check: the same z values, n = 198, ω² = 1/9, and σ² = 1/6 give 0.1327 at K = 1 and 0.0757 at K = 10. A gain smaller than δ is invisible to the eval. K here sizes the estimate; a gating case still runs 15 times (SKILL.md rule 6).
 
 ## Compare two versions
 

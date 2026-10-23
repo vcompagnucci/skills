@@ -2,11 +2,7 @@
 
 How to design features built on generative AI and machine learning. Apple says to use AI only where it adds clear value, keep people in control, say when AI is involved, and design for its mistakes, its latency, and models that change. (`generative-ai`, `machine-learning`)
 
-**Contents:** When to use AI · Generative AI · Machine learning · Key source articles
-
-## When to use AI
-
-- **Offer generative AI only where it adds clear, specific value.** Time savings, better communication, or more creativity justify it. When AI only complements the core, like Genmoji beside regular emoji, offer a non-AI fallback, since features can be unavailable or declined. (`generative-ai`)
+**Contents:** Generative AI · Machine learning · Key source articles
 
 ## Generative AI (`generative-ai`)
 

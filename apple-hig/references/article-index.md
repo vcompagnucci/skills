@@ -4,6 +4,8 @@ The 119 pages of Apple's Human Interface Guidelines in this skill, on app interf
 
 The other 39 pages are listed at the end. They are left out on purpose: pages only for Apple Watch, Apple TV, or Vision Pro, Apple technologies and services like CarPlay, HealthKit, Apple Pay, and In-App Purchase, and system integrations like Siri, App Shortcuts, App Clips, and Control Center controls. `scripts/hig_page.py <slug>` still opens any of them. The HIG's 15 navigation pages only list links, so they aren't counted.
 
+**Contents:** Principles and platforms · Layout and content views · Navigation and search · Presentation, modality, and windows · Buttons and menus · Editing, files, and sharing · Controls and data entry · Color, type, materials, and images · Icons and symbols · Feedback, status, and data display · Onboarding, help, settings, and writing · Accessibility and inclusion · Motion, sound, haptics, and media · Inputs · Widgets, Live Activities, and notifications · Privacy and accounts · AI and machine learning · Not in this skill
+
 ## Principles and platforms (`references/principles-and-platforms.md`)
 
 - **[Design principles](https://developer.apple.com/design/human-interface-guidelines/design-principles)** (`design-principles`, 2026-06-08). Great design rests on how people think, feel, and interact, and eight principles (purpose, agency, responsibility, familiarity, flexibility, simplicity, craft, delight) are tools for weighing competing priorities, not one right way.
@@ -176,20 +178,20 @@ The other 39 pages are listed at the end. They are left out on purpose: pages on
 
 ## Not in this skill (open with the script)
 
-- **[Complications](https://developer.apple.com/design/human-interface-guidelines/complications)** (`complications`, 2023-10-24,  only). Apple Watch, Apple TV, or Vision Pro only.
+- **[Complications](https://developer.apple.com/design/human-interface-guidelines/complications)** (`complications`, 2023-10-24). Apple Watch, Apple TV, or Vision Pro only.
 - **[Designing for tvOS](https://developer.apple.com/design/human-interface-guidelines/designing-for-tvos)** (`designing-for-tvos`, 2022-09-14). Apple Watch, Apple TV, or Vision Pro only.
 - **[Designing for visionOS](https://developer.apple.com/design/human-interface-guidelines/designing-for-visionos)** (`designing-for-visionos`, 2024-02-02). Apple Watch, Apple TV, or Vision Pro only.
 - **[Designing for watchOS](https://developer.apple.com/design/human-interface-guidelines/designing-for-watchos)** (`designing-for-watchos`, 2023-06-05). Apple Watch, Apple TV, or Vision Pro only.
-- **[Digit entry views](https://developer.apple.com/design/human-interface-guidelines/digit-entry-views)** (`digit-entry-views`, undated,  only). Apple Watch, Apple TV, or Vision Pro only.
-- **[Digital Crown](https://developer.apple.com/design/human-interface-guidelines/digital-crown)** (`digital-crown`, 2023-12-05,  only). Apple Watch, Apple TV, or Vision Pro only.
-- **[Eyes](https://developer.apple.com/design/human-interface-guidelines/eyes)** (`eyes`, 2024-06-10,  only). Apple Watch, Apple TV, or Vision Pro only.
-- **[Immersive experiences](https://developer.apple.com/design/human-interface-guidelines/immersive-experiences)** (`immersive-experiences`, 2025-06-09,  only). Apple Watch, Apple TV, or Vision Pro only.
-- **[Lockups](https://developer.apple.com/design/human-interface-guidelines/lockups)** (`lockups`, undated,  only). Apple Watch, Apple TV, or Vision Pro only.
-- **[Ornaments](https://developer.apple.com/design/human-interface-guidelines/ornaments)** (`ornaments`, 2024-02-02,  only). Apple Watch, Apple TV, or Vision Pro only.
-- **[Remotes](https://developer.apple.com/design/human-interface-guidelines/remotes)** (`remotes`, undated,  only). Apple Watch, Apple TV, or Vision Pro only.
-- **[Spatial layout](https://developer.apple.com/design/human-interface-guidelines/spatial-layout)** (`spatial-layout`, 2024-03-29,  only). Apple Watch, Apple TV, or Vision Pro only.
-- **[Top Shelf](https://developer.apple.com/design/human-interface-guidelines/top-shelf)** (`top-shelf`, undated,  only). Apple Watch, Apple TV, or Vision Pro only.
-- **[Watch faces](https://developer.apple.com/design/human-interface-guidelines/watch-faces)** (`watch-faces`, undated,  only). Apple Watch, Apple TV, or Vision Pro only.
+- **[Digit entry views](https://developer.apple.com/design/human-interface-guidelines/digit-entry-views)** (`digit-entry-views`, undated). Apple Watch, Apple TV, or Vision Pro only.
+- **[Digital Crown](https://developer.apple.com/design/human-interface-guidelines/digital-crown)** (`digital-crown`, 2023-12-05). Apple Watch, Apple TV, or Vision Pro only.
+- **[Eyes](https://developer.apple.com/design/human-interface-guidelines/eyes)** (`eyes`, 2024-06-10). Apple Watch, Apple TV, or Vision Pro only.
+- **[Immersive experiences](https://developer.apple.com/design/human-interface-guidelines/immersive-experiences)** (`immersive-experiences`, 2025-06-09). Apple Watch, Apple TV, or Vision Pro only.
+- **[Lockups](https://developer.apple.com/design/human-interface-guidelines/lockups)** (`lockups`, undated). Apple Watch, Apple TV, or Vision Pro only.
+- **[Ornaments](https://developer.apple.com/design/human-interface-guidelines/ornaments)** (`ornaments`, 2024-02-02). Apple Watch, Apple TV, or Vision Pro only.
+- **[Remotes](https://developer.apple.com/design/human-interface-guidelines/remotes)** (`remotes`, undated). Apple Watch, Apple TV, or Vision Pro only.
+- **[Spatial layout](https://developer.apple.com/design/human-interface-guidelines/spatial-layout)** (`spatial-layout`, 2024-03-29). Apple Watch, Apple TV, or Vision Pro only.
+- **[Top Shelf](https://developer.apple.com/design/human-interface-guidelines/top-shelf)** (`top-shelf`, undated). Apple Watch, Apple TV, or Vision Pro only.
+- **[Watch faces](https://developer.apple.com/design/human-interface-guidelines/watch-faces)** (`watch-faces`, undated). Apple Watch, Apple TV, or Vision Pro only.
 - **[AirPlay](https://developer.apple.com/design/human-interface-guidelines/airplay)** (`airplay`, 2023-05-02). Apple technology left out of this skill.
 - **[Augmented reality](https://developer.apple.com/design/human-interface-guidelines/augmented-reality)** (`augmented-reality`, undated, iOS and iPadOS only). Apple technology left out of this skill.
 - **[CareKit](https://developer.apple.com/design/human-interface-guidelines/carekit)** (`carekit`, 2023-05-02, iOS and iPadOS only). Apple technology left out of this skill.

@@ -1,6 +1,6 @@
 ---
 name: apple-hig
-description: Apple's Human Interface Guidelines (HIG) for iPhone, iPad and Mac apps, cited by page. Use for any iOS, iPadOS or macOS interface question: designing or reviewing a screen, how a component should look or behave, a size or spec, or what Apple or the HIG says, including for Apple-style web.
+description: Apple's Human Interface Guidelines (HIG) for iPhone, iPad and Mac apps. Use for any iOS, iPadOS or macOS interface question: designing or reviewing a screen, how a component should look or behave, a size or spec, or what Apple or the HIG says, including for Apple-style web.
 ---
 
 # Apple HIG
@@ -10,22 +10,22 @@ The 119 HIG pages on app interface design for iPhone, iPad and Mac, distilled in
 ## Steps
 
 1. **Route.** Find the question's branch in "Where to look" and open only the files it names.
-2. **Read the live page** before you finalize a component, and whenever an exact value or table matters: `python3 scripts/hig_page.py <slug>`, or add `--section "Best practices"` for one section. The HIG site is a JavaScript app, so a web fetch returns only the title. When the live page differs from the reference file, the live page is newer: answer from it and say what changed.
+2. **Read the live page** before you state a component's look, behavior or spec as the answer, and whenever an exact value or table matters: `python3 scripts/hig_page.py <slug>`, or add `--section "Best practices"` for one section. The HIG site is a JavaScript app, so a web fetch returns only the title. When the live page differs from the reference file, the live page is newer: answer from it and say what changed.
 3. **Answer in the HIG voice**, below.
 
-Done when every rule, number, example and reason in the answer carries its slug, and every component you finalized was read on its live page.
+Done when every claim you attribute to Apple carries its slug, every other claim is labeled as yours, and every component's look, behavior or spec, and every exact value, that you state was read on its live page.
 
 ## Where to look
 
-- **One page or component.** Grep `references/article-index.md` for its slug and file, then open that file.
-- **A named concept.** Grep `references/glossary.md`, 441 terms with the pages that define them.
+- **One page or component, or a choice between components.** Grep `references/article-index.md` for each slug and its file, then read that file's section whose heading begins with "Choosing", when it has one, and the section whose heading carries the slug.
+- **A named concept.** Grep `references/glossary.md`, 441 terms with the pages that define them, then open the topic file of the slug it cites when the answer needs more than the definition.
 - **A number** (a size, contrast ratio, spacing, count or timing). `references/numbers.md`, then the live page for the full table.
-- **A review of a screen or a design.** List every component on it and check each against its file, then check the whole against the core ideas in `references/hig-in-brief.md`. Done when every component has been checked.
-- **An app or a flow from scratch.** Follow "Designing an app, in order" in `references/hig-in-brief.md`, opening each file as its step comes up.
+- **A review of a screen or a design.** List every component on it and check each against the section that carries its slug in its topic file, then weigh the whole against each point under "Core ideas" in `references/hig-in-brief.md`. Done when every component has a verdict, each rule it breaks is named with its slug, and every core idea has been weighed.
+- **An app or a flow from scratch.** Follow "Designing an app, in order" in `references/hig-in-brief.md`, opening the topic file below for each step's slugs as the step comes up. Done when every step has a decision with its slug, or a stated reason it doesn't apply.
 - **A topic.** The file below that holds it.
 - **Apple's approach as a whole, or a question across many topics.** `references/hig-in-brief.md`, then the files its points cite.
 - **Apple-style web.** The same files. Carry each principle over, and name every rule that depends on an Apple control or system feature the web lacks.
-- **A page this skill leaves out:** Apple Watch, Apple TV, Vision Pro, CarPlay and the other Apple technologies, Apple Pay, Wallet, In-App Purchase, iCloud, Maps, Siri, App Shortcuts, App Clips, Control Center controls, iMessage apps, Always On. Say the skill leaves it out, find its slug at the end of `references/article-index.md`, read it with the script, and answer from the page.
+- **A page this skill leaves out:** Apple Watch, Apple TV, Vision Pro, CarPlay and the other Apple technologies, Apple Pay, Wallet, In-App Purchase, iCloud, Maps, Siri, App Shortcuts, App Clips, Control Center controls, iMessage apps, Always On. Say the skill leaves it out, find its slug under "Not in this skill (open with the script)" in `references/article-index.md`, read it with the script, and answer from the page.
 - **Apple's fluid motion and gestures from the WWDC talks, translated for the web.** Call the Skill tool with "apple-design".
 - **Anything outside the HIG** (WWDC sessions, developer API docs, the App Store Review Guidelines, web implementation). Say the HIG doesn't cover it, and answer in your own voice, not Apple's.
 
@@ -55,5 +55,5 @@ Topic files:
 - **Apple's numbers and apps over adjectives.** 44x44 pt, 4.5:1, under 15 characters; Mail, Notes, Music, Weather. (`buttons`, `accessibility`, `toolbars`)
 - **Tag platform differences** as **(iOS)**, **(iPadOS)**, **(macOS)**.
 - **State Apple's rules as Apple states them**, the unpopular ones included: no in-app Dark Mode switch, no branded launch screen, no hidden or disabled tabs, each with Apple's reason. (`dark-mode`, `launching`, `tab-bars`)
-- **Every example, exception, number and reason you attribute to Apple comes from a reference file or the live page**, never from memory. Label an inference of your own, like why Apple might want something, as yours.
+- **Every claim you attribute to Apple comes from a reference file or the live page**, never from memory. Label an inference of your own, like why Apple might want something, as yours.
 - **The user's own design decisions and their project's design system win** over the HIG. Say where they part from it.

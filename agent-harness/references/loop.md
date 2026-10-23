@@ -1,7 +1,5 @@
 # The loop
 
-Failures, streams, and retries are in failures.md; durable state in state.md; versions, latency, cost, and spend caps in operations.md.
-
 ## Turns and endings
 
 - **One turn is: build the prompt, call the model, run its tool calls, append the results, repeat until it answers without a tool call.** Each model call is a step, and one user message can take many. Record each message, tool call, result, and approval as its own typed item in order, because one blob with attached calls hides what happened first.
@@ -13,7 +11,6 @@ Failures, streams, and retries are in failures.md; durable state in state.md; ve
 - **When a turn must end with a result tool (a back-office worker filing its finding), code checks that it was called.** If not, the harness reminds the model at most twice, then returns the fallback. A prompt line asking for it is not enough.
 - **"No reply" is a valid end** in a channel where a user's "thanks" needs nothing back. A loop that must always answer sends filler.
 - **Release a forced tool call after one call.** If a tool stays required, the model must call it again after every result, forever. Sonnet 5.5 rejects a forced `tool_choice` outright. Send `auto`, mark the tool strict, and say in the prompt when to use it.
-- **Every escalation carries a reason in a fixed field.** Anthropic's inbound agent halved its handoffs to humans by reading those reasons and fixing the top ones.
 
 ## Stop conditions
 
@@ -31,7 +28,7 @@ Failures, streams, and retries are in failures.md; durable state in state.md; ve
   - now: move tool calls that can keep running to the background and deliver at once. Feed in each background result when it lands, one per call, each as a new message after the batch is answered.
   - append: add context without a model call.
 - **A message that joins a running turn rewrites nothing and cancels nothing.** The current output and any started tool finish first. The pending queue lives only on the connection, so record what you injected and reconcile it against history after a disconnect before resending.
-- **An interrupt stops model output at once but waits for running tools to finish.** The provider may report the interrupted turn as an ordinary end (Claude's Managed Agents has no interrupt stop reason), so record the interrupt in your own log.
+- **An interrupt stops model output at once but waits for running tools to finish.** The provider may report the interrupted turn as an ordinary end (Claude's Managed Agents has no interrupt stop reason), so record the interrupt in your own log. A stop or takeover is different: it ends the run and cancels tools too (humans.md, "A person takes over").
 - **Tell the model what it couldn't see.** Before every model call, inject events that arrived while the agent worked, so it acts on the current state. Say when the user interrupted on purpose, that an interrupted tool may have partly run, and the current time. On Claude, relay operator facts mid-turn as a `role: "system"` message after the tool results, never mixed into the user's text.
 - **When the user changes a request mid-task, update the active task and drop results that come back for the old version.** Tag delegated work with a task id or version, so a late result, including one from a previous session after a reconnect, can't overwrite newer work.
 - **Give every user message you submit to the agent an idempotency key.** Create it once, save it with the message before sending, and reuse it on any retry after a timeout or a lost response, so a retry can't start a second turn. Make a new key for each distinct submission, even when the text is identical.

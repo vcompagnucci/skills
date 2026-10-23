@@ -15,7 +15,7 @@ Anthropic and OpenAI measure their own models with their own attackers and harne
 | Claude Opus 5, thinking / off | 88.92% (40/40) / 85.49% (40/40) | 200 attempts per scenario | 2026-09-22 | Gray Swan Shade, Anthropic card |
 | Claude Fable 5, thinking, before Anthropic strengthened the fallback model | 86.87% (40/40) | 200 attempts per scenario | 2026-09-01 | Gray Swan Shade, Anthropic card |
 
-- **Most of the newest models' coding breaks come through the fallback model, not the model itself.** Opus 5.5 answering on its own was compromised 0 of 2,872 times (models.md). Sonnet 5.5 sent 25% of requests to Sonnet 5 after a cyber block, and 12.01% of those were compromised. Sonnet 5.5 itself fell in 4 of 5,901 (2026-09-28). Sonnet 5.5 has the lowest raw rates in the current coding and browser tables, yet trails Opus 5.5 on Gray Swan IPI (3.4% against 1.0% at k=15) because its GUI computer use reaches 12.5%. The safest model depends on your surface. (`anthropic-system-card-sonnet-5-5`, `anthropic-system-card-opus-5-5`)
+- **Most of the newest models' coding breaks come through the fallback model, not the model itself.** Opus 5.5 answering on its own was compromised 0 of 2,872 times (models.md, "How to read any robustness number"). Sonnet 5.5 sent 25% of requests to Sonnet 5 after a cyber block, and 12.01% of those were compromised. Sonnet 5.5 itself fell in 4 of 5,901 (0.07%) (2026-09-28). Sonnet 5.5 has the lowest raw rates in the current coding and browser tables, yet trails Opus 5.5 on Gray Swan IPI (3.4% against 1.0% at k=15) because its GUI computer use reaches 12.5%. The safest model depends on your surface. (`anthropic-system-card-sonnet-5-5`, `anthropic-system-card-opus-5-5`)
 
 ## Shade adaptive attacks in GUI computer use (Anthropic)
 
@@ -51,7 +51,7 @@ Anthropic and OpenAI measure their own models with their own attackers and harne
 
 ## Refusals (Anthropic)
 
-- **Never rely on the model refusing a malicious agent task.** Without safeguards, Opus 5.5 refused 81.0% of malicious Claude Code requests, Sonnet 5.5 85.2% and Mythos 5.1 88.5% (2026-09-28). Opus 5.5 refused 79.46% of harmful computer-use tasks against 93.75% for Opus 5. Surveillance of individuals was the largest share of its failures (2026-09-22). (`anthropic-system-card-sonnet-5-5`, `anthropic-system-card-opus-5-5`)
+- **Never rely on the model refusing a malicious agent task.** Without safeguards, Opus 5.5 refused 81.0% of malicious Claude Code requests, Sonnet 5.5 85.2% and Mythos 5.1 88.5% (61 malicious prompts run 10 times each, 2026-09-28). Of 112 harmful computer-use tasks, Opus 5.5 refused 79.46% against 93.75% for Opus 5, and surveillance of individuals was the largest share of its failures (2026-09-22). Mythos 5.1 refused 87.50% of them (2026-09-22) and Sonnet 5.5 79.46% (2026-09-28). (`anthropic-system-card-sonnet-5-5`, `anthropic-system-card-opus-5-5`)
 
 ## OpenAI's evals of its own models
 

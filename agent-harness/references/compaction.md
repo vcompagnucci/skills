@@ -3,7 +3,7 @@
 ## Clear before you summarize
 
 - **Remove the cheapest thing first.** Clear old tool results that can be fetched again, or move them to a file and leave the path. Neither loses anything, but clear in batches (next section). Summarize only when that stops being enough, because a summary is lossy.
-- **Never prune or compact away a loaded procedure.** Wrap each one in tags so code can find it and keep it through clearing and compaction: losing one mid-conversation degrades the agent with no visible error.
+- **Keep every loaded procedure through clearing and compaction.** Wrap each one in tags so code can find it and carry it over: losing one mid-conversation degrades the agent with no visible error.
 - **Judge compaction and clearing by total input cost, not cache hit rate,** because both lower cache reuse on the next call. Read the cached tokens on every response (`cached_tokens` on OpenAI, `cache_read_input_tokens` on Claude); OpenAI also returns why a call missed when you pass `comparison_response_id`.
 
 ## When and where to cut

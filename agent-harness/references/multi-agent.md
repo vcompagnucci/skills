@@ -23,7 +23,7 @@ Does one agent with good tools and a clear prompt fail at this?
 
 - **A manager calls specialists as tools and keeps the user;** use it when one voice should answer and shared checks run in one place. **A handoff gives the conversation to another agent for good;** use it when a specialist fully takes over. The question is who owns the final answer.
 - **Route in code when ownership matters.** Classify the request with structured output and pick the specialist in code. A model-decided transfer can route differently on the same request, and a takeover that's wrong is hard to undo.
-- **A handoff forwards the whole transcript unless you narrow it.** Decide what the receiving agent needs; what leaks through a summary is a security question.
+- **A handoff forwards the whole transcript unless you narrow it.** Decide what the receiving agent needs; what may leak through that summary is agent-security, data.md, "Give the agent only the data the task needs".
 - **An agent called as a tool starts a nested run.** Give it structured input, not a free-text string, and extract its output before the caller sees it, with a fallback when it's malformed.
 - **Use an agent-to-agent protocol only across a boundary you don't own,** and keep your own subagents in-process, as production harnesses do (A2A ships in 1 of 11 studied). Over A2A, keep the server's `contextId` as the session key and reuse `messageId` on retries.
 - **Backend actions stay with the main agent,** so state-changing actions (in support, refunds and account changes) have one place to check them. OpenAI's Agents API enforces this (subagents can't call your function tools).

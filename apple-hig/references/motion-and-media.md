@@ -11,7 +11,7 @@ How an app moves, sounds, and feels, and how it plays photos, video, and live TV
 
 - **Prefer system components, which include motion and adapt it for you.** They adjust it to accessibility settings and input methods: Liquid Glass responds to direct touch with more emphasis than to a trackpad. The rules below are for custom motion. (`motion`)
 - **Add motion only when it supports the experience.** Gratuitous or excessive animation distracts people and can leave them feeling disconnected or physically uncomfortable. (`motion`)
-- **Make motion optional.** Not everyone can or wants to experience it, so never use motion as the only way to communicate important information, and supplement visual feedback with haptics and audio. (`motion`)
+- **Make motion optional.** Not everyone can or wants to experience it. (`motion`)
 - **Make feedback motion realistic and consistent with the gesture that triggered it.** Motion that doesn't make sense disorients people: a view revealed by sliding down from the top shouldn't be dismissed by sliding it to the side. (`motion`)
 - **Keep feedback animations brief and precise.** They feel lightweight and unobtrusive and often communicate better than prominent animation, as a succinct animation tied to a successful game action gets the message across without distracting from play. (`motion`)
 - **In apps, avoid adding motion to frequent interactions.** The system already animates standard elements subtly, and motion on a custom element makes people spend extra attention every time they use it. (`motion`)

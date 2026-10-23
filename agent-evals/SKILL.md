@@ -1,6 +1,6 @@
 ---
 name: agent-evals
-description: Build and run evals for any AI agent (coding, browser, data, assistant or customer-facing), with extra checks for customer-facing agents. Use when designing test cases, reading traces for failure modes, writing or validating an LLM judge, grading tool calls and account state, improving the agent against the eval, gating a release, auditing an eval setup, measuring a live agent, simulating users, red-teaming the agent, or sizing samples and comparing versions.
+description: Build and run evals for any AI agent (coding, browser, data, assistant or customer-facing). Use when designing test cases, reading traces for failure modes, writing or validating an LLM judge, grading tool calls and account state, scoring retrieval and abstention, improving the agent against the eval, gating a release, auditing an eval setup, measuring a live agent, simulating users, red-teaming the agent, or sizing samples and comparing versions.
 ---
 
 # Agent evals
@@ -10,23 +10,23 @@ A process for evaluating any AI agent that looks things up, decides and takes ac
 ## Where are you?
 
 ```
-First eval ever? 20 to 50 real cases with the expected end state from data or policy
-  (discover.md "Where cases come from, in this order"), code checks on that state
-  (evaluators.md "Known rules get code tests from day one"), several runs each in a
-  reset sandbox (testing.md, first bullet), then read every transcript (discover.md
-  "Reading traces"). Judges, statistics, and panels come later.
+First eval ever? 20 to 50 real cases with the expected end state from data or policy (discover.md "Where cases come from, in this order"), code checks
+  on that state (evaluators.md "Pick the grader", "Known rules get code tests from day one"), several runs each in a reset sandbox (testing.md "The test
+  environment", "A stateful sandbox, reset for every trial"), then read every transcript (discover.md "Reading traces"). Judges, statistics, and panels come
+  later. Done when every case's expected end state has a code check, every case ran in a reset sandbox, and every transcript carries a first-failure note or "no failure observed".
 Is there an agent yet?
-├── No → references/discover.md, "Before reading anything" and "Where cases come from" only:
-│   use past tickets, logs or tasks to write the spec and the cases. Error analysis reads the
-│   agent's answers, so it starts once the agent runs on those cases.
+├── No → references/discover.md, "Before reading anything" and "Where cases come from, in this order" only: use past tickets, logs or
+│   tasks to write the spec and the cases. Error analysis reads the agent's answers, so it starts once the agent runs on those cases.
 └── Yes ↓
 Do you have real traces (conversations, tickets, task logs) to read?
-├── No → references/discover.md (sourcing cases, synthetic data)
-└── Yes → Have you read them and named the failure modes?
-    ├── No → references/discover.md
-    └── Yes → Does each mode have an evaluator you validated against human labels?
-        ├── No → references/evaluators.md (retrieval and abstention: references/retrieval.md)
-        └── Yes → Measured its flip rate, panels, vendor pins, new journeys?
+├── No → references/discover.md, "Where cases come from, in this order" and "Synthetic scenarios"
+└── Yes → Have you read them to saturation and labeled every trace Pass or Fail against each final mode (discover.md "Reading traces", steps 6 and 7)?
+    ├── No → references/discover.md, "Reading traces" (build references/review-app.md first)
+    └── Yes → Does each mode have a code check, or a judge whose failure catch rate and pass agreement, measured once on its held-out test split,
+        │   meet evaluators.md "Measure agreement", "Accept by the cost of a miss"?
+        ├── No → references/evaluators.md (judge skeleton: references/judge-prompt.md; retrieval and abstention: references/retrieval.md)
+        └── Yes → Has each judge passed the judges.md checks that apply to it (flip rate in "Repeatability", vendor pins and per-stratum TPR and
+            │   TNR in "When validation stops holding", "Several judges on one mode" only if you combine judges)?
             ├── No → references/judges.md
             └── Yes → Is the agent live?
                 ├── No → references/testing.md (CI, release gates) and references/simulation.md
@@ -34,9 +34,8 @@ Do you have real traces (conversations, tickets, task logs) to read?
 
 Jumping in at a specific task?
 Inheriting an eval setup, or unsure you can trust it? → references/audit.md first
-Improving the agent against the eval (what to fix first, prompt or tool or harness, an
-  automated prompt optimizer such as GEPA, keep or revert, when to stop, comparing models
-  on accuracy and cost)? → references/improve.md
+Improving the agent against the eval (what to fix first, prompt or tool or harness, an automated prompt optimizer such as GEPA,
+  keep or revert, when to stop, comparing models on accuracy and cost)? → references/improve.md
 Shipping any change (prompt, model, tools), live or not? → references/testing.md, "Release gates"
 Computing an interval, sizing a sample, or comparing two versions? → references/statistics.md
 Simulated users, replaying real conversations, forecasting a version on live traffic? → references/simulation.md
@@ -44,7 +43,7 @@ Red teaming the agent (injection, exfiltration, attack success rates)? → refer
 Customer-facing agent? Before a check touches handoffs, language, sensitive data, tools and account state, multi-turn, policy, voice, or customers who are themselves AI agents → references/support-checks.md
 ```
 
-Open one reference at a time. **Never compute a formula from memory** (corrected failure rate, bootstrap and Wilson intervals, pass@k, pass^k, effective n for clustered cases, power and the smallest detectable difference, paired tests). Copy it from statistics.md and run its check value first. Sources count the positive class in opposite directions, so a remembered formula silently gives the wrong rate.
+Open one reference at a time, and only the ones your branch names.
 
 ## Which source wins
 
@@ -78,26 +77,27 @@ Inside the skill this order already ran, and the losing position is gone, so nev
 11. **Evals decay.** Re-run error analysis every 2 to 4 weeks on 100+ fresh traces and after every incident, and treat a judge with a changed prompt, model, temperature, sample count, vote rule, or cutoff as a new judge to validate.
 12. **Before any batch billed per token (an API key or a per-token vendor), show the model, the number of agent runs, and the number of judge calls, and wait for approval.** Baselines and judge sweeps multiply fast. A batch that runs only on a flat subscription (Claude Code on the user's plan) starts without asking, but still states the counts, since it uses up the plan's limits. Judge runs are the exception: they never run on a subscription (rule 13).
 13. **A judge whose verdicts feed a number runs through the API on a dated model snapshot, never through a subscription or a model alias.** Write the snapshot id (like `claude-sonnet-5-5-20260915`) in the judge's config, record the model the response reports on every verdict, and discard verdicts from any other model. Vendor and built-in evaluators too (judges.md). A subscription or alias can switch models without notice, which silently turns your validated judge into an unvalidated one. Subscriptions are fine for drafting cases, writing judge prompts, and helping with error analysis.
+14. **Never compute a formula from memory** (corrected failure rate, bootstrap and Wilson intervals, pass@k, pass^k, effective n for clustered cases, power and the smallest detectable difference, paired tests). Copy it from statistics.md and run its check value first. Sources count the positive class in opposite directions, so a remembered formula silently gives the wrong rate.
 
 ## Numbers to use
 
-| Question | Answer |
-|---|---|
-| First look after a significant change | 20 to 50 outputs, one expert, about 30 minutes |
-| Traces a human reads before any agent suggests failure modes | at least 30 |
-| When error analysis is done | saturation, around 100 traces |
-| Human labels per judge | about 100, balanced, never under 30 Pass and 30 Fail |
-| CI suite size | start at 20 to 50 cases, grow past 100 |
-| Runs per CI case | 15 |
-| Runs to reproduce and verify a production bug fix | 10, or 20 if it was seen once |
-| Red-team probes per attack type | 50+, attack success reported at 1, 10, and 100 tries |
-| First eval for a tool, skill, or specialist the agent must choose | 10 to 20 cases |
-| Repeats per validation trace to measure a judge's flip rate | 4 |
-| Cases to detect a 3-point difference between two versions | about 1,000 (statistics.md) |
-| Clean cases or conversations to claim a failure rate under 0.1% with zero failures seen | about 3,840 |
-| Production judges | a random sample sized from the interval, capped per run |
-| Monitor threshold | set at a 1% false-positive rate on benign twins |
-| Shadow, then canary | shadow 4+ hours (pause above 2% deviation), then about 1% of live traffic |
+| Question | Answer | Where |
+|---|---|---|
+| First look after a significant change | 20 to 50 outputs, one expert, about 30 minutes | discover.md "Reading traces" |
+| Traces a human reads before any agent suggests failure modes | at least 30 | discover.md "Reading traces" |
+| When error analysis is done | saturation, around 100 traces | discover.md "Reading traces" |
+| Human labels per judge | about 100, balanced, never under 30 Pass and 30 Fail | evaluators.md "Label" |
+| CI suite size | start at 20 to 50 cases, grow past 100 | |
+| Runs per CI case | 15 | rule 6 |
+| Runs to reproduce and verify a production bug fix | 10, or 20 if it was seen once | testing.md "Release gates" |
+| Red-team probes per attack type | 50+, attack success reported at 1, 10, and 100 tries | red-team.md "Attack", "Confirm and report" |
+| First eval for a tool, skill, or specialist the agent must choose | 10 to 20 cases | discover.md "Where cases come from, in this order" |
+| Repeats per validation trace to measure a judge's flip rate | 4 | judges.md "Repeatability" |
+| Cases to detect a 3-point difference between two versions | about 1,000 | statistics.md "Size a comparison before running it" |
+| Clean cases or conversations to claim a failure rate under 0.1% with zero failures seen | about 3,840 | statistics.md "One rate" |
+| Production judges | a random sample sized from the interval, capped per run | production.md "Measure the rate" |
+| Monitor threshold | set at a 1% false-positive rate on benign twins | production.md "Monitors" |
+| Shadow, then canary | shadow 4+ hours (pause above 2% deviation), then about 1% of live traffic | testing.md "Release gates" |
 
 ## Scope
 

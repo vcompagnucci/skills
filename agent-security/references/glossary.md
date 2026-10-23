@@ -1,6 +1,6 @@
 # Glossary
 
-Terms the references use in a source's own sense, one line each with the source that coined or defines it, in alphabetical order. Find a term with grep; never read this file whole.
+Terms the references use in a source's own sense, one line each with the source that coined or defines it, in alphabetical order. Find a term with grep; never read this file whole. Contents: one alphabetical list, Action guardrails to Zero data retention.
 
 - **Action guardrails.** Scopes, threshold limits, confirmation flows and least-privilege tokens on what the agent can do in backend systems. (`fin-ai-guardrails-customer-service`)
 - **Action-selector / plan-then-execute / LLM map-reduce / dual LLM / code-then-execute / context-minimization.** The six design patterns that remove the path from untrusted text to consequential actions. (`beurer-kellner-design-patterns`)

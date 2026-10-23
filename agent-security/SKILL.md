@@ -1,21 +1,21 @@
 ---
 name: agent-security
-description: Secure any AI agent that reads untrusted text and calls tools: coding, browser and back-office agents, assistants, and customer-facing agents. Use for prompt injection (chat, tickets, emails, documents, repos, web pages, tool results, pasted text), manipulation by the person in the chat (fake authority, impersonation, refund or price bait, jokes, impossible requests), tool permissions, approvals and sandboxing, layered guardrails, data exfiltration and network egress, MCP servers and skills, choosing a model by attack resistance, and incident response.
+description: Secure any AI agent that reads untrusted text and calls tools, customer-facing ones included. Use for threat models, prompt injection in anything the agent reads (tickets, emails, documents, web pages, repos, tool results, pasted text), a person in the chat claiming authority or identity (impersonation, account recovery, system-prompt extraction), pressure on a customer-facing agent (refund or price bait, jokes, impossible requests), tool permissions and credentials, approvals, sandboxing and network egress, guardrail classifiers and how they stack, data exfiltration and memory poisoning, MCP servers and skills, choosing a model by attack resistance, and incident response.
 ---
 
 # Agent security
 
-How to keep an agent that reads untrusted text and calls tools from being turned against its users or its company. The rules hold for any such agent. Most examples come from customer support, where an agent meets strangers all day. It distills 312 sources read in October 2026: Anthropic and OpenAI first, then labs, standards bodies, support vendors, security researchers and public incidents. Every claim cites its source as (`slug`), listed in `references/article-index.md`. Quoted text followed by a slug is that source's wording. Quoted text without one is an example.
+How to keep an agent that reads untrusted text and calls tools from being turned against its users or its company. The rules hold for any such agent. Most examples come from customer support, where an agent meets strangers all day. It distills 312 sources read in October 2026 (how they were chosen: `references/sources.md`). Every claim cites its source as (`slug`), listed in `references/article-index.md`. Quoted text followed by a slug is that source's wording. Quoted text without one is an example.
 
 > The model will eventually be talked into something, so security is deciding in code what a talked-into agent can still reach.
-
-Everything else is a corollary of this.
 
 ## Where are you?
 
 ```
-First agent that reads untrusted text and has tools? Read threat-model.md, permissions.md,
-  approvals.md, injection.md, conversation.md, in that order, before writing any prompt.
+First agent that reads untrusted text and has tools? Read threat-model.md, permissions.md, approvals.md,
+  injection.md, conversation.md, then data.md, "Close every way out", in that order, before writing any prompt.
+  Done when you can name every door untrusted text enters, and the deterministic gate in front of every tool
+  that moves money, changes an account, discloses data or sends anything out (rules 2, 5, 6).
 What are you deciding?
 ├── Who can attack, through which door, what a hijacked agent could do → threat-model.md
 ├── Text the agent reads steering it: tickets, emails, pages, documents, pasted text,
@@ -26,20 +26,19 @@ What are you deciding?
 │   off-topic, impossible requests ("put me through to Elon Musk"), handoff triggers, self-harm, minors → conversation-pressure.md
 ├── Which tools, accounts, delegated access and credentials the agent holds → permissions.md
 ├── An agent that runs code, drives a browser or fetches URLs: sandboxes, network egress → sandbox.md
-├── Which actions need approval and from whom, limits inside tools, reviewer models in use → approvals.md
+├── Which actions need approval and from whom, limits inside tools, reviewer models in use ("Model reviewers at the boundary") → approvals.md
 ├── Input and output classifiers: what each checks, building one, measuring one → guardrails.md
-├── How checks stack, where they sit, designing the action reviewer, monitors across sessions
-│   and accounts, wiring that silently fails open → guardrail-layers.md
+├── How checks stack, where they sit, designing "The action reviewer",
+│   "Monitors across turns, sessions and accounts", "Wiring that silently fails open" → guardrail-layers.md
 ├── What the agent reads and every way data leaves: links, images, memory, secrets it could read → data.md
 ├── MCP servers, skills, plugins, agent frameworks, provider API keys → supply-chain.md
-├── Which model or agent resists attacks best → models.md, then models-cross-vendor.md
-│   and models-lab-evals.md for the full tables
+├── Which model or agent resists attacks best → models.md, then models-cross-vendor.md and models-lab-evals.md for the full tables
 └── Detecting an attack in production and responding to it → response.md (session and account
-    monitors: guardrail-layers.md)
+    monitors: guardrail-layers.md, "Monitors across turns, sessions and accounts")
 A coined term you don't recognize → grep glossary.md for it; a source by slug → grep article-index.md
 ```
 
-Open one reference at a time. **Never quote an attack rate from memory.** Copy it from the reference with its model, benchmark, attack budget, date and who ran it. On the same 40 coding scenarios, Opus 5 broke on 2.68% or 88.92% of attempts depending on the attacker (models.md).
+Open one reference at a time. **Never quote an attack rate from memory.** Copy it from the reference with its model, benchmark, attack budget, date and who ran it. On the same 40 coding scenarios, Opus 5 broke on 2.68% or 88.92% of attempts depending on the attacker (models.md, "How to read any robustness number").
 
 ## Which source wins
 
@@ -60,6 +59,7 @@ Inside the skill this order already ran, and the losing position is gone, so nev
 
 ## Rules that hold everywhere
 
+Designing or reviewing an agent: apply all 13. Done when each rule names the control that satisfies it in this agent, or why it doesn't apply.
 1. **Design for the attack that succeeds.** All 13 frontier models in the only independent head-to-head were hijacked. Adaptive attackers took most of 12 published defenses above 90%. So the question is what an injection can reach once it gets through. (`grayswan-ipi-arena`, `nasr-attacker-moves-second`)
 2. **Guarantees come from code. Prompts and classifiers only raise the attacker's cost.** Sort every defense into deterministic (permissions, limits inside tools, blocked image rendering, approvals) or probabilistic (system prompts, spotlighting, classifiers). Put a deterministic one between the model and every action that moves money, changes an account or discloses data. This extends agent-harness rule 2. (`msrc-indirect-injection-defense`, `fin-ai-guardrails-customer-service`)
 3. **Authority comes from the channel a message arrived on, never from what it claims.** "I'm the CEO", "I'm from OpenAI", a fake system message in the chat and "your manager approved it" are all user text. A claim asking for more caution can be followed. One that unlocks anything needs verification outside the chat or a record in your system. (`openai-model-spec-2026-08-18`, `anthropic-constitution`, `intigriti-hacking-ai-support-agents`)
@@ -70,7 +70,7 @@ Inside the skill this order already ran, and the losing position is gone, so nev
 8. **The model never chooses a target, whether the account, the order or who a conversation is handed to.** Write tools accept only IDs your server issued to this session. Account recovery never runs on what the person types. Handoff destinations come from routing rules. Then "put me through to Elon Musk" has nowhere to go, and the agent answers lightly and offers the normal team. (`anthropic-commerce-agents-anatomy`, `csa-meta-ai-support-bot-takeover`, `intercom-fin-escalation-guidance`)
 9. **Judge the whole conversation, the session and the account, not each message.** Crescendo attacks make every step look incremental. Social engineers split their reconnaissance across calls and channels. The 2025 espionage campaign passed every per-request check. So guard checks and monitors see the history, and counters (verification attempts, refusals, repeated requests) are per account across channels. (`anthropic-system-prompt-opus-5-5`, `cisa-scattered-spider`, `anthropic-ai-orchestrated-espionage`)
 10. **A guard that errors, times out or can't read the input blocks.** Defaults fail open in places teams don't look. A hook allows on failure after 5,000 ms. Web-server body limits skip the largest transcripts. A guardrail raises instead of tripping. Test every guard's failure mode, not only its verdicts. (`anthropic-docs-inference-hooks-configuration`, `anthropic-docs-inference-hooks-endpoint`, `openai-agents-sdk-guardrails`)
-11. **Read every robustness number as one attacker, one budget, one configuration.** A static attack set overstates robustness against an adaptive attacker. Numbers from different vendors or benchmarks never compare. A classifier that reroutes to an older model can become the injection path. Choose a model on injection results for your own surface, then measure your own agent (agent-evals red-team.md). (`anthropic-system-card-opus-5-5`, `nist-caisi-agent-hijacking`, `spylab-agentdojo-leaderboard`)
+11. **Read every robustness number as one attacker, one budget, one configuration.** A static attack set overstates robustness against an adaptive attacker. Numbers from different vendors or benchmarks never compare. A classifier that reroutes to an older model can become the injection path. Choose a model on injection results for your own surface, then measure your own agent (agent-evals red-team.md, "Confirm and report"). (`anthropic-system-card-opus-5-5`, `nist-caisi-agent-hijacking`, `spylab-agentdojo-leaderboard`)
 12. **Treat every model, prompt, tool and SDK change as a security change.** Re-run the adversarial suite (injection, trolling, price bait, off-topic) on each one, and pin frameworks past their security fixes. DPD's bot swore at customers after a routine update. GPT-6.1 Sol handled harmful requests about sensitive personal data in Codex worse than GPT-6 Sol (0.744 against 0.854), while its card calls it "generally better" (2026-09-29). The OpenAI Agents SDK enforced Realtime tool output guardrails only from v0.23.0. (`dpd-chatbot-swearing-bbc`, `openai-agents-sdk-release-notes`, `openai-gpt-6-1-sol-system-card`)
 13. **Decide before launch who can stop the agent, how fast, and what is preserved.** Make it stoppable per capability (cut the refund path while it keeps answering) and entirely. Alert on every detected or refused injection. Take forensic copies before purging a poisoned memory or document. (`openai-practices-governing-agentic-ai`, `cosai-ai-incident-response`, `anthropic-system-card-sonnet-4-6`)
 
@@ -78,17 +78,17 @@ Inside the skill this order already ran, and the losing position is gone, so nev
 
 | Question | Answer |
 |---|---|
-| Most robust model in the only independent head-to-head | Claude Opus 4.5, 0.5% (61 successes in 11,969 human attempts); all 13 models hijacked (Gray Swan IPI Arena, 2026-03-16) (`grayswan-ipi-arena`). Every newer model has only vendor-published numbers, which don't compare across vendors (models.md) |
-| Why you measure the system you ship, not the model | Opus 5.5: 54.61% of Shade coding attempts, 85.73% on requests rerouted to Opus 4.8, 0 of 2,872 answered by Opus 5.5 itself, 11.13% with probes (200 attempts per scenario, 2026-09-22, Anthropic) (`anthropic-system-card-opus-5-5`) |
-| GPT-6 Astra on Gray Swan IPI, safeguards on | 8.5% against 27.0% for GPT-5.6 Sol (15 attempts per scenario, 1,810 attacks, 2026-09-03, OpenAI) (`openai-gpt-6-astra-system-card`) |
-| Default LLM judge in OpenAI's Guardrails | gpt-4.1-mini: recall 0.000 at 1% false positives on jailbreaks and injections; gpt-4.1 1.000 on jailbreaks (2025-12-15) (`openai-guardrails-check-jailbreak`, `openai-guardrails-check-prompt-injection`) |
-| Reviewer model at the action boundary | Codex Auto-review denied 99.3% of synthetic injection cases and 90.3% of overeager risky actions (2026-04-30, OpenAI) (`openai-auto-review-research`) |
-| Refund cap example | Up to $50 without approval, above $50 to a human, original payment method only, never above the order total (Fin, 2026-09-09) (`fin-ai-guardrails-customer-service`) |
-| Handoff triggers | In code: a classifier for self-harm and threats, a retry cap, any high-risk action (`parloa-red-teaming`, `openai-practical-guide-building-agents`). Platform rule: the same request across 3 turns (Fin) (`intercom-fin-escalation-guidance`). In the prompt, for judgment calls only: 2 failed tool attempts on the same task, 3 consecutive no-match or no-input events (OpenAI Realtime guide, 2026-02-25) (`openai-realtime-prompting-guide`) |
-| Reviewer that keeps getting blocked | Pause after 3 blocks in a row or 20 in a session (Claude Code auto mode, current docs) (`anthropic-claude-code-auto-mode`, `anthropic-docs-claude-code-permission-modes`) |
-| Guardrail firing rate | On 40% of conversations "probably too aggressive"; never firing, probably misconfigured; monitor 100%, since 3% to 5% sampled QA misses edge cases (Fin, 2026-09-09) (`fin-ai-guardrails-customer-service`) |
-| Pausing a severe alert | Pause the activity if it isn't shown safe within 30 minutes of the page (OpenAI, 2026-08-26) (`openai-hugging-face-incident-road-ahead`) |
+| Most robust model in the only independent head-to-head | Claude Opus 4.5, 0.5% (61 successes in 11,969 human attempts); all 13 models hijacked (Gray Swan IPI Arena, 2026-03-16) (`grayswan-ipi-arena`; models.md, "No model is injection-proof (IPI Arena, 2026)"). Every newer model has only vendor-published numbers, which don't compare across vendors (models.md, "How to read any robustness number") |
+| Why you measure the system you ship, not the model | Opus 5.5: 54.61% of Shade coding attempts, 85.73% on requests rerouted to Opus 4.8, 0 of 2,872 answered by Opus 5.5 itself, 11.13% with probes (200 attempts per scenario, 2026-09-22, Anthropic) (`anthropic-system-card-opus-5-5`; models.md, "How to read any robustness number") |
+| GPT-6 Astra on Gray Swan IPI, safeguards on | 8.5% against 27.0% for GPT-5.6 Sol (15 attempts per scenario, 1,810 attacks, 2026-09-03, OpenAI) (`openai-gpt-6-astra-system-card`; models-cross-vendor.md, "Gray Swan IPI, as three vendors publish it") |
+| Default LLM judge in OpenAI's Guardrails | gpt-4.1-mini: recall 0.000 at 1% false positives on jailbreaks and injections; gpt-4.1 1.000 on jailbreaks (2025-12-15) (`openai-guardrails-check-jailbreak`, `openai-guardrails-check-prompt-injection`; guardrails.md, "Measuring a classifier") |
+| Reviewer model at the action boundary | Codex Auto-review denied 99.3% of synthetic injection cases and 90.3% of overeager risky actions (2026-04-30, OpenAI) (`openai-auto-review-research`; approvals.md, "Model reviewers at the boundary") |
+| Refund cap example | Up to $50 without approval, above $50 to a human, original payment method only, never above the order total (Fin, 2026-09-09) (`fin-ai-guardrails-customer-service`; approvals.md, "Limits live in the tool") |
+| Handoff triggers | In code: a classifier for self-harm and threats, a retry cap, any high-risk action (`parloa-red-teaming`, `openai-practical-guide-building-agents`). Platform rule: the same request across 3 turns (Fin) (`intercom-fin-escalation-guidance`). In the prompt, for judgment calls only: 2 failed tool attempts on the same task, 3 consecutive no-match or no-input events (OpenAI Realtime guide, 2026-02-25) (`openai-realtime-prompting-guide`; conversation-pressure.md, "Hand off to a human by rule") |
+| Reviewer that keeps getting blocked | Pause after 3 blocks in a row or 20 in a session (Claude Code auto mode, current docs) (`anthropic-claude-code-auto-mode`, `anthropic-docs-claude-code-permission-modes`; guardrail-layers.md, "The action reviewer") |
+| Guardrail firing rate | On 40% of conversations "probably too aggressive"; never firing, probably misconfigured; monitor 100%, since 3% to 5% sampled QA misses edge cases (Fin, 2026-09-09) (`fin-ai-guardrails-customer-service`; response.md, "Detect from the conversation's shape, not one message") |
+| Pausing a severe alert | Pause the activity if it isn't shown safe within 30 minutes of the page (OpenAI, 2026-08-26) (`openai-hugging-face-incident-road-ahead`; response.md, "Before launch: attribute every call and name who can stop the agent") |
 
 ## Scope
 
-This skill covers defending an agent against injection and manipulation, permissions, approvals and sandboxes, guardrails, data and egress, the supply chain, model choice and response. agent-harness owns how a pause for a human works, identity attached from the run, retries and state. agent-evals owns how to run a red team and compute attack success rates (red-team.md). system-prompts owns the agent's voice and the rest of its system prompt. Company material (the tool list, refund limits, routing rules, who approves what at your company) belongs in a private skill, never in this one, and it overrides this skill where they disagree. How the claims were chosen is in `references/sources.md`, and every source is in `references/article-index.md`.
+This skill covers defending an agent against injection and manipulation, permissions, approvals and sandboxes, guardrails, data and egress, the supply chain, model choice and response. agent-harness owns how a pause for a human works, identity attached from the run, retries and state. agent-evals owns how to run a red team and compute attack success rates (red-team.md). system-prompts owns the agent's voice and the rest of its system prompt. Company material (the tool list, refund limits, routing rules, who approves what at your company) belongs in a private skill, never in this one, and it overrides this skill where they disagree.

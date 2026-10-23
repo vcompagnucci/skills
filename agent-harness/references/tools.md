@@ -46,4 +46,4 @@
 - **On MCP, a broken response stream loses the request in flight,** and the client re-issues it as a new request, so every state-changing MCP tool needs its own idempotency key.
 - **Long-running work returns a task handle the client polls instead of holding a stream open.** A remote tool may answer with a durable task instead of a result (MCP's tasks extension), and the server decides per request, so handle both shapes. Save the task id with the run before polling, poll no faster than the server's interval until a terminal state, and answer its input requests through the task.
 - **Treat cancelling a task as a request:** read the task's final state before telling the user it stopped.
-- **A tool that needs more input from a person ends the call with `input_required` and an opaque state token** (humans.md covers the client side; verifying the token belongs to the security skill).
+- **A tool that needs more input from a person ends the call with `input_required` and an opaque state token** (the client side is humans.md, "Pausing for a human"; verify the token when the call resumes).

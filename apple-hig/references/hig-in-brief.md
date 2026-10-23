@@ -1,6 +1,6 @@
 # The HIG in brief
 
-The ideas that run through every page, for broad questions and screen reviews, and the order to work in when designing an app from scratch. Each point is a summary: open the file it cites before stating a detail.
+The ideas that run through every page, for broad questions and screen reviews, and the order to work in when designing an app from scratch. Each point is a summary: before stating a detail, open the topic file for the slug it cites (the topic list under "Where to look" in SKILL.md, or grep `references/article-index.md`).
 
 > **"The most successful and enduring designs are based on a deep understanding of how people think, feel, and interact with the world."** (`design-principles`)
 

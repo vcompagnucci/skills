@@ -48,4 +48,4 @@ Real traces come first because synthetic users are more cooperative and articula
 
 ## Before building an evaluator
 
-Fix what's cheap first. If the prompt never asked for the behavior, add the instruction and re-check. If the failure breaks a policy, safety, or authorization rule, move the rule into tool code with a test. Build evaluators only for the failures that survive.
+Fix what's cheap first, in the place SKILL.md rule 8 names, and re-check. Build evaluators only for the failures that survive.

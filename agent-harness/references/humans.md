@@ -1,6 +1,6 @@
 # Humans in the loop
 
-How the harness pauses for a person, hands the conversation over, and ends it. Who may approve what is a security question.
+How the harness pauses for a person, hands the conversation over, and ends it. Who may approve what is agent-security, approvals.md, "Who may approve, and what counts".
 
 ## Pausing for a human
 
@@ -25,6 +25,7 @@ How the harness pauses for a person, hands the conversation over, and ends it. W
 - **Pass the cancel down to the model call and into every tool.** Stopping the reply leaves backend work running, a tool stops only if it checks the signal, and a provider abort is best effort. Discard partial streamed output, write the owed results (failures.md), and keep only events already committed. Mark the run stopped only after cleanup finishes, and tell the user something was cancelled only after the backend confirms it.
 - **An explicit stop goes to a server endpoint** that cancels the producer, saves the partial reply, and clears the active-run pointer only if it still points to that run, so a late stop can't clear a newer run.
 - **The model picks a named outcome; code carries it out.** In a support agent, the agent chooses "hand to KYC team" with its reason, and code replies to the customer, tags, reassigns, and closes in a fixed order, so no step is skipped.
+- **Every escalation carries a reason in a fixed field.** Anthropic's inbound agent halved its handoffs to humans by reading those reasons and fixing the top ones.
 - **Escalate on two triggers:** failures crossing a threshold you set, or an action that is high-risk and irreversible. Elapsed time is never an approval.
 - **Two modes, kept apart:** the agent asks your team a private question and keeps the conversation, or a person takes the conversation. The first is a question the run waits on (see "Pausing for a human"); the second changes the owner.
 - **When the conversation comes back, the agent reads what the person did** (their messages, actions, and notes in the log) before replying, and any run paused before the takeover is discarded, not resumed.

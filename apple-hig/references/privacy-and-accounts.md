@@ -6,8 +6,8 @@ How an app asks for data and permissions, and handles accounts and sign-in, on i
 
 ## Choosing sign-in
 
-- **Require an account only if core functionality needs it, and ask for sign-in as late as possible.** People often abandon apps that force sign-in first: a shopping app can let people browse and ask at purchase. Briefly say why, and what people gain. (`managing-accounts`, `sign-in-with-apple`)
-- **Offer Sign in with Apple first, then passkeys, and keep passwords only with two-factor authentication.** Sign in with Apple is a sign-in people trust without another account to remember, and a passkey needs only a user name. Never invent an authentication scheme. (`managing-accounts`, `privacy`)
+- **Require an account only if core functionality needs it, and ask for sign-in as late as possible.** (`managing-accounts`, `sign-in-with-apple`)
+- **Offer Sign in with Apple first, then passkeys, and keep passwords only with two-factor authentication.** (`managing-accounts`, `privacy`)
 
 ## Privacy (`privacy`)
 
