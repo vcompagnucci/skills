@@ -18,3 +18,7 @@ npx skills@latest add vcompagnucci/skills
 ## Design
 
 - **[apple-hig](./apple-hig/SKILL.md).** Apple's Human Interface Guidelines for iPhone, iPad and Mac apps. 119 pages.
+
+## Photos
+
+- **[photo-retouch](./photo-retouch/SKILL.md).** Retouching RAW portraits with classical tools, measured against the camera original, plus an optional local editor to review and export them. Working code included.

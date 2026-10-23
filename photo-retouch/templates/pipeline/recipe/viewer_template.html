@@ -1,0 +1,2129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio edit</title>
+<link rel="icon" href="data:,">
+<!-- DialKit 2.0.2 (Josh Puckett, MIT), tal cual viene: copiado en recipe/vendor/, el editor no sale a la red -->
+<link rel="stylesheet" href="recipe/vendor/dialkit-2.0.2/styles.css">
+<style>
+  :root {
+    --bg: #0f0f10; --panel: #18181a; --raised: #232326; --line: rgba(255,255,255,0.08);
+    --text: #f2f2f3; --dim: #8e8e93; --accent: #0a84ff;
+    --section: rgba(255,255,255,0.7);  /* titulos de seccion: el --dial-text-section de DialKit */
+    --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased;
+    display: grid; grid-template-rows: auto 1fr; overflow: hidden; user-select: none;
+  }
+  header { display: flex; align-items: center; gap: 16px; padding: 12px 20px; border-bottom: 1px solid var(--line); }
+  .seg { display: inline-flex; background: var(--panel); border-radius: 9px; padding: 3px; gap: 2px; }
+  .seg button {
+    all: unset; cursor: pointer; display: inline-flex; align-items: center; height: 34px; padding: 0 12px;
+    border-radius: 7px; font-size: 13px; color: var(--dim);
+    transition: background 160ms var(--ease), color 160ms var(--ease);
+  }
+  .seg button[aria-pressed="true"] { background: var(--raised); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+  .seg button:active { color: var(--text); }
+  .seg button:disabled { opacity: 0.35; cursor: default; }
+  .seg button:focus-visible, .item:focus-visible, .primary:focus-visible, .close:focus-visible, .knob:focus-visible, .zoom:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .photos button { gap: 8px; padding: 0 10px 0 3px; }
+  .photos img { width: 28px; height: 28px; border-radius: 6px; object-fit: cover; }
+  /* con muchas fotos la barra se desplaza en vez de empujar Export */
+  .photos { min-width: 0; overflow-x: auto; scrollbar-width: none; }
+  .photos button { flex: none; }
+  /* sumar fotos: el + aparte, al lado de Export (pedido del fotografo, 2026-10-19), y las que se estan preparando como pestanas sin
+     miniatura al final de la barra */
+  .actions { display: flex; align-items: center; gap: 8px; flex: none; }
+  .add {
+    all: unset; cursor: pointer; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 9px;
+    background: var(--panel); color: var(--dim); transition: background 160ms var(--ease), color 160ms var(--ease);
+  }
+  .add svg { width: 13px; height: 13px; }
+  .add:active { background: var(--raised); color: var(--text); }
+  .add:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  @media (hover: hover) and (pointer: fine) { .add:hover { color: var(--text); } }
+  @media (prefers-reduced-motion: no-preference) {
+    .add { transition: background 160ms var(--ease), color 160ms var(--ease), scale 120ms var(--ease); }
+    .add:active { scale: 0.96; }
+  }
+  .photos .pending {
+    padding: 0 12px; gap: 8px; cursor: default;
+    transition: opacity 200ms var(--ease), background 160ms var(--ease), color 160ms var(--ease);
+  }
+  @starting-style { .photos .pending { opacity: 0; } }  /* la pestana nueva aparece, no salta */
+  .photos .pending .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--dim); transition: background 160ms var(--ease); }
+  .photos .pending.ready { cursor: pointer; color: var(--text); }
+  .photos .pending.ready .dot { background: var(--accent); }
+  .photos .pending.failed { cursor: pointer; }
+  .photos .pending.failed .dot { background: #ff453a; }
+  @media (prefers-reduced-motion: no-preference) {
+    .photos .pending:not(.ready, .failed) .dot { animation: working 1.2s ease-in-out infinite; }
+  }
+  @keyframes working { 50% { opacity: 0.3; } }
+  /* soltar archivos sobre la ventana */
+  .drop {
+    position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; pointer-events: none;
+    background: rgba(15,15,16,0.72); opacity: 0; transition: opacity 120ms var(--ease);
+  }
+  .drop p { padding: 14px 20px; border: 1.5px dashed rgba(255,255,255,0.35); border-radius: 12px; font-size: 14px; }
+  .drop.show { opacity: 1; }
+  .spacer { flex: 1; }
+  .primary {
+    all: unset; cursor: pointer; display: inline-flex; align-items: center; height: 40px; padding: 0 16px;
+    border-radius: 9px; font-size: 13px; font-weight: 500;
+    background: var(--accent); color: white; transition: filter 160ms var(--ease);
+  }
+  .primary:active { filter: brightness(0.92); }
+  .primary:disabled { opacity: 0.4; cursor: default; filter: none; }
+  /* exportar: un modal en el centro, la vista previa grande a la izquierda y las opciones a la derecha */
+  .export {
+    --pv: min(560px, calc(100vh - 120px), calc(100vw - 400px));
+    margin: auto; padding: 0; border: 1px solid var(--line); border-radius: 16px; max-width: none; max-height: none;
+    background: var(--panel); color: var(--text); box-shadow: 0 30px 90px rgba(0,0,0,0.6);
+    opacity: 0; transition: opacity 120ms var(--ease), overlay 120ms allow-discrete, display 120ms allow-discrete;
+  }
+  .export[open] { opacity: 1; transition-duration: 200ms; }
+  @starting-style { .export[open] { opacity: 0; } }
+  @media (prefers-reduced-motion: no-preference) {
+    .export { translate: 0 8px; transition: opacity 120ms var(--ease), translate 200ms var(--ease), overlay 120ms allow-discrete, display 120ms allow-discrete; }
+    .export[open] { translate: 0 0; }
+    @starting-style { .export[open] { translate: 0 8px; } }
+  }
+  .export::backdrop {
+    background: rgba(0,0,0,0.55); opacity: 0;
+    transition: opacity 120ms var(--ease), overlay 120ms allow-discrete, display 120ms allow-discrete;
+  }
+  .export[open]::backdrop { opacity: 1; transition-duration: 200ms; }
+  @starting-style { .export[open]::backdrop { opacity: 0; } }
+  .sheet { display: grid; grid-template-columns: var(--pv) 268px; gap: 20px; padding: 16px 20px 16px 16px; }
+  .side { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+  .side .title { display: flex; align-items: center; justify-content: space-between; height: 28px; }
+  .side h2 { font-size: 15px; font-weight: 600; }
+  .close {
+    all: unset; cursor: pointer; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 7px;
+    color: var(--dim); transition: background 160ms var(--ease), color 160ms var(--ease);
+  }
+  .close:active { color: var(--text); background: var(--raised); }
+  .field { display: grid; gap: 8px; }
+  .field > span { font-size: 12px; color: var(--dim); }
+  .side .seg { display: flex; background: var(--bg); }
+  .side .seg button { flex: 1; justify-content: center; height: 30px; padding: 0 4px; font-size: 12px; }
+  .side .foot { margin-top: auto; display: grid; gap: 12px; }
+  /* lo que se baja: que es (la version, o el RAW) y el archivo: tamano, bits, formato y peso */
+  .summary { display: grid; gap: 3px; min-width: 0; }
+  .summary p { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #what { font-size: 13px; font-weight: 500; }
+  #info { font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+  /* un servidor viejo o apagado no puede armar el archivo: el aviso se ve y Download se apaga */
+  .foot[data-state="warn"] #info, #info.heavy { color: #ffb340; white-space: normal; }
+  .foot[data-state="warn"] .primary { opacity: 0.4; cursor: default; filter: none; }
+  .side .primary { justify-content: center; height: 38px; }
+  /* la vista previa es el archivo: entra entero en el cuadro, con su proporcion */
+  .preview {
+    position: relative; width: var(--pv); height: var(--pv); border-radius: 10px; overflow: clip;
+    display: grid; place-items: center; background: var(--bg);
+  }
+  .preview canvas { display: block; max-width: 100%; max-height: 100%; }
+  /* el marco del recorte: se mueve arrastrando adentro y se agranda o achica arrastrando bordes y esquinas (el cursor lo
+     pone el script segun donde esta el puntero); con foco, las flechas lo corren */
+  .preview canvas { touch-action: none; }
+  .preview canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  main { display: grid; grid-template-columns: 220px 1fr 300px; min-height: 0; }
+  /* izquierda: la vista y las versiones de la foto */
+  /* las dos barras van en pareja (pedido del fotografo, 2026-10-19): el mismo margen de 12 a los costados y 8 arriba, titulos de 36 al
+     ras del margen, filas de 36 con el texto a 22 del borde, y entre secciones la misma linea que DialKit pone entre
+     carpetas, a 10 de la ultima fila y pegada al titulo siguiente. Los numeros salen de DialKit (--dial-row-height 36,
+     --dial-radius 8, el padding-bottom de .dialkit-folder-inner) */
+  .side-nav { padding: 8px 12px 12px; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px; min-height: 0; overflow-y: auto; }
+  /* los titulos, como los de las carpetas de DialKit: 13, semibold, en oracion, al ras del margen */
+  .side-nav h2 { display: flex; align-items: center; height: 36px; font-size: 13px; font-weight: 600; color: var(--section); letter-spacing: -0.01em; }
+  .side-nav h2 ~ h2 { height: 37px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .list { display: flex; flex-direction: column; gap: 2px; }
+  .item {
+    all: unset; cursor: pointer; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border-radius: 8px;
+    font-size: 13px; color: var(--dim); transition: background 160ms var(--ease), color 160ms var(--ease);
+  }
+  .item[aria-current="true"], .item[aria-pressed="true"] { color: var(--text); background: var(--raised); }
+  .item:active { color: var(--text); background: rgba(255,255,255,0.07); }
+  .item svg { width: 14px; height: 14px; flex: none; }
+  .version { position: relative; display: grid; }
+  /* el nombre en una linea; el lugar del ⋯ y la X se reserva solo mientras se ven, y ahi el nombre se recorta */
+  .version .item > span { min-width: 0; overflow: clip; text-overflow: ellipsis; white-space: nowrap; }
+  .version:focus-within .item, .version:has(.act[aria-expanded="true"]) .item { padding-right: 62px; }
+  /* renombrar: el nombre pasa a ser un campo en el mismo lugar, con la misma medida */
+  .rename {
+    all: unset; box-sizing: border-box; height: 36px; padding: 0 10px; border-radius: 8px; font-size: 13px;
+    color: var(--text); background: var(--raised); outline: 2px solid var(--accent); outline-offset: -2px; cursor: text; user-select: text;
+  }
+  .version-menu { min-width: 180px; }
+  /* los dos menus (Before y el de cada version) salen de su boton: aparecen en 150 ms y se van en 100, mas rapido que
+     al entrar. Crecen desde arriba a la izquierda, que es donde esta lo que los abrio */
+  .before-menu, .version-menu {
+    transform-origin: top left; opacity: 0;
+    transition: opacity 100ms var(--ease), scale 100ms var(--ease), overlay 100ms allow-discrete, display 100ms allow-discrete;
+  }
+  .before-menu:popover-open, .version-menu:popover-open { opacity: 1; transition-duration: 150ms; }
+  @starting-style { .before-menu:popover-open, .version-menu:popover-open { opacity: 0; } }
+  @media (prefers-reduced-motion: no-preference) {
+    .before-menu, .version-menu { scale: 0.97; }
+    .before-menu:popover-open, .version-menu:popover-open { scale: 1; }
+    @starting-style { .before-menu:popover-open, .version-menu:popover-open { scale: 0.97; } }
+  }
+  /* borrar una version: aparece al pasar el puntero o con el foco en la fila */
+  .act {
+    all: unset; cursor: pointer; position: absolute; right: 5px; top: 50%; translate: 0 -50%;
+    display: grid; place-items: center; width: 26px; height: 26px; border-radius: 6px; color: var(--dim);
+    opacity: 0; transition: opacity 120ms var(--ease), background 120ms var(--ease), color 120ms var(--ease);
+  }
+  .act svg { width: 10px; height: 10px; }
+  .act.more { right: 31px; }
+  .act.more svg { width: 12px; height: 12px; }
+  .act[aria-expanded="true"] { opacity: 1; color: var(--text); background: rgba(255,255,255,0.08); }
+  .version:focus-within .act { opacity: 1; }
+  .act:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .act:active { color: var(--text); background: rgba(255,255,255,0.1); }
+  /* los atajos, abajo: la tecla y lo que hace */
+  .keys { margin-top: auto; padding-top: 14px; display: grid; gap: 8px; font-size: 12px; color: var(--dim); }
+  .keys p { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .keys p[hidden] { display: none; }
+  kbd {
+    font: inherit; font-size: 11px; color: var(--text); padding: 2px 6px; border-radius: 5px;
+    background: var(--raised); border: 1px solid var(--line);
+  }
+  .stage { position: relative; display: grid; place-items: center; min-height: 0; overflow: clip; }
+  .frame {
+    position: relative; border-radius: 4px; touch-action: none; cursor: grab;
+    background: #000; box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px var(--line);
+  }
+  .frame.dragging { cursor: grabbing; }
+  /* en el antes y despues con la foto entera no hay nada que mover: arrastrar en cualquier parte corre la barra */
+  .frame.compare.fitted, .frame.splitting { cursor: ew-resize; }
+  /* la foto: un lienzo de WebGL; arranca invisible y aparece una sola vez, cuando llega la primera imagen */
+  #canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; border-radius: inherit; opacity: 0; transition: opacity 200ms var(--ease); }
+  .frame.ready #canvas { opacity: 1; }
+  /* la barra del antes y despues. .split es la zona de agarre: 44 px de ancho a lo alto de toda la foto, con la linea
+     (::before) en el medio y la manija. La foto no recorta (el radio va en el lienzo): en los bordes la manija queda
+     entera, colgando en el margen, y se sigue pudiendo agarrar */
+  .split {
+    --hit: 44px;
+    position: absolute; top: 0; bottom: 0; left: 50%; width: var(--hit); margin-left: calc(var(--hit) / -2);
+    cursor: ew-resize; opacity: 0; pointer-events: none; transition: opacity 180ms var(--ease);
+  }
+  .split::before {
+    content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; margin-left: -1px;
+    background: rgba(255,255,255,0.9); box-shadow: 0 0 0 0.5px rgba(0,0,0,0.3);
+  }
+  .frame.compare .split { opacity: 1; pointer-events: auto; }
+  /* la manija: una capsula vertical, como la linea que la atraviesa */
+  .knob {
+    position: absolute; top: 50%; left: 50%; width: 28px; height: 44px; translate: -50% -50%; border-radius: 14px;
+    display: grid; place-items: center; background: #fff; color: #1c1c1e;
+    box-shadow: 0 0 0 0.5px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .knob svg { opacity: 0.7; }
+  .frame.splitting .knob { scale: 1.06; box-shadow: 0 0 0 0.5px rgba(0,0,0,0.15), 0 4px 14px rgba(0,0,0,0.35); }
+  .label {
+    position: absolute; top: 12px; padding: 4px 9px; border-radius: 6px; font-size: 12px; font-weight: 500;
+    background: rgba(0,0,0,0.55); color: var(--text); pointer-events: none; opacity: 0; transition: opacity 180ms var(--ease);
+  }
+  .label.before { left: 12px; }
+  .label.after-label { right: 12px; }
+  .frame.compare .label { opacity: 1; }
+  /* el antes es un menu nuestro, con la forma de los de DialKit: el RAW o cualquier otra version de la foto */
+  .pick {
+    border: 0; font-family: inherit; line-height: inherit; display: inline-flex; align-items: center; gap: 5px;
+    padding-right: 7px; cursor: pointer; transition: opacity 180ms var(--ease), background-color 160ms var(--ease);
+  }
+  .pick::after { content: ""; position: absolute; inset: min(0px, (100% - 44px) / 2); }  /* 44 px de alto para el clic */
+  .pick svg { opacity: 0.7; }
+  .frame.compare .pick { pointer-events: auto; }
+  .pick:active, .pick[aria-expanded="true"] { background-color: rgba(0,0,0,0.8); }
+  .pick:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  /* sin otra version que elegir, el antes es el RAW y nada mas: un rotulo, sin flecha */
+  .pick:disabled { cursor: default; padding-right: 9px; }
+  .pick:disabled svg { display: none; }
+  .frame.compare .pick:disabled { pointer-events: none; }
+  /* un rotulo que la barra tapa se va (quedaria sobre el otro lado de la foto), y con Espacio se van los dos */
+  .frame.compare .label.covered { opacity: 0; pointer-events: none; }
+  .before-menu { min-width: 168px; }
+  /* tercios mientras se mueve; en difference se ven sobre la pared clara y sobre la ropa negra */
+  .grid {
+    --grid-line: rgba(255,255,255,0.6);
+    --a: calc(100% / 3); --b: calc(200% / 3);
+    position: absolute; inset: 0; pointer-events: none; mix-blend-mode: difference;
+    background:
+      linear-gradient(to right, transparent calc(var(--a) - 0.5px), var(--grid-line) 0 calc(var(--a) + 0.5px),
+                      transparent 0 calc(var(--b) - 0.5px), var(--grid-line) 0 calc(var(--b) + 0.5px), transparent 0),
+      linear-gradient(to bottom, transparent calc(var(--a) - 0.5px), var(--grid-line) 0 calc(var(--a) + 0.5px),
+                      transparent 0 calc(var(--b) - 0.5px), var(--grid-line) 0 calc(var(--b) + 0.5px), transparent 0);
+    opacity: 0; transition: opacity 240ms var(--ease);
+  }
+  .frame.moving .grid { opacity: 1; transition-duration: 120ms; }
+  .loading {
+    position: absolute; top: 14px; left: 50%; translate: -50% 0; padding: 5px 10px; border-radius: 20px;
+    font-size: 12px; color: var(--dim); background: var(--panel); border: 1px solid var(--line);
+    pointer-events: none; opacity: 0; transition: opacity 160ms var(--ease);
+  }
+  /* el zoom: Fit, o el porcentaje (100 % = un pixel de la foto por pixel de la pantalla). Es un boton que va de Fit al
+     100 % y vuelve, como el doble clic */
+  .zoom {
+    all: unset; cursor: pointer; position: absolute; bottom: 14px; left: 50%; translate: -50% 0;
+    min-width: 34px; padding: 5px 10px; border-radius: 20px; text-align: center;
+    font-size: 12px; color: var(--dim); background: var(--panel); border: 1px solid var(--line);
+    font-variant-numeric: tabular-nums; transition: color 160ms var(--ease), background 160ms var(--ease);
+  }
+  .zoom:active { color: var(--text); background: var(--raised); }
+  .loading.show { opacity: 1; transition-delay: 300ms; }
+  /* derecha: el panel de DialKit en linea es la barra misma, como el de la izquierda: sin una tarjeta adentro, sobre el
+     fondo de la pagina. DialKit pinta con --dial-glass-bg su fondo y lo que tapa al desplazar debajo de sus titulos */
+  aside { border-left: 1px solid var(--line); min-height: 0; overflow-y: auto; transition: opacity 160ms var(--ease); }
+  aside .dialkit-root { --dial-glass-bg: var(--bg); }
+  aside .dialkit-panel-inner { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  aside .dialkit-panel[data-mode="inline"] .dialkit-panel-wrapper { padding-top: 8px; }
+  /* sin el titulo "Edit": la barra izquierda no tiene uno, y asi las dos abren con un titulo de seccion a la misma altura.
+     El panel se llama por el aria-label del aside */
+  aside .dialkit-panel-header { display: none; }
+  /* mirando el RAW no hay nada que ajustar: el panel queda apagado (inert) */
+  aside.off { opacity: 0.35; }
+  /* las versiones estan a la izquierda y se guardan solo con Save version: sin el menu de versiones de DialKit ni su
+     "copiar parametros" (codigo para un programa) */
+  aside .dialkit-panel-toolbar { display: none; }
+  /* sin el menu, la linea de la primera carpeta quedaba doble con la del titulo: la misma regla que DialKit usa con
+     varios paneles */
+  aside .dialkit-folder-root > .dialkit-folder-content > .dialkit-folder-inner > .dialkit-folder:first-child { border-top: none; margin-top: 0; }
+  /* Save version, la ultima accion del panel: la que guarda, un escalon arriba de Reset */
+  aside .dialkit-folder-root > .dialkit-folder-content > .dialkit-folder-inner > .dialkit-button:last-child {
+    color: var(--dial-text-primary); background: var(--dial-surface-hover);
+  }
+  aside .dialkit-folder-root > .dialkit-folder-content > .dialkit-folder-inner > .dialkit-button:last-child:active { background: var(--dial-surface); }
+  /* DialKit pide Geist Mono a Google Fonts; el editor no sale a la red, asi que va la mono del sistema */
+  .dialkit-slider-value, .dialkit-slider-input { font-family: "Geist Mono", "SF Mono", ui-monospace, Menlo, monospace; }
+  /* los avisos: Sonner, de Emil Kowalski (recipe/vendor/sonner-2.0.8, React adentro, sin red). Todos neutros, sin
+     colores por tipo (pedido del fotografo, 2026-10-19). El contenedor es un popover para quedar arriba tambien del panel de export,
+     que esta en la capa superior; Sonner pone su lista fija abajo al centro */
+  #toasts { inset: auto; width: 0; height: 0; margin: 0; padding: 0; border: 0; background: none; overflow: visible; }
+  #toasts [data-sonner-toast] { box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  /* tooltip propio (popover, para quedar arriba tambien del panel de export): entra desde su boton, 125 ms, y se va
+     mas rapido; el que sale al instante, en un grupo ya caliente, no anima */
+  .tip {
+    position: fixed; inset: auto; left: 0; top: 0; margin: 0; max-width: 240px; pointer-events: none;
+    border: 0; padding: 6px 9px; border-radius: 7px; background: var(--raised); color: var(--text);
+    font-family: inherit; font-size: 12px; line-height: 1.35; box-shadow: 0 6px 20px rgba(0,0,0,0.35), 0 0 0 1px var(--line);
+    opacity: 0; scale: 0.97; transition: opacity 90ms var(--ease), scale 90ms var(--ease);
+  }
+  .tip.open { opacity: 1; scale: 1; transition-duration: 125ms; }
+  .tip[data-instant] { transition-duration: 0ms; }
+  @media (hover: hover) and (pointer: fine) {
+    .seg button:not(:disabled):hover { color: var(--text); }
+    .primary:not(:disabled):hover { filter: brightness(1.1); }
+    .close:hover { color: var(--text); background: var(--raised); }
+    .item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .item[aria-current="true"]:hover, .item[aria-pressed="true"]:hover { background: var(--raised); }
+    .version:hover .act { opacity: 1; }
+    .version:hover .item { padding-right: 62px; }
+    .act:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+    .zoom:hover { color: var(--text); background: var(--raised); }
+    .pick:enabled:hover { background-color: rgba(0,0,0,0.75); }
+    .frame.compare .split:hover .knob { scale: 1.06; }
+    aside .dialkit-folder-root > .dialkit-folder-content > .dialkit-folder-inner > .dialkit-button:last-child:hover { background: rgba(255,255,255,0.14); }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .primary { transition: filter 160ms var(--ease), scale 120ms var(--ease); }
+    .primary:not(:disabled):active { scale: 0.97; }
+    .knob { transition: scale 160ms var(--ease), box-shadow 160ms var(--ease); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration: 0ms !important; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="seg photos" id="photos" role="group" aria-label="Photo"></div>
+  <div class="spacer"></div>
+  <div class="actions" id="actions">
+  <button class="primary" id="export" aria-haspopup="dialog" aria-expanded="false" aria-controls="dialog">Export</button>
+  </div>
+</header>
+<main>
+  <nav class="side-nav" aria-label="View and versions">
+    <h2 id="viewsTitle">View</h2>
+    <div class="list" id="views" role="group" aria-labelledby="viewsTitle">
+      <button class="item" id="rawView" aria-pressed="false">RAW original</button>
+      <button class="item" id="compareView" aria-pressed="false">Before / after</button>
+    </div>
+    <h2 id="versionsTitle">Versions</h2>
+    <div class="list" id="versions" role="list" aria-labelledby="versionsTitle"></div>
+    <div class="keys">
+      <p id="peekKey"><kbd>Space</kbd>Hold to see the RAW</p>
+      <p><kbd>Double-click</kbd>Zoom to 100%</p>
+    </div>
+  </nav>
+  <section class="stage" id="stage">
+    <div class="frame" id="frame">
+      <canvas id="canvas" role="img" aria-label="Photo"></canvas>
+      <div class="grid"></div>
+      <button class="label before pick" id="beforePick" popovertarget="beforeMenu" aria-haspopup="menu" aria-expanded="false"><span id="beforeName">RAW original</span><svg width="8" height="5" viewBox="0 0 8 5" aria-hidden="true"><path d="M.75.75 4 4 7.25.75" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="label after-label" id="afterLabel">Version 1</span>
+      <div class="split" id="split">
+        <div class="knob" id="knob" role="slider" tabindex="0" aria-label="Before and after divider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+          <svg width="14" height="10" viewBox="0 0 14 10" aria-hidden="true"><path d="M4.5 1 1 5l3.5 4M9.5 1 13 5l-3.5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="loading" id="loading">Loading full resolution</div>
+    <button class="zoom" id="zoom">Fit</button>
+  </section>
+  <aside id="controls" aria-label="Adjustments"></aside>
+</main>
+<dialog class="export" id="dialog" aria-labelledby="dialogTitle">
+  <div class="sheet">
+    <div class="preview" id="preview"><canvas id="previewCanvas" aria-label="Preview"></canvas><button class="zoom" id="pvZoom">Fit</button></div>
+    <div class="side">
+      <div class="title"><h2 id="dialogTitle">Export</h2><button class="close" id="close" aria-label="Close" data-tip="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>
+      <!-- en el orden de Lightroom Classic y Fotos: formato, tamano, recorte. -->
+      <div class="field"><span>Format</span><div class="seg" id="format" role="group" aria-label="Format"></div></div>
+      <div class="field"><span>Size</span><div class="seg" id="size" role="group" aria-label="Size"></div></div>
+      <div class="field"><span>Crop</span><div class="seg" id="area" role="group" aria-label="Crop"></div></div>
+      <div class="foot" id="foot"><div class="summary"><p id="what"></p><p id="info"></p></div><button class="primary" id="download" autofocus>Download</button></div>
+    </div>
+  </div>
+</dialog>
+<div id="toasts" popover="manual"></div>
+<div class="drop" id="drop" aria-hidden="true"><p>Drop to add photos</p></div>
+<input type="file" id="addFiles" multiple hidden>
+<div class="tip" id="tip" popover="manual" role="tooltip"></div>
+<!-- el menu del antes: fuera de la foto (un clic adentro no tiene que llegar al arrastre) y con las clases de DialKit -->
+<div class="dialkit-root" data-theme="dark"><div class="dialkit-select-dropdown before-menu" id="beforeMenu" popover role="menu" aria-label="Before"></div></div>
+<div class="dialkit-root" data-theme="dark"><div class="dialkit-select-dropdown version-menu" id="versionMenu" popover role="menu" aria-label="Version">
+  <button class="dialkit-select-option" role="menuitem" tabindex="-1" data-do="rename">Rename</button>
+  <button class="dialkit-select-option" role="menuitem" tabindex="-1" data-do="delete">Delete from all photos</button>
+</div></div>
+<script src="recipe/vendor/dialkit-2.0.2/browser.global.js"></script>
+<script src="recipe/vendor/sonner-2.0.8/sonner.global.js"></script>
+<script>
+const DATA = /*DATA*/;
+const PHOTOS = DATA.photos;  // [{key, label, w, h, eyes, top}]
+// lo que se ve es siempre la version puesta (la de la lista de versiones). La vista suma dos maneras de mirarla, que
+// se excluyen: el RAW original, y el antes y despues (a la izquierda el RAW u otra version, a la derecha la puesta).
+// before: por foto, contra que se compara: null = el RAW, "base" = la 1, o el id de otra version
+const state = { photo: -1, raw: false, compare: false, before: {}, views: {}, split: 0.5, peek: false };
+const $ = id => document.getElementById(id);
+const frame = $("frame"), canvas = $("canvas");
+const P = () => PHOTOS[state.photo];
+const mode = () => (state.raw ? "raw" : state.compare ? "compare" : "edit");
+const dpr = () => window.devicePixelRatio || 1;
+// la pantalla: 2560 px de lado largo, achicada en luz lineal desde la maestra (viewer.py). La entera, cuando hace falta
+const imageUrl = (p, kind, full) => `editadas/${full ? "" : "pantalla/"}${p.key}${kind === "raw" ? "-antes" : ""}.png?v=${DATA.version}`;
+// el fondo: la capa (la pared de atras y el alpha; en pantalla, a la medida de la imagen de pantalla) y la luz de la pared,
+// en las copias de 8 bits de viewer.py (Chrome lee un PNG de 16 bits cortando bits). top: null si la foto no tiene capas,
+// y entonces la carpeta Background no le hace nada
+const layerUrl = (p, full) => (full ? `editadas/fondo/${p.key}-capa-editor.png` : `editadas/pantalla/${p.key}-capa.png`) + `?v=${DATA.version}`;
+const lightUrl = p => `editadas/fondo/${p.key}-luz-editor.png?v=${DATA.version}`;
+const bgUrls = p => (p.top == null ? [] : [layerUrl(p, false), lightUrl(p)]);
+
+// --- ojeras y ajustes: los numeros de recipe/adjust.py, que es la referencia -------------------
+const EYE_DEFAULT = DATA.eyes?.default ?? 100, EYE_MAX = DATA.eyes?.max ?? 100;
+const KEYS = ["exposure", "brightness", "contrast", "highlights", "shadows", "whites", "blacks", "temperature", "tint", "vibrance", "saturation"];
+const TONE = ["brightness", "contrast", "highlights", "shadows", "whites", "blacks"];
+const BG_KEYS = ["exposure", "evenness", "smoothing", "falloff", "temperature", "tint", "saturation"];  // los de recipe/backdrop.py
+const LUMA = [0.2126, 0.7152, 0.0722].map(Math.fround);
+const TEMP = 0.2, TINT = 0.1, KNEE = 0.6;
+const toX = v => (v > 216 / 24389 ? 1.16 * Math.cbrt(v) - 0.16 : v * (24389 / 2700));
+// temperatura y tinte (-1..1): una ganancia por canal, normalizada para que un gris no cambie de luz (adjust.gains)
+function gains(t, n) {
+  const g = [Math.exp(TEMP * t), Math.exp(-TINT * n), Math.exp(-TEMP * t)];
+  const norm = g[0] * LUMA[0] + g[1] * LUMA[1] + g[2] * LUMA[2];
+  return g.map(x => Math.fround(x / norm));
+}
+
+// del panel a los uniformes del shader: lo que no depende del pixel se calcula una vez, en doble precision, como numpy
+function adjustUniforms(a) {
+  const unit = k => (a[k] || 0) / (k === "exposure" ? 1 : 100);
+  const ev = Math.fround(2 ** unit("exposure"));
+  const gain = gains(unit("temperature"), unit("tint")).map(x => Math.fround(x * ev));
+  const top = Math.max(...gain), topX = top > 1 ? toX(top) : 0;
+  const knee = topX > 1 ? 1 - KNEE * (topX - 1) / topX : 1;
+  return {
+    on: KEYS.some(k => a[k]), gain, tone: top > 1 || TONE.some(k => a[k]),
+    top: topX, knee, shoulder: topX > 1 ? (topX - knee) / (1 - knee) : 1,
+    contrast: unit("contrast"), highlights: unit("highlights"), shadows: unit("shadows"),
+    whites: unit("whites"), blacks: unit("blacks"), bright: 2 ** unit("brightness"),
+    sat: unit("saturation"), vib: unit("vibrance"),
+  };
+}
+// el fondo, lo mismo: lo de backdrop.target que no depende del pixel. Todo en 0, apagado
+const BG_OFF = { on: false, ev: 1, even: 0, smooth: 0, fall: 0, gain: [1, 1, 1], sat: 1 };
+function bgUniforms(b) {
+  const v = k => b[k] || 0;
+  if (!BG_KEYS.some(v)) return BG_OFF;
+  return { on: true, ev: 2 ** v("exposure"), even: v("evenness") / 100, smooth: v("smoothing") / 100, fall: v("falloff") / 100,
+           gain: gains(v("temperature") / 100, v("tint") / 100), sat: 1 + v("saturation") / 100 };
+}
+// la intensidad de las ojeras: hasta el 100 %, de la editada a su punta (0 o 100); pasado, de la punta del 100 a la del tope
+function eyeMix(level) {
+  const d = EYE_DEFAULT;
+  if (level === d) return null;
+  if (level < d) return { from: null, to: "0", f: 1 - level / d };
+  if (level <= 100) return { from: null, to: "100", f: (level - d) / (100 - d) };
+  return { from: "100", to: String(EYE_MAX), f: (level - 100) / (EYE_MAX - 100) };
+}
+
+// --- el render: WebGL2. Un triangulo que cubre el lienzo y un shader que hace todo -----------------
+const VERT = `#version 300 es
+void main() {
+  vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+  gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+}`;
+// El orden: la base (editada o RAW), las ojeras mezcladas en sRGB como blend_eyes del servidor, los ajustes en luz
+// lineal (adjust, copia de recipe/adjust.py), el fondo (backdrop, copia de recipe/backdrop.py) y a 8 bits con un dither
+// de menos de medio nivel: lo neutro queda exacto
+const FRAG = `#version 300 es
+precision highp float;
+precision highp int;
+precision highp sampler2D;
+uniform sampler2D u_edit, u_raw, u_eA0, u_eB0, u_eC0, u_eA1, u_eB1, u_eC1, u_eA2, u_eB2, u_eC2;
+uniform vec2 u_canvas, u_center, u_photo;
+uniform float u_scale;
+uniform int u_show;
+uniform vec4 u_rect0, u_rect1, u_rect2;
+uniform float u_eyeF0, u_eyeF1, u_eyeF2;
+uniform bool u_eyeFromBase0, u_eyeFromBase1, u_eyeFromBase2, u_adjust, u_tone, u_dither;
+uniform bool u_flip;  // para leer: las filas salen de arriba hacia abajo, como las quiere un ImageData
+uniform vec3 u_gain;
+uniform float u_top, u_knee, u_shoulder, u_contrast, u_highlights, u_shadows, u_whites, u_blacks, u_bright, u_sat, u_vib;
+uniform sampler2D u_layer, u_light;
+uniform bool u_bg;
+uniform float u_bgEv, u_bgEven, u_bgSmooth, u_bgFall, u_bgSat, u_bgTop;
+uniform vec3 u_bgGain;
+out vec4 outColor;
+
+const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
+const float TAU = 6.283185307179586;
+
+vec3 encode(vec3 l) {
+  l = clamp(l, 0.0, 1.0);
+  return mix(12.92 * l, 1.055 * pow(l, vec3(1.0 / 2.4)) - 0.055, step(vec3(0.0031308), l));
+}
+vec3 decode(vec3 e) {
+  return mix(e / 12.92, pow((e + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), e));
+}
+// achicar bien: el nivel del mipmap justo por encima de la huella del pixel y cuatro muestras dentro de ella.
+// Agrandar: bilineal, como el navegador con una imagen
+vec4 tap4(sampler2D t, vec2 uv, float foot) {
+  if (foot <= 1.0) return textureLod(t, uv, 0.0);
+  float lod = floor(log2(foot));
+  vec2 o = 0.25 * foot / exp2(lod) / vec2(textureSize(t, int(lod)));
+  return 0.25 * (textureLod(t, uv + vec2(-o.x, -o.y), lod) + textureLod(t, uv + vec2(o.x, -o.y), lod)
+               + textureLod(t, uv + vec2(-o.x, o.y), lod) + textureLod(t, uv + vec2(o.x, o.y), lod));
+}
+vec3 tap(sampler2D t, vec2 uv, float foot) { return tap4(t, uv, foot).rgb; }
+// un parche entra como diferencia contra su base (C, la editada recortada), leidos los dos con el mismo filtro: donde
+// no corrige, la diferencia es 0 exacto y la foto queda intacta, a cualquier zoom. Al 1:1 es mix(desde, hasta, f)
+// f y fromBase son de esa cara: cada una tiene su intensidad
+vec3 face(vec3 lin, vec2 px, vec4 r, sampler2D A, sampler2D B, sampler2D C, float f, bool fromBase) {
+  if (f <= 0.0 || r.z <= 0.0) return lin;
+  vec2 q = (px - r.xy) / r.zw;
+  if (q.x < 0.0 || q.y < 0.0 || q.x >= 1.0 || q.y >= 1.0) return lin;
+  float foot = 1.0 / u_scale;
+  vec3 c = encode(tap(C, q, foot));
+  vec3 a = fromBase ? c : encode(tap(A, q, foot));
+  vec3 d = (a - c) + f * (encode(tap(B, q, foot)) - a);
+  return d == vec3(0.0) ? lin : decode(clamp(encode(lin) + d, 0.0, 1.0));
+}
+
+float toX(float v) { v = max(v, 0.0); return v > 216.0 / 24389.0 ? 1.16 * pow(v, 1.0 / 3.0) - 0.16 : v * (24389.0 / 2700.0); }
+float fromX(float x) { float t = (x + 0.16) / 1.16; return x > 0.08 ? t * t * t : x * (2700.0 / 24389.0); }
+float smooth01(float a, float b, float x) { float t = clamp((x - a) / (b - a), 0.0, 1.0); return t * t * (3.0 - 2.0 * t); }
+float bump(float u) { u = clamp(u, 0.0, 1.0); return 16.0 * u * u * (1.0 - u) * (1.0 - u); }
+float tone(float x) {
+  if (u_top > 1.0 && x > u_knee) x = u_knee + (1.0 - u_knee) * (1.0 - pow(1.0 - clamp((x - u_knee) / (u_top - u_knee), 0.0, 1.0), u_shoulder));
+  if (u_contrast != 0.0) x -= u_contrast * 0.55 * sin(TAU * x) / TAU;
+  if (u_highlights != 0.0) x += u_highlights * 0.15 * bump((x - 0.4) / 0.6);
+  if (u_shadows != 0.0) x += u_shadows * 0.15 * bump(x / 0.6);
+  if (u_whites != 0.0) x += u_whites * 0.15 * smooth01(0.5, 1.0, x);
+  if (u_blacks != 0.0) x += u_blacks * 0.15 * (1.0 - smooth01(0.0, 0.5, x));
+  x = clamp(x, 0.0, 1.0);
+  if (u_bright != 1.0) x = x * u_bright / (1.0 + (u_bright - 1.0) * x);
+  return x;
+}
+vec3 cbrt3(vec3 v) { return sign(v) * pow(abs(v), vec3(1.0 / 3.0)); }
+vec3 oklab(vec3 c) {
+  vec3 lms = cbrt3(vec3(dot(vec3(0.4122214708, 0.5363325363, 0.0514459929), c),
+                        dot(vec3(0.2119034982, 0.6806995451, 0.1073969566), c),
+                        dot(vec3(0.0883024619, 0.2817188376, 0.6299787005), c)));
+  return vec3(dot(vec3(0.2104542553, 0.7936177850, -0.0040720468), lms),
+              dot(vec3(1.9779984951, -2.4285922050, 0.4505937099), lms),
+              dot(vec3(0.0259040371, 0.7827717662, -0.8086757660), lms));
+}
+vec3 fromOklab(vec3 lab) {
+  vec3 l = vec3(dot(vec3(1.0, 0.3963377774, 0.2158037573), lab),
+                dot(vec3(1.0, -0.1055613458, -0.0638541728), lab),
+                dot(vec3(1.0, -0.0894841775, -1.2914855480), lab));
+  l = l * l * l;
+  return vec3(dot(vec3(4.0767416621, -3.3077115913, 0.2309699292), l),
+              dot(vec3(-1.2684380046, 2.6097574011, -0.3413193965), l),
+              dot(vec3(-0.0041960863, -0.7034186147, 1.7076147010), l));
+}
+vec3 gamut(vec3 c) {
+  float y = clamp(dot(c, LUMA), 0.0, 1.0), t = 1.0;
+  vec3 d = c - y;
+  for (int i = 0; i < 3; i++) {
+    if (d[i] > 1e-7) t = min(t, (1.0 - y) / d[i]);
+    else if (d[i] < -1e-7) t = min(t, y / -d[i]);
+  }
+  return clamp(y + d * t, 0.0, 1.0);
+}
+vec3 adjust(vec3 lin) {
+  vec3 c = lin * u_gain;
+  if (u_tone) {
+    float hi = max(c.r, max(c.g, c.b)), lo = min(c.r, min(c.g, c.b));
+    float hi2 = fromX(tone(toX(hi))), lo2 = fromX(tone(toX(lo))), span = hi - lo;
+    vec3 t = span > 1e-7 ? (c - lo) / max(span, 1e-7) : vec3(1.0);
+    c = lo2 + (hi2 - lo2) * t;
+  }
+  if (u_sat != 0.0 || u_vib != 0.0) {
+    vec3 lab = oklab(c);
+    float f = 1.0 + u_sat;
+    if (u_vib != 0.0) { float w = clamp(1.0 - length(lab.yz) / 0.25, 0.0, 1.0); f *= 1.0 + u_vib * w * w; }
+    lab.yz *= f;
+    c = fromOklab(lab);
+  }
+  return gamut(c);
+}
+// el fondo (backdrop.compose): una ganancia por pixel de pared, sobre la foto ya ajustada. La capa trae la pared de
+// atras (RGB) y el alpha: 0 es la pared pura, donde la pared es el pixel mismo; 1, la gente, que queda como la dejo el
+// panel. La luz de la pared, la pared de atras y su parte mas clara pasan por los mismos ajustes que la foto
+vec3 backdrop(vec3 c, vec2 uv, float foot) {
+  vec4 layer = tap4(u_layer, uv, foot);
+  if (layer.a >= 1.0) return c;
+  vec3 light = textureLod(u_light, uv, 0.0).rgb, b = layer.rgb;
+  float top = u_bgTop;
+  if (u_adjust) {
+    light = adjust(light);
+    b = adjust(b);
+    top = 100.0 * toX(dot(adjust(vec3(fromX(top / 100.0))), LUMA));
+  }
+  float y = max(dot(light, LUMA), 1e-6), L = 100.0 * toX(y * u_bgEv);
+  if (u_bgEven != 0.0) { float t = 100.0 * toX(fromX(top / 100.0) * u_bgEv); L = t + (1.0 - u_bgEven) * (L - t); }
+  // la caida: hasta 64 L* en el borde derecho, desde el 35 % del ancho y con potencia 1,82
+  if (u_bgFall != 0.0) { float f = clamp((uv.x - 0.35) / 0.65, 0.0, 1.0); L -= u_bgFall * 64.0 * (f > 0.0 ? pow(f, 1.82) : 0.0); }
+  L = clamp(L, 1.0, 100.0);
+  vec3 g = fromX(L / 100.0) / y * u_bgGain;
+  if (u_bgSat != 1.0) g *= (y + u_bgSat * (light - y)) / max(light, vec3(1e-6));
+  // las franjas del papel: la luz ancha sobre la pared de atras, que es la pared pura a 12 px
+  // (backdrop.paper: hasta 0,08 en log es papel y se aplana; desde 0,2 es una sombra de la gente y queda)
+  if (u_bgSmooth != 0.0) {
+    float d = log(y / max(dot(b, LUMA), 1e-6));
+    g *= exp(d * (1.0 - smoothstep(0.08, 0.2, abs(d))) * u_bgSmooth);
+  }
+  vec3 wall = layer.a <= 0.0 ? c : min((1.0 - layer.a) * b, c);
+  return c + (g - 1.0) * wall;
+}
+uint pcg(uint v) {
+  uint s = v * 747796405u + 2891336453u;
+  uint w = ((s >> ((s >> 28u) + 4u)) ^ s) * 277803737u;
+  return (w >> 22u) ^ w;
+}
+
+void main() {
+  vec2 dev = vec2(gl_FragCoord.x, u_flip ? gl_FragCoord.y : u_canvas.y - gl_FragCoord.y);
+  vec2 px = u_center + (dev - 0.5 * u_canvas) / u_scale;
+  vec2 uv = px / u_photo;
+  if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) { outColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
+  float foot = float(textureSize(u_edit, 0).x) / u_photo.x / u_scale;
+  vec3 lin;
+  if (u_show == 1) lin = tap(u_raw, uv, foot);
+  else {
+    lin = tap(u_edit, uv, foot);
+    lin = face(lin, px, u_rect0, u_eA0, u_eB0, u_eC0, u_eyeF0, u_eyeFromBase0);
+    lin = face(lin, px, u_rect1, u_eA1, u_eB1, u_eC1, u_eyeF1, u_eyeFromBase1);
+    lin = face(lin, px, u_rect2, u_eA2, u_eB2, u_eC2, u_eyeF2, u_eyeFromBase2);
+    if (u_adjust) lin = adjust(lin);
+    if (u_bg) lin = backdrop(lin, uv, foot);
+  }
+  vec3 e = encode(lin);
+  if (u_dither) {
+    uvec2 p = uvec2(gl_FragCoord.x, u_flip ? u_canvas.y - gl_FragCoord.y : gl_FragCoord.y);  // el mismo grano dado vuelta o no
+    e += (float(pcg(p.x + pcg(p.y)) >> 8) / 16777216.0 - 0.5) * (0.98 / 255.0);
+  }
+  outColor = vec4(e, 1.0);
+}`;
+
+function createRenderer(cv) {
+  const gl = cv.getContext("webgl2", { alpha: false, antialias: false, depth: false, stencil: false, powerPreference: "high-performance" });
+  if (!gl) return null;
+  const shader = (type, src) => {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    return s;
+  };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, shader(gl.VERTEX_SHADER, VERT)); gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, FRAG));
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+  gl.useProgram(prog);
+  gl.bindVertexArray(gl.createVertexArray());
+  const loc = new Proxy({}, { get: (cache, name) => (name in cache ? cache[name] : (cache[name] = gl.getUniformLocation(prog, name))) });
+  const UNITS = ["u_edit", "u_raw", "u_eA0", "u_eB0", "u_eC0", "u_eA1", "u_eB1", "u_eC1", "u_eA2", "u_eB2", "u_eC2", "u_layer", "u_light"];
+  UNITS.forEach((name, i) => gl.uniform1i(loc[name], i));
+  gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+  // un pixel para las ranuras sin imagen: el shader no las lee, pero cada ranura tiene que tener algo
+  const blank = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, blank);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.SRGB8_ALPHA8, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 255]));
+
+  // texturas sRGB con mipmaps: el hardware las pasa a luz lineal al leerlas y los mipmaps se promedian en luz lineal
+  const textures = new Map();  // url -> { tex, w, h, ready, promise, gone }
+  function load(url) {
+    let t = textures.get(url);
+    if (t) return t.promise;
+    t = { tex: null, w: 0, h: 0, ready: false, gone: false };
+    textures.set(url, t);
+    t.promise = fetch(url).then(r => { if (!r.ok) throw new Error(`${r.status} ${url}`); return r.blob(); })
+      .then(b => createImageBitmap(b, { colorSpaceConversion: "none", premultiplyAlpha: "none" }))
+      .then(bmp => {
+        if (t.gone || gl.isContextLost()) { bmp.close(); return t; }
+        const tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texStorage2D(gl.TEXTURE_2D, 1 + Math.floor(Math.log2(Math.max(bmp.width, bmp.height))), gl.SRGB8_ALPHA8, bmp.width, bmp.height);
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, bmp);
+        gl.generateMipmap(gl.TEXTURE_2D);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        Object.assign(t, { tex, w: bmp.width, h: bmp.height, ready: true });
+        bmp.close();
+        return t;
+      });
+    t.promise.catch(() => textures.delete(url));
+    return t.promise;
+  }
+  const ready = url => textures.get(url)?.ready ?? false;
+  function release(url) {
+    const t = textures.get(url);
+    if (!t) return;
+    t.gone = true;
+    if (t.tex) gl.deleteTexture(t.tex);
+    textures.delete(url);
+  }
+  // s: lo que se dibuja (ver scene()). target: null para el lienzo, o { w, h } para el destino que read() ya puso, dado
+  // vuelta. clip: [x0, x1], la franja del lienzo que se pinta (el antes y despues son dos escenas, una de cada lado)
+  function draw(s, target = null, clip = null) {
+    const W = target ? target.w : cv.width, H = target ? target.h : cv.height;
+    gl.viewport(0, 0, W, H);
+    const slots = [s.edit, s.raw, ...s.eyes.flatMap(e => [e.A, e.B, e.C]), s.layer, s.light];
+    UNITS.forEach((_, i) => {
+      gl.activeTexture(gl.TEXTURE0 + i);
+      gl.bindTexture(gl.TEXTURE_2D, textures.get(slots[i])?.tex ?? blank);
+    });
+    gl.uniform2f(loc.u_canvas, W, H);
+    gl.uniform2f(loc.u_center, s.cx, s.cy);
+    gl.uniform2f(loc.u_photo, s.pw, s.ph);
+    gl.uniform1f(loc.u_scale, s.scale);
+    gl.uniform1i(loc.u_show, s.show);
+    s.eyes.forEach((e, i) => {
+      gl.uniform4f(loc[`u_rect${i}`], ...e.rect);
+      gl.uniform1f(loc[`u_eyeF${i}`], e.f);
+      gl.uniform1i(loc[`u_eyeFromBase${i}`], e.fromBase);
+    });
+    const a = s.adjust;
+    gl.uniform1i(loc.u_adjust, a.on);
+    gl.uniform1i(loc.u_tone, a.tone);
+    gl.uniform3f(loc.u_gain, ...a.gain);
+    for (const k of ["top", "knee", "shoulder", "contrast", "highlights", "shadows", "whites", "blacks", "bright", "sat", "vib"])
+      gl.uniform1f(loc[`u_${k}`], a[k]);
+    const b = s.bg;
+    gl.uniform1i(loc.u_bg, b.on);
+    gl.uniform1f(loc.u_bgEv, b.ev); gl.uniform1f(loc.u_bgEven, b.even); gl.uniform1f(loc.u_bgSmooth, b.smooth); gl.uniform1f(loc.u_bgFall, b.fall);
+    gl.uniform1f(loc.u_bgSat, b.sat); gl.uniform1f(loc.u_bgTop, s.bgTop);
+    gl.uniform3f(loc.u_bgGain, ...b.gain);
+    gl.uniform1i(loc.u_dither, s.dither);
+    gl.uniform1i(loc.u_flip, !!target);
+    if (clip) { gl.enable(gl.SCISSOR_TEST); gl.scissor(clip[0], 0, Math.max(clip[1] - clip[0], 0), H); }
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    if (clip) gl.disable(gl.SCISSOR_TEST);
+  }
+  // la escena a W x H, leida: un solo destino que se rehace solo si cambia el tamano, dibujada dada vuelta para que
+  // readPixels (que lee de abajo hacia arriba) la entregue derecha, en un buffer que se reusa
+  let readTex = null, readFbo = null, readPx = null, readW = 0, readH = 0;
+  function read(s, W, H) {
+    if (W !== readW || H !== readH) {
+      if (readTex) { gl.deleteFramebuffer(readFbo); gl.deleteTexture(readTex); }
+      readTex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, readTex);
+      gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA8, W, H);
+      readFbo = gl.createFramebuffer();
+      gl.bindFramebuffer(gl.FRAMEBUFFER, readFbo);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, readTex, 0);
+      readPx = new Uint8ClampedArray(W * H * 4); readW = W; readH = H;
+    }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, readFbo);
+    draw(s, { w: W, h: H });
+    gl.readPixels(0, 0, W, H, gl.RGBA, gl.UNSIGNED_BYTE, readPx);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    return readPx;
+  }
+  return { gl, load, ready, release, draw, read };
+}
+
+// --- vista: centro y ancho visible, en pixeles de la foto ----------------------
+function fitView(p) { return { cx: p.w / 2, cy: p.h / 2, size: p.w }; }
+function view() { return state.views[P().key]; }
+const minSize = () => (size.w * dpr()) / 4;  // hasta 400 %
+const rubber = (over, size) => (1 - 1 / (over * 0.55 / size + 1)) * size;  // como el rebote de iOS
+function clampView(v, elastic = false) {
+  const p = P();
+  const size = Math.min(Math.max(v.size, minSize()), p.w);
+  const axis = (c, half, len) => {
+    const lo = half, hi = len - half;
+    if (!elastic) return Math.min(Math.max(c, lo), hi);
+    if (c < lo) return lo - rubber(lo - c, size);
+    if (c > hi) return hi + rubber(c - hi, size);
+    return c;
+  };
+  return { cx: axis(v.cx, size / 2, p.w), cy: axis(v.cy, (size * p.h) / p.w / 2, p.h), size };
+}
+
+// --- lo que se dibuja: la foto, su vista y su ajuste ---------------------------
+const renderer = createRenderer(canvas);
+let settings = { levels: {}, adjust: Object.fromEntries(KEYS.map(k => [k, 0])), background: Object.fromEntries(BG_KEYS.map(k => [k, 0])) };
+let uniforms = adjustUniforms(settings.adjust), bgU = bgUniforms(settings.background);
+// la entera reemplaza a la de pantalla cuando la de pantalla tendria que agrandarse
+const screenUrl = (p, kind) => imageUrl(p, kind, false), fullUrl = (p, kind) => imageUrl(p, kind, true);
+const needsFull = (p, scale) => scale * p.w > ((DATA.screen ?? 2560) * p.w) / Math.max(p.w, p.h) + 1;
+// un look: el RAW, o una version (la intensidad de las ojeras y los uniforms de sus ajustes y de su fondo)
+const RAW_LOOK = { raw: true };
+const liveLook = () => ({ raw: false, levels: settings.levels, uniforms, bg: bgU });
+// los valores de DialKit vienen planos ("Light.Exposure"); fromValues los quiere por carpeta
+const nest = flat => {
+  const out = {};
+  for (const [k, v] of Object.entries(flat)) { const [folder, control] = k.split("."); if (control) (out[folder] ??= {})[control] = v; }
+  return out;
+};
+// una version que no es la puesta: la 1 es la base de DialKit (baseValues, interno, en la copia fija de vendor/)
+function versionLook(id) {
+  const values = id === "base" ? store.baseValues.get(dial.id) : store.getPresets(dial.id).find(v => v.id === id)?.values;
+  if (!values) return RAW_LOOK;
+  const st = fromValues(nest(values), P());
+  return { raw: false, levels: st.levels, uniforms: adjustUniforms(st.adjust), bg: bgUniforms(st.background) };
+}
+// contra que se compara: lo elegido en el menu, salvo que sea la misma version de la derecha (ahi va el RAW; lo elegido
+// vuelve cuando la derecha cambia, asi se puede recorrer con ↓ ↑ contra una fija)
+function beforeId() {
+  const b = state.before[P().key];
+  return b && b !== (store.getActivePresetId(dial.id) ?? "base") ? b : null;
+}
+const beforeLook = () => (beforeId() ? versionLook(beforeId()) : RAW_LOOK);
+function scene(p, v, W, opts = {}) {
+  const scale = opts.scale ?? W / v.size;
+  const look = opts.look ?? (state.raw ? RAW_LOOK : liveLook());
+  const bg = look.raw || p.top == null ? BG_OFF : look.bg ?? BG_OFF;
+  // la capa del fondo va a la misma escala que la editada: la de pantalla agrandada desdibujaria el borde del pelo
+  const full = needsFull(p, scale) && renderer.ready(fullUrl(p, "edit")) && renderer.ready(fullUrl(p, "raw")) &&
+               (!bg.on || renderer.ready(layerUrl(p, true)));
+  // cada cara con su intensidad (las ojeras van por cara desde el 2026-10-19)
+  const eyes = [0, 1, 2].map(i => {
+    const e = p.eyes?.[i];
+    const mix = !e || look.raw || p.key !== P().key ? null : eyeMix(look.levels?.[e.face] ?? EYE_DEFAULT);
+    const patch = tag => (e && tag ? `editadas/ojeras/${p.key}-${e.face}-${tag}.png?v=${DATA.version}` : null);
+    return { rect: e ? [e.x, e.y, e.w, e.h] : [0, 0, 0, 0], A: patch(mix?.from), B: patch(mix?.to), C: patch(mix && "base"),
+             f: mix ? mix.f : 0, fromBase: !mix?.from };
+  });
+  return {
+    edit: (full ? fullUrl : screenUrl)(p, "edit"), raw: (full ? fullUrl : screenUrl)(p, "raw"), full,
+    layer: bg.on ? layerUrl(p, full) : null, light: bg.on ? lightUrl(p) : null, bg, bgTop: p.top ?? 0,
+    cx: v.cx, cy: v.cy, pw: p.w, ph: p.h, scale,
+    show: look.raw ? 1 : 0,
+    eyes,
+    adjust: look.raw ? uniforms : look.uniforms, dither: opts.dither ?? true,
+  };
+}
+// lo que va en el lienzo: una escena, o dos con el antes y despues, cada una de su lado de la barra (clip, en pixeles
+// del lienzo). Espacio, solo sobre la version, muestra el RAW
+function frames(p, v, W) {
+  const m = mode();
+  if (m === "compare") {
+    const x = Math.round(state.split * W);
+    return [{ s: scene(p, v, W, { look: beforeLook() }), clip: [0, x] }, { s: scene(p, v, W, { look: liveLook() }), clip: [x, W] }];
+  }
+  return [{ s: scene(p, v, W, { look: m === "raw" || state.peek ? RAW_LOOK : liveLook() }) }];
+}
+// todo lo que la escena necesita ya esta en la placa (las ojeras de esta intensidad incluidas)
+function sceneReady(s) {
+  if (!renderer.ready(s.edit) || !renderer.ready(s.raw)) return false;
+  if (s.bg.on && !(renderer.ready(s.layer) && renderer.ready(s.light))) return false;
+  return s.eyes.every(e => e.f <= 0 || [e.A, e.B, e.C].every(url => !url || renderer.ready(url)));
+}
+let holding = false;  // cambiando de foto: un solo dibujo, al final
+// el tamano del lienzo para la foto actual (fit). Se aplica con su primer dibujo y no antes: achicar el lienzo lo borra,
+// y si la foto nueva todavia no llego se veria negro
+let size = { w: 0, h: 0, cw: 0, ch: 0 };
+function draw() {
+  if (!renderer || state.photo < 0 || holding) return;
+  const p = P(), parts = frames(p, view(), size.cw);
+  // lo que se ve de cerca sin la entera (o sin la capa entera, recien prendido el fondo): se pide, y mientras tanto va
+  // la de pantalla
+  const lacking = parts.filter(f => needsFull(p, f.s.scale) && !f.s.full);
+  $("loading").classList.toggle("show", lacking.length > 0);
+  if (lacking.length) loadFull(p, lacking.some(f => f.s.bg.on));
+  if (!parts.every(f => sceneReady(f.s))) return;  // queda lo que ya estaba, a su tamano: nunca medio dibujo
+  if (frame.style.width !== `${size.w}px` || frame.style.height !== `${size.h}px`) {
+    frame.style.width = `${size.w}px`; frame.style.height = `${size.h}px`;
+  }
+  if (canvas.width !== size.cw || canvas.height !== size.ch) { canvas.width = size.cw; canvas.height = size.ch; }
+  for (const f of parts) renderer.draw(f.s, null, f.clip);
+  frame.classList.add("ready");
+}
+
+// el zoom dice Fit con la foto entera (clampView no deja alejarse mas) y si no el porcentaje: 100 % es un pixel de la
+// foto por pixel de la pantalla, como en Lightroom. El boton, como el doble clic, va al 100 % y vuelve a Fit
+const oneToOne = () => size.w * dpr();  // el ancho de foto que se ve al 100 %
+const toOneToOne = v => v.size > oneToOne() * 1.1;
+const isFitted = v => v.size >= P().w - 0.5;
+function paintZoom(v) {
+  const b = $("zoom"), fitted = isFitted(v);
+  frame.classList.toggle("fitted", fitted);
+  b.textContent = fitted ? "Fit" : `${Math.round((oneToOne() / v.size) * 100)}%`;
+  b.dataset.tip = toOneToOne(v) ? "Zoom to 100%" : "Zoom to fit";
+}
+function apply(v) {
+  paintZoom(v);
+  draw();
+}
+let gridTimer = null;
+function showGrid() {
+  frame.classList.add("moving");
+  clearTimeout(gridTimer);
+  gridTimer = setTimeout(() => { if (!drag) frame.classList.remove("moving"); }, 260);
+}
+function setView(v) { state.views[P().key] = v; apply(v); showGrid(); if (panelOpen()) refreshPanel(); }
+
+// --- animaciones -----------------------------------------------------------
+let anim = null, animTarget = null;
+function stopAnim() { cancelAnimationFrame(anim); animTarget = null; }
+function animateTo(target, ms = 320) {
+  cancelAnimationFrame(anim);
+  animTarget = target;
+  const from = { ...view() }, t0 = performance.now();
+  const ease = t => 1 - Math.pow(1 - t, 3);
+  const step = now => {
+    const t = Math.min((now - t0) / ms, 1), e = ease(t);
+    setView({ cx: from.cx + (target.cx - from.cx) * e, cy: from.cy + (target.cy - from.cy) * e, size: from.size + (target.size - from.size) * e });
+    if (t < 1) anim = requestAnimationFrame(step); else animTarget = null;
+  };
+  anim = requestAnimationFrame(step);
+}
+function settle() { const v = view(), c = clampView(v); if (c.cx !== v.cx || c.cy !== v.cy || c.size !== v.size) animateTo(c, 260); }
+
+// --- arrastre con inercia; en el antes y despues, la barra ------
+let drag = null, splitDrag = null, splitAnim = null;
+// donde empezo el ultimo clic: el marco captura el puntero, y entonces el doble clic le llega a el y no a la perilla
+let downOn = null;
+// la barra va al puntero; si salta lejos (un clic lejos de ella), llega deslizandose en vez de aparecer
+function moveSplit(clientX, glide = false) {
+  const r = frame.getBoundingClientRect(), to = Math.min(Math.max((clientX - r.left) / r.width, 0), 1);
+  cancelAnimationFrame(splitAnim);
+  if (!glide || Math.abs(to - state.split) * r.width < 24 || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    state.split = to; paintSplit(); draw(); return;
+  }
+  const from = state.split, t0 = performance.now();
+  const step = now => {
+    const t = Math.min((now - t0) / 160, 1);
+    state.split = from + (to - from) * (1 - (1 - t) ** 3); paintSplit(); draw();
+    if (t < 1) splitAnim = requestAnimationFrame(step);
+  };
+  splitAnim = requestAnimationFrame(step);
+}
+function paintSplit() {
+  const pct = state.split * 100;
+  $("split").style.left = `${pct}%`;
+  $("knob").setAttribute("aria-valuenow", Math.round(pct));
+  // un rotulo que la barra tapa (con su zona de agarre) se va: quedaria sobre el otro lado de la foto
+  const x = state.split * size.w, reach = 28, before = $("beforePick"), after = $("afterLabel");
+  before.classList.toggle("covered", x < before.offsetLeft + before.offsetWidth + reach);
+  after.classList.toggle("covered", x > after.offsetLeft - reach);
+}
+frame.addEventListener("pointerdown", e => {
+  downOn = e.target;
+  if (e.button !== 0 || e.target.closest(".label")) return;
+  stopAnim();
+  frame.setPointerCapture(e.pointerId);
+  // en el antes y despues la barra se agarra en su zona de 44 px, sin saltar; con la foto entera no hay nada que
+  // mover, asi que se agarra desde cualquier parte y viene al puntero. Nunca se corre la foto queriendo correr la barra
+  if (mode() === "compare") {
+    const band = !!e.target.closest(".split");
+    if (band || isFitted(view())) {
+      const r = frame.getBoundingClientRect();
+      splitDrag = { offset: band ? e.clientX - (r.left + state.split * r.width) : 0 };
+      frame.classList.add("splitting");
+      if (!band) moveSplit(e.clientX, true);
+      return;
+    }
+  }
+  frame.classList.add("dragging");
+  drag = { x: e.clientX, y: e.clientY, start: { ...view() }, samples: [{ x: e.clientX, y: e.clientY, t: performance.now() }] };
+});
+frame.addEventListener("pointermove", e => {
+  if (splitDrag) return moveSplit(e.clientX - splitDrag.offset);
+  if (!drag) return;
+  const k = drag.start.size / size.w;
+  setView(clampView({ cx: drag.start.cx - (e.clientX - drag.x) * k, cy: drag.start.cy - (e.clientY - drag.y) * k, size: drag.start.size }, true));
+  drag.samples.push({ x: e.clientX, y: e.clientY, t: performance.now() });
+  if (drag.samples.length > 6) drag.samples.shift();
+});
+const endDrag = () => {
+  if (splitDrag) { splitDrag = null; frame.classList.remove("splitting"); return; }
+  if (!drag) return;
+  frame.classList.remove("dragging");
+  const s = drag.samples, a = s[0], b = s[s.length - 1], dt = Math.max(b.t - a.t, 1);
+  let vx = (b.x - a.x) / dt, vy = (b.y - a.y) / dt;  // px por ms
+  if (performance.now() - b.t > 80) vx = vy = 0;  // se quedo quieto antes de soltar: sin inercia
+  drag = null;
+  showGrid();
+  const k = view().size / size.w;
+  let last = performance.now();
+  const glide = now => {
+    const dt = now - last; last = now;
+    const v = view();
+    const next = clampView({ cx: v.cx - vx * dt * k, cy: v.cy - vy * dt * k, size: v.size }, true);
+    setView(next);
+    const decay = Math.pow(0.995, dt);
+    vx *= decay; vy *= decay;
+    const c = clampView(next);
+    if (c.cx !== next.cx || c.cy !== next.cy) { vx *= 0.6; vy *= 0.6; }
+    if (Math.hypot(vx, vy) > 0.02) anim = requestAnimationFrame(glide); else settle();
+  };
+  if (Math.hypot(vx, vy) > 0.15) anim = requestAnimationFrame(glide); else settle();
+};
+frame.addEventListener("pointerup", endDrag);
+frame.addEventListener("pointercancel", endDrag);
+$("knob").addEventListener("keydown", e => {
+  const step = e.shiftKey ? 0.1 : 0.02;
+  if (e.key === "ArrowLeft") state.split = Math.max(state.split - step, 0);
+  else if (e.key === "ArrowRight") state.split = Math.min(state.split + step, 1);
+  else return;
+  e.preventDefault(); e.stopPropagation(); paintSplit(); draw();
+});
+
+// --- zoom: el pellizco del trackpad (Chrome lo manda como rueda con ctrl) o ⌘ + rueda, en cualquier parte de la
+// ventana: agranda la foto y nunca la pagina. Sobre el escenario va hacia el puntero; en los paneles, hacia el centro.
+// La rueda sola mueve la foto, y en los paneles los desplaza como siempre
+function zoomTo(clientX, clientY, size) {
+  const r = frame.getBoundingClientRect(), v = view(), k = v.size / r.width;
+  const px = v.cx + (clientX - r.left - r.width / 2) * k, py = v.cy + (clientY - r.top - r.height / 2) * k;
+  const s = Math.min(Math.max(size, minSize()), P().w), f = s / v.size;
+  return clampView({ cx: px + (v.cx - px) * f, cy: py + (v.cy - py) * f, size: s });
+}
+const zoomable = () => !panelOpen() && state.photo >= 0;
+// adonde va el zoom: el puntero si esta sobre el escenario, si no el centro de la foto
+function anchor(e) {
+  if (e.target instanceof Element && $("stage").contains(e.target) && Number.isFinite(e.clientX)) return [e.clientX, e.clientY];
+  const r = frame.getBoundingClientRect();
+  return [r.left + r.width / 2, r.top + r.height / 2];
+}
+let wheelTimer = null, gesture = null;
+document.addEventListener("wheel", e => {
+  const zoom = e.ctrlKey || e.metaKey;
+  if (!zoom && !frame.contains(e.target)) return;
+  e.preventDefault();
+  if (!zoomable() || (zoom && gesture)) return;
+  stopAnim();
+  if (zoom) setView(zoomTo(...anchor(e), view().size / Math.exp(-e.deltaY * 0.01)));
+  else { const v = view(), k = v.size / size.w; setView(clampView({ cx: v.cx + e.deltaX * k, cy: v.cy + e.deltaY * k, size: v.size }, true)); }
+  clearTimeout(wheelTimer); wheelTimer = setTimeout(settle, 120);
+}, { passive: false });
+// Safari no manda el pellizco como rueda sino como gesture*, con la escala desde que empezo
+document.addEventListener("gesturestart", e => {
+  e.preventDefault();
+  if (!zoomable()) return;
+  stopAnim();
+  gesture = { size: view().size, at: anchor(e) };
+});
+document.addEventListener("gesturechange", e => { e.preventDefault(); if (gesture && zoomable()) setView(zoomTo(...gesture.at, gesture.size / e.scale)); });
+document.addEventListener("gestureend", e => { e.preventDefault(); if (gesture) { gesture = null; settle(); } });
+// doble clic: al 100 % donde se hizo clic, y de vuelta a Fit. El boton del zoom hace lo mismo desde el centro
+const toggleZoom = (x, y) => animateTo(toOneToOne(view()) ? zoomTo(x, y, oneToOne()) : fitView(P()));
+frame.addEventListener("dblclick", e => { if (!downOn?.closest(".knob, .label")) toggleZoom(e.clientX, e.clientY); });
+$("zoom").addEventListener("click", () => { const r = frame.getBoundingClientRect(); toggleZoom(r.left + r.width / 2, r.top + r.height / 2); });
+// ⌘+ y ⌘- van por Fit, 50, 100, 200 y 400 %, desde el centro de lo que se ve; ⌘0 vuelve a Fit
+const STOPS = [0.5, 1, 2, 4];
+// con el export abierto, ⌘+ ⌘- ⌘0 son de la vista previa: los mismos pasos, desde el centro de lo que se ve
+function previewZoomKey(key) {
+  const G = pvGeom();
+  if (key === "0") { pview = null; return drawPreview(); }
+  const zs = [G.fit, ...STOPS.map(s => s * dpr()).filter(z => z > G.fit * 1.001)];
+  const next = key === "-" || key === "_" ? zs.findLast(z => z < G.z * 0.99) : zs.find(z => z > G.z * 1.01);
+  if (next) zoomPreview(next, G.cx, G.cy);
+}
+function zoomStep(dir) {
+  const v = animTarget ?? view(), fitSize = P().w;
+  const sizes = [fitSize, ...STOPS.map(s => oneToOne() / s).filter(s => s < fitSize - 0.5)];  // de Fit al 400 %
+  const next = dir > 0 ? sizes.find(s => s < v.size * 0.99) : sizes.findLast(s => s > v.size * 1.01);
+  if (next) animateTo(clampView({ cx: v.cx, cy: v.cy, size: next }));
+}
+
+// --- imagenes: las de pantalla de las cuatro fotos se cargan al abrir; la entera, solo la de la foto actual ----
+const eyeUrls = p => (p.eyes || []).flatMap(e => ["base", "0", "100", String(EYE_MAX)].map(tag => `editadas/ojeras/${p.key}-${e.face}-${tag}.png?v=${DATA.version}`));
+function preload(first) {
+  const order = [first, ...PHOTOS.filter(p => p !== first)];
+  // las de pantalla primero, con la capa y la luz del fondo, asi cambiar de foto apenas abierto ya tiene que mostrar;
+  // despues las ojeras, que al 70 no hacen falta
+  const jobs = [...order.flatMap(p => [screenUrl(p, "edit"), screenUrl(p, "raw"), ...bgUrls(p)]), ...order.flatMap(eyeUrls)];
+  // de a dos: la primera foto llega antes y la memoria no salta
+  let i = 0;
+  const next = () => { if (i < jobs.length) renderer.load(jobs[i++]).then(draw, () => {}).finally(next); };
+  next(); next();
+}
+let fullTimer = null;
+// la entera de la foto, y la capa del fondo entera si se ve (layer). draw() la pide en cada cuadro que le falta: cada
+// archivo se pide una sola vez
+const fullPending = new Set();
+function loadFull(p, layer = false) {
+  const urls = [fullUrl(p, "edit"), fullUrl(p, "raw"), ...(layer && p.top != null ? [layerUrl(p, true)] : [])].filter(u => !renderer.ready(u));
+  if (urls.every(u => fullPending.has(u))) return;
+  urls.forEach(u => fullPending.add(u));
+  Promise.all(urls.map(u => renderer.load(u)))
+    .then(() => { if (P() === p) { draw(); if (panelOpen()) drawPreview(); } }, () => {})
+    .finally(() => urls.forEach(u => fullPending.delete(u)));
+}
+// la entera de la foto anterior se suelta (son 280 MB en la placa, 420 con la capa); la de esta se pide si se queda un rato
+function swapFull(p) {
+  for (const q of PHOTOS) if (q !== p) [fullUrl(q, "edit"), fullUrl(q, "raw"), layerUrl(q, true)].forEach(u => renderer.release(u));
+  prefetchFull(p);
+}
+// tambien al prender el fondo: la capa entera hace falta apenas se acerque
+function prefetchFull(p) {
+  clearTimeout(fullTimer);
+  fullTimer = setTimeout(() => { if (P() === p) loadFull(p, bgU.on); }, 700);
+}
+
+function fit() {
+  if (state.photo < 0) return;
+  const st = $("stage").getBoundingClientRect(), p = P(), a = p.w / p.h;
+  const W = st.width - 64, H = st.height - 112;
+  const w = Math.floor(Math.min(W, H * a)), h = Math.round(w / a);
+  size = { w, h, cw: Math.round(w * dpr()), ch: Math.round(h * dpr()) };
+  apply(view());
+  paintSplit();
+}
+function render() {
+  // en el RAW y en el antes y despues ya se esta comparando: Espacio no hace nada, y su ayuda no se muestra
+  if (mode() !== "edit") setPeek(false);
+  $("peekKey").hidden = mode() !== "edit";
+  frame.classList.toggle("compare", mode() === "compare");
+  document.querySelectorAll("#photos button").forEach((b, i) => b.setAttribute("aria-pressed", i === state.photo));
+  $("rawView").setAttribute("aria-pressed", String(state.raw));
+  $("compareView").setAttribute("aria-pressed", String(state.compare));
+  $("controls").inert = state.raw;
+  $("controls").classList.toggle("off", state.raw);
+  paintCompare();
+  paintSplit();
+  draw();
+  if (panelOpen()) refreshPanel();
+}
+// el antes y despues: a la derecha, la version puesta; a la izquierda, la que se elija en su menu (el RAW si no). Una
+// version borrada deja de ser el antes
+function paintCompare() {
+  if (!dial || state.photo < 0) return;
+  const p = P(), id = dial.id, active = store.getActivePresetId(id) ?? "base";
+  const items = [...baseItem(id, { value: "base", name: "Version 1" }), ...store.getPresets(id).map(v => ({ value: v.id, name: v.name }))];
+  if (!items.some(v => v.value === state.before[p.key])) state.before[p.key] = null;
+  const options = [{ value: "raw", name: "RAW original" }, ...items.filter(v => v.value !== active)];
+  const pick = $("beforePick"), menu = $("beforeMenu"), want = beforeId() ?? "raw", sig = JSON.stringify([options, want]);
+  if (pick.dataset.sig !== sig) {
+    pick.dataset.sig = sig;
+    const name = options.find(v => v.value === want).name;
+    $("beforeName").textContent = name;
+    pick.setAttribute("aria-label", `Before: ${name}`);
+    pick.disabled = options.length < 2;
+    menu.replaceChildren(...options.map(v => {
+      const b = document.createElement("button"), on = String(v.value === want);
+      b.className = "dialkit-select-option"; b.textContent = v.name; b.tabIndex = -1; b.dataset.value = v.value;
+      b.setAttribute("role", "menuitemradio"); b.setAttribute("aria-checked", on); b.dataset.selected = on;
+      return b;
+    }));
+  }
+  if ((pick.disabled || mode() !== "compare") && menu.matches(":popover-open")) menu.hidePopover();
+  $("afterLabel").textContent = activeVersion() ?? "Version 1";
+}
+// el menu: se abre debajo del rotulo, con el foco en la elegida; ↓ ↑ recorren, Enter o Espacio eligen, Escape o un
+// clic afuera cierran (es un popover: el foco vuelve solo al rotulo)
+const beforeMenu = $("beforeMenu");
+beforeMenu.addEventListener("beforetoggle", e => {
+  if (e.newState !== "open") return;
+  const r = $("beforePick").getBoundingClientRect();
+  beforeMenu.style.left = `${r.left}px`; beforeMenu.style.top = `${r.bottom + 6}px`;
+});
+beforeMenu.addEventListener("toggle", e => {
+  $("beforePick").setAttribute("aria-expanded", String(e.newState === "open"));
+  if (e.newState === "open") (beforeMenu.querySelector('[aria-checked="true"]') ?? beforeMenu.firstElementChild)?.focus();
+});
+beforeMenu.addEventListener("click", e => {
+  const b = e.target.closest("[role=menuitemradio]");
+  if (!b) return;
+  state.before[P().key] = b.dataset.value === "raw" ? null : b.dataset.value;
+  beforeMenu.hidePopover();
+  render();
+});
+beforeMenu.addEventListener("keydown", e => {
+  const items = [...beforeMenu.children], i = items.indexOf(document.activeElement);
+  const to = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: items.length - 1 }[e.key];
+  if (to === undefined) return;
+  e.preventDefault();
+  items[(to + items.length) % items.length].focus();
+});
+addEventListener("resize", () => { if (beforeMenu.matches(":popover-open")) beforeMenu.hidePopover(); });
+// la vista: RAW original y Before / after se prenden y se apagan, y prender uno apaga el otro. Los dos apagados = la
+// version puesta
+$("rawView").addEventListener("click", () => { state.raw = !state.raw; if (state.raw) state.compare = false; render(); });
+$("compareView").addEventListener("click", () => { state.compare = !state.compare; if (state.compare) state.raw = false; render(); });
+// cambiar de foto: el lienzo toma su tamano, el panel la suya y se dibuja en el mismo cuadro, sin pasar por negro
+function pickPhoto(i) {
+  if (i === state.photo) return;
+  flushSaves();
+  state.photo = i;
+  const p = P();
+  holding = true;
+  try { fit(); mountControls(p); swapFull(p); } finally { holding = false; }
+  render();
+}
+function setPeek(on) {
+  if (state.peek === on) return;
+  state.peek = on;
+  draw();
+}
+
+// --- el panel: DialKit, uno por foto. Las versiones son los presets de DialKit ------------------
+// DialKit guarda en sessionStorage; al abrir, el servidor lo llena con lo de editadas/versiones.json y cada cambio
+// vuelve al servidor: localStorage depende del puerto, y el editor abre en el que este libre
+// las ojeras, una por cara (pedido del fotografo, 2026-10-19: "que se le puedan modificar las ojeras por cara, en las fotos grupales"):
+// un control por persona, de izquierda a derecha. La clave es la persona y no el lugar, asi copiar de un retrato a una
+// de grupo cae en la misma cara. Antes era un solo "Intensity" para todas: migrate() lo pasa a cada cara
+// el nombre de cada cara en el panel, por su id de recipe/photos.py: { "face-id": "Label" }. Sin entrada, el id
+// capitalizado ("persona-1" -> "Persona 1")
+const FACE_NAMES = {};
+const faceName = face => FACE_NAMES[face] ?? face.replace(/-/g, " ").replace(/^./, c => c.toUpperCase());
+const eyeControls = p => [...(p.eyes ?? [])].sort((a, b) => a.x - b.x).map(e => [faceName(e.face), e.face]);
+const CONFIG = {
+  Light: {
+    Exposure: [0, -2, 2, 0.01], Brightness: [0, -100, 100, 1], Contrast: [0, -100, 100, 1], Highlights: [0, -100, 100, 1],
+    Shadows: [0, -100, 100, 1], Whites: [0, -100, 100, 1], Blacks: [0, -100, 100, 1],
+  },
+  Color: { Temperature: [0, -100, 100, 1], Tint: [0, -100, 100, 1], Vibrance: [0, -100, 100, 1], Saturation: [0, -100, 100, 1] },
+  // solo la pared, con la mascara del matting (recipe/backdrop.py)
+  Background: {
+    Exposure: [0, -2, 2, 0.01], Evenness: [0, 0, 100, 1], Smoothing: [0, 0, 100, 1], Falloff: [0, 0, 100, 1],
+    Temperature: [0, -100, 100, 1], Tint: [0, -100, 100, 1], Saturation: [0, -100, 100, 1],
+  },
+  Reset: { type: "action" },
+  "Copy to other photos": { type: "action" },
+  "Save version": { type: "action" },
+};
+const defaultsFor = p => Object.fromEntries(Object.entries(configFor(p)).filter(([, v]) => !v.type).map(([folder, controls]) =>
+  [folder, Object.fromEntries(Object.entries(controls).map(([k, c]) => [k, c[0]]))]));
+const store = DialKit.DialStore;
+const MAX_VERSIONS = 40, MAX_NAME = 40;  // los topes de editor_server.py (MAX_PRESETS, MAX_NAME)
+const storeKey = key => `studio-edit:${key}`;
+const panelId = key => `edit-${key}`;
+DialKit.createDialRoot({ mode: "inline", target: $("controls"), theme: "dark" });
+let dial = null;
+
+function fromValues(v, p) {
+  const L = v.Light, C = v.Color, B = v.Background ?? {}, r = x => Math.round(x ?? 0);
+  return {
+    levels: Object.fromEntries(eyeControls(p).map(([name, face]) => [face, r(v["Under-eyes"]?.[name] ?? EYE_DEFAULT)])),
+    adjust: {
+      exposure: Math.round(L.Exposure * 100) / 100, brightness: r(L.Brightness), contrast: r(L.Contrast),
+      highlights: r(L.Highlights), shadows: r(L.Shadows), whites: r(L.Whites), blacks: r(L.Blacks),
+      temperature: r(C.Temperature), tint: r(C.Tint), vibrance: r(C.Vibrance), saturation: r(C.Saturation),
+    },
+    background: {
+      exposure: Math.round((B.Exposure ?? 0) * 100) / 100, evenness: r(B.Evenness), smoothing: r(B.Smoothing), falloff: r(B.Falloff),
+      temperature: r(B.Temperature), tint: r(B.Tint), saturation: r(B.Saturation),
+    },
+  };
+}
+// una foto importada todavia sin ojeras inventariadas no tiene Under-eyes, y sin pared de estudio no tiene Background
+const configFor = p => ({
+  ...(p.eyes?.length ? { "Under-eyes": Object.fromEntries(eyeControls(p).map(([name]) => [name, [EYE_DEFAULT, 0, EYE_MAX, 1]])) } : {}),
+  ...Object.fromEntries(Object.entries(CONFIG).filter(([k]) => k !== "Background" || p.top != null)),
+});
+function mountControls(p) {
+  dial?.destroy();
+  const current = DialKit.createDialKit("Edit", configFor(p), {
+    id: panelId(p.key), persist: { key: storeKey(p.key), storage: "sessionStorage" },
+    onAction: a => { if (a === "Reset") current.setValues(defaultsFor(p)); else if (a === "Save version") saveVersion(); else if (a === COPY) copyToOthers(); },
+  });
+  dial = current;
+  // borrar la version que se ve pasa a la primera que queda (DialKit marca la base pero deja los valores de la borrada);
+  // si no queda ninguna, a la base con sus valores
+  let shown = null;
+  current.subscribe(values => {
+    const active = store.getActivePresetId(current.id), left = store.getPresets(current.id);
+    if (shown && !active && !left.some(v => v.id === shown)) {
+      shown = null;
+      return left.length ? store.loadPreset(current.id, left[0].id) : store.clearActivePreset(current.id);
+    }
+    shown = active;
+    settings = fromValues(values, p);
+    uniforms = adjustUniforms(settings.adjust);
+    const wasOn = bgU.on;
+    bgU = bgUniforms(settings.background);
+    if (bgU.on && !wasOn) prefetchFull(p);
+    renderVersions();
+    render();
+    markDirty(p.key);
+  });
+  const first = store.getPresets(current.id)[0];
+  if (first && !store.getActivePresetId(current.id)) store.loadPreset(current.id, first.id);
+}
+const activeVersion = () => {
+  const id = store.getActivePresetId(dial.id);
+  return id ? store.getPresets(dial.id).find(v => v.id === id)?.name ?? null : null;
+};
+
+// las versiones, tambien a la izquierda: son los presets de DialKit. La base ("Version 1") solo aparece cuando no hay
+// ninguna guardada: el usuario la saco de la lista el 2026-10-18, y abrir una foto pone su primera version
+const baseItem = (id, item) => (store.getPresets(id).length ? [] : [item]);
+let versionsSig = "";
+const ICON_MORE = `<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="2" cy="6" r="1.15" fill="currentColor"/><circle cx="6" cy="6" r="1.15" fill="currentColor"/><circle cx="10" cy="6" r="1.15" fill="currentColor"/></svg>`;
+const ICON_X = `<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+function renderVersions() {
+  const id = dial.id, active = store.getActivePresetId(id);
+  const items = [...baseItem(id, { id: null, name: "Version 1" }), ...store.getPresets(id)];
+  const sig = JSON.stringify([id, active, items.map(v => [v.id, v.name])]);
+  if (sig === versionsSig) return;
+  versionsSig = sig;
+  $("versions").replaceChildren(...items.map(v => {
+    const row = document.createElement("div");
+    row.className = "version"; row.setAttribute("role", "listitem");
+    if (v.id) row.dataset.id = v.id;
+    const pick = document.createElement("button");
+    pick.className = "item"; pick.append(Object.assign(document.createElement("span"), { textContent: v.name }));
+    pick.setAttribute("aria-current", String(v.id === active));
+    pick.addEventListener("click", () => pickVersion(v.id));
+    row.append(pick);
+    if (v.id) {
+      const more = document.createElement("button");
+      more.className = "act more"; more.innerHTML = ICON_MORE; more.setAttribute("aria-label", `More for ${v.name}`);
+      more.setAttribute("aria-haspopup", "menu"); more.setAttribute("aria-expanded", "false"); more.dataset.tip = "Rename or delete";
+      more.addEventListener("click", () => openVersionMenu(v.id, more));
+      row.addEventListener("contextmenu", e => { e.preventDefault(); openVersionMenu(v.id, more, e); });
+      row.append(more);
+      const del = document.createElement("button");
+      del.className = "act del"; del.innerHTML = ICON_X; del.setAttribute("aria-label", `Delete ${v.name}`); del.dataset.tip = "Delete from all photos";
+      del.addEventListener("click", () => deleteVersion(v.id));
+      row.append(del);
+    }
+    return row;
+  }));
+}
+// las versiones son las mismas en todas las fotos (pedido del fotografo, 2026-10-19: "si se elimina de una se elimina de todas"): la
+// lista (id, nombre y orden) es una sola; los valores son de cada foto, porque el fondo de cada estilo esta afinado por
+// foto. Guardar en una la suma a las demas con sus valores tal cual; borrar en una la saca de todas. DialKit guarda el
+// estado de cada foto en memoria si ya se abrio (y esa manda al volver) y en sessionStorage, que es lo que viaja al
+// servidor: se escriben los dos
+const COPY = "Copy to other photos";
+const others = () => PHOTOS.filter(q => q.key !== P().key);
+const flatDefaults = q => Object.fromEntries(Object.entries(defaultsFor(q)).flatMap(([f, c]) => Object.entries(c).map(([k, v]) => [`${f}.${k}`, v])));
+// unos valores, con las claves de la foto q: lo que trae `values`, si no lo que tenia (own), y si no el de siempre. Un
+// "Under-eyes.Intensity" (de antes de las ojeras por cara) vale para cada cara que no traiga la suya
+function valuesFor(q, values, own = {}) {
+  const all = values["Under-eyes.Intensity"] ?? own["Under-eyes.Intensity"];
+  return Object.fromEntries(Object.entries(flatDefaults(q)).map(([k, d]) =>
+    [k, values[k] ?? own[k] ?? (k.startsWith("Under-eyes.") ? all : undefined) ?? d]));
+}
+// al abrir: cada version de cada foto con las claves de esa foto (sobre todo, la intensidad unica pasa a cada cara)
+function migrate() {
+  for (const q of PHOTOS) {
+    const s = photoState(q);
+    const presets = s.presets.map(v => ({ ...v, values: valuesFor(q, v.values) }));
+    const st = { ...s.st, values: valuesFor(q, s.st.values ?? {}), baseValues: valuesFor(q, s.st.baseValues ?? {}) };
+    if (JSON.stringify([presets, st.values, st.baseValues]) !== JSON.stringify([s.presets, s.st.values, s.st.baseValues]))
+      writeState(q, { ...s, st }, presets, s.active, st.values);
+  }
+}
+function photoState(q) {
+  const id = panelId(q.key), raw = sessionStorage.getItem(storeKey(q.key));
+  const st = raw ? JSON.parse(raw) : { version: 1, values: flatDefaults(q), baseValues: flatDefaults(q), presets: [], activePresetId: null };
+  const retained = store.presets.has(id) || store.snapshots.has(id);
+  const presets = (retained ? store.presets.get(id) ?? st.presets : st.presets) ?? [];
+  const active = retained && store.activePreset.has(id) ? store.activePreset.get(id) : st.activePresetId;
+  return { id, st, retained, presets: presets.map(v => ({ ...v, values: { ...v.values } })), active };
+}
+// values: lo que se ve en esa foto. Si la version puesta no cambia, lo mismo que se veia
+function writeState(q, s, presets, active, values = active === s.active ? (s.retained ? store.snapshots.get(s.id) : null) ?? s.st.values
+  : presets.find(v => v.id === active)?.values ?? s.st.baseValues) {
+  if (s.retained) { store.presets.set(s.id, presets); store.activePreset.set(s.id, active); store.snapshots.set(s.id, { ...values }); }
+  sessionStorage.setItem(storeKey(q.key), JSON.stringify({ ...s.st, values: { ...values }, presets, activePresetId: active }));
+  markDirty(q.key);
+}
+// la lista de la foto que se ve, en las demas: lo que tienen queda con sus valores, lo que falta entra con los de esta,
+// lo que esta no tiene sale. Si la puesta salio, pasa a la primera que queda
+function mirrorVersions() {
+  const list = store.getPresets(dial.id);
+  for (const q of others()) {
+    const s = photoState(q), own = new Map(s.presets.map(v => [v.id, v]));
+    const presets = list.map(v => own.has(v.id) ? { ...own.get(v.id), name: v.name } : { id: v.id, name: v.name, values: valuesFor(q, v.values) });
+    if (JSON.stringify(presets.map(v => [v.id, v.name])) === JSON.stringify(s.presets.map(v => [v.id, v.name]))) continue;
+    writeState(q, s, presets, presets.some(v => v.id === s.active) ? s.active : presets[0]?.id ?? null);
+  }
+}
+// al abrir: una foto sin versiones (recien importada) recibe la lista de la primera que tenga, con esos valores
+function fillEmptyVersions() {
+  const from = PHOTOS.map(photoState).find(s => s.presets.length);
+  if (!from) return;
+  for (const q of PHOTOS) {
+    const s = photoState(q);
+    if (s.presets.length) continue;
+    const presets = from.presets.map(v => ({ ...v, values: valuesFor(q, v.values) }));
+    writeState(q, s, presets, presets.some(v => v.id === from.active) ? from.active : presets[0].id);
+  }
+}
+// Copy to other photos, en el panel: los valores de la version que se ve, en esa misma version de las otras fotos, y
+// queda puesta. Pisa los suyos, y el tooltip lo dice antes del clic
+const copyTip = () => {
+  const v = store.getPresets(dial.id).find(x => x.id === store.getActivePresetId(dial.id));
+  const to = others().map(q => q.label), list = to.length > 3 ? `the other ${to.length} photos` : to.length > 1 ? `${to.slice(0, -1).join(", ")} and ${to.at(-1)}` : to[0];
+  return v ? `Copies these settings to ${v.name} in ${list}, replacing theirs.` : "Save a version first, then copy it.";
+};
+function copyToOthers() {
+  const id = store.getActivePresetId(dial.id), v = store.getPresets(dial.id).find(x => x.id === id);
+  if (!v) return toast("Save a version first, then copy it");
+  mirrorVersions();
+  for (const q of others()) {
+    // las caras que esta foto tiene y la de origen no (de un retrato a una de grupo) quedan con lo suyo
+    const s = photoState(q), values = valuesFor(q, v.values, s.presets.find(x => x.id === id)?.values);
+    writeState(q, s, s.presets.map(x => x.id === id ? { ...x, values } : x), id, values);
+  }
+  toast(`${v.name} copied to the other ${others().length} photos`);
+}
+// elegir una version la muestra: apaga el RAW; en el antes y despues pasa a ser la de la derecha
+function pickVersion(presetId) {
+  state.raw = false;
+  if (presetId) store.loadPreset(dial.id, presetId); else store.clearActivePreset(dial.id);
+}
+// borrar y renombrar valen para todas las fotos: la lista es una sola
+function deleteVersion(presetId) {
+  store.deletePreset(dial.id, presetId);
+  mirrorVersions();
+}
+// renombrar: clic derecho en la version o el ⋯ al lado de la X abren el menu; Rename vuelve el nombre un campo en el
+// mismo lugar. Enter o salir guardan, Escape deja el que estaba. Un nombre vacio o repetido no entra. DialKit no trae
+// renombrar: se cambia el nombre en su lista y se le pide que la guarde y avise
+const versionMenu = $("versionMenu");
+let menuFor = null, menuFrom = null;
+function openVersionMenu(presetId, from, at) {
+  menuFor = presetId; menuFrom = from;
+  const r = from.getBoundingClientRect();
+  versionMenu.style.left = `${at ? at.clientX : r.left}px`;
+  versionMenu.style.top = `${at ? at.clientY + 2 : r.bottom + 6}px`;
+  versionMenu.showPopover();
+}
+versionMenu.addEventListener("toggle", e => {
+  const open = e.newState === "open";
+  menuFrom?.setAttribute("aria-expanded", String(open));
+  if (open) versionMenu.firstElementChild.focus();
+});
+versionMenu.addEventListener("click", e => {
+  const b = e.target.closest("[data-do]"), id = menuFor;
+  if (!b) return;
+  versionMenu.hidePopover();
+  if (b.dataset.do === "rename") startRename(id); else deleteVersion(id);
+});
+versionMenu.addEventListener("keydown", e => {
+  const items = [...versionMenu.children], i = items.indexOf(document.activeElement);
+  const to = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: items.length - 1 }[e.key];
+  if (to === undefined) return;
+  e.preventDefault();
+  items[(to + items.length) % items.length].focus();
+});
+addEventListener("resize", () => { if (versionMenu.matches(":popover-open")) versionMenu.hidePopover(); });
+function startRename(presetId) {
+  const v = store.getPresets(dial.id).find(x => x.id === presetId);
+  const row = [...$("versions").children].find(r => r.dataset.id === presetId);
+  if (!v || !row) return;
+  const field = document.createElement("input");
+  field.className = "rename"; field.value = v.name; field.maxLength = MAX_NAME; field.spellcheck = false;
+  field.setAttribute("aria-label", `Rename ${v.name}`);
+  row.replaceChildren(field);
+  field.focus(); field.select();
+  let done = false;
+  const finish = keep => {
+    if (done) return;
+    done = true;
+    const name = field.value.trim().replace(/\s+/g, " ");
+    versionsSig = "";  // la fila vuelve a armarse aunque el nombre no cambie
+    if (keep && name && name !== v.name) {
+      if (store.getPresets(dial.id).some(x => x.id !== presetId && x.name === name)) toast(`${name} already exists`);
+      else return renameVersion(presetId, name);
+    }
+    renderVersions();
+  };
+  field.addEventListener("keydown", e => {
+    if (e.key === "Enter") { e.preventDefault(); finish(true); }
+    else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); finish(false); }
+  });
+  field.addEventListener("blur", () => finish(true));
+}
+function renameVersion(presetId, name) {
+  const id = dial.id;
+  store.presets.set(id, store.getPresets(id).map(v => v.id === presetId ? { ...v, name } : v));
+  store.persistPanel(id);
+  store.notify(id);
+  mirrorVersions();
+  renderVersions();
+  toast(`Renamed to ${name} in all photos`);
+}
+// Save version, abajo del panel, es la unica forma de guardar una: guarda lo que se ve como una version nueva, que queda
+// fija, y se sigue editando la que estaba (como una instantanea). Abrir una version guardada y moverla, la cambia
+function saveVersion() {
+  const id = dial.id, was = store.getActivePresetId(id), made = store.saveNewPreset(id);
+  const name = store.getPresets(id).find(v => v.id === made)?.name;
+  // se sigue en la que se estaba; desde la base, en la nueva: la base no se ve en la lista mientras haya versiones
+  store.loadPreset(id, was ?? made);
+  mirrorVersions();
+  toast(`${name} saved in all photos`);
+}
+
+// guardar en el servidor: lo que DialKit dejo en sessionStorage, un rato despues del ultimo cambio. Sin el boton de
+// Reset, que DialKit guarda como un valor mas: al cargar lo repone solo
+const dirty = new Set(), sent = {};
+const scalars = values => Object.fromEntries(Object.entries(values ?? {}).filter(([, v]) => typeof v !== "object"));
+const clean = s => ({ ...s, values: scalars(s.values), baseValues: scalars(s.baseValues),
+                      presets: (s.presets ?? []).map(v => ({ ...v, values: scalars(v.values) })) });
+let saveTimer = null, saveWarned = false;
+function markDirty(key) { dirty.add(key); clearTimeout(saveTimer); saveTimer = setTimeout(flushSaves, 400); }
+function flushSaves(keepalive = false) {
+  clearTimeout(saveTimer);
+  for (const key of dirty) {
+    const body = sessionStorage.getItem(storeKey(key));
+    if (!body || sent[key] === body) continue;
+    sent[key] = body;
+    fetch("api/versions", { method: "POST", headers: { "Content-Type": "application/json" }, keepalive,
+                            body: JSON.stringify({ photo: key, state: clean(JSON.parse(body)) }) })
+      .then(r => { if (!r.ok) throw new Error(r.status); })
+      .catch(() => {
+        sent[key] = null;
+        if (!saveWarned) { saveWarned = true; toast(OUTDATED_SAVE); }
+      });
+  }
+  dirty.clear();
+}
+addEventListener("pagehide", () => flushSaves(true));
+
+// --- exportar ------------------------------------------------------------------
+// tooltips: el primero espera TIP_DELAY; mientras uno esta abierto, o se cerro hace menos de TIP_WARM, el siguiente sale
+// al instante y sin animacion (el grupo de Radix y Base UI). Con el mouse y con el foco del teclado, nunca con el dedo.
+// Un boton lo pide con data-tip; Copy to other photos, de DialKit, lo arma al mostrarse porque depende de la version
+const tip = $("tip"), TIP_DELAY = 600, TIP_WARM = 400;
+let tipFor = null, tipTimer = 0, tipHideTimer = 0, tipClosedAt = -Infinity;
+const tipTarget = t => t?.closest?.("[data-tip], aside .dialkit-button");
+const tipText = el => el.dataset.tip ?? (el.textContent.trim() === COPY ? copyTip() : null);
+function showTip(el, instant) {
+  const text = tipText(el);
+  if (!text || !el.isConnected) return;
+  clearTimeout(tipHideTimer);
+  tipFor = el; tip.textContent = text;
+  el.setAttribute("aria-describedby", "tip");
+  tip.toggleAttribute("data-instant", instant);
+  if (!tip.matches(":popover-open")) tip.showPopover();
+  const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight, gap = 8;
+  const below = r.top - gap - h < 4, cx = r.left + r.width / 2;
+  const x = Math.min(Math.max(4, cx - w / 2), innerWidth - w - 4);
+  tip.style.left = `${x}px`; tip.style.top = `${below ? r.bottom + gap : r.top - gap - h}px`;
+  tip.style.transformOrigin = `${cx - x}px ${below ? 0 : h}px`;  // crece desde su boton
+  getComputedStyle(tip).opacity;  // el estado cerrado queda puesto antes de abrir: si no, no hay transicion
+  tip.classList.add("open");
+}
+function hideTip() {
+  clearTimeout(tipTimer);
+  if (!tipFor) return;
+  tipFor.removeAttribute("aria-describedby");
+  tipFor = null; tipClosedAt = performance.now();
+  tip.classList.remove("open");
+  tipHideTimer = setTimeout(() => { if (!tipFor && tip.matches(":popover-open")) tip.hidePopover(); }, 120);
+}
+function wantTip(el) {
+  if (el === tipFor) return;
+  clearTimeout(tipTimer);
+  const warm = tipFor || performance.now() - tipClosedAt < TIP_WARM;
+  if (tipFor) { tipFor.removeAttribute("aria-describedby"); tipFor = null; }
+  if (warm) showTip(el, true); else tipTimer = setTimeout(() => showTip(el, false), TIP_DELAY);
+}
+document.addEventListener("pointerover", e => { const el = tipTarget(e.target); if (el && e.pointerType === "mouse") wantTip(el); });
+document.addEventListener("pointerout", e => {
+  const el = tipTarget(e.target);
+  if (!el || el.contains(e.relatedTarget)) return;
+  if (el === tipFor) hideTip(); else clearTimeout(tipTimer);
+});
+document.addEventListener("focusin", e => { const el = tipTarget(e.target); if (el?.matches(":focus-visible")) wantTip(el); });
+document.addEventListener("focusout", e => { if (tipTarget(e.target) === tipFor) hideTip(); else clearTimeout(tipTimer); });
+for (const type of ["pointerdown", "wheel", "keydown"]) addEventListener(type, hideTip, { capture: true, passive: true });
+
+// un aviso: Sonner, neutro, abajo al centro, con los colores del editor. Si el panel de export esta abierto, el
+// contenedor se vuelve a poner en la capa superior para quedar arriba de el
+const toasts = $("toasts");
+Sonner.mount(toasts, {
+  // abajo a la derecha de la foto, al lado del panel (300 px): encima tapaba Save version recien guardada
+  theme: "dark", position: "bottom-right", offset: { bottom: 24, right: 300 + 24 }, duration: 2600, visibleToasts: 3, gap: 8,
+  style: { "--normal-bg": "#232326", "--normal-border": "rgba(255,255,255,0.08)", "--normal-text": "#f2f2f3",
+           "--border-radius": "10px", "--width": "340px", fontFamily: "inherit" },
+  toastOptions: { style: { fontSize: "13px", padding: "12px 16px" } },
+});
+toasts.showPopover();
+function toast(text) {
+  if (document.querySelector("dialog[open]")) { toasts.hidePopover(); toasts.showPopover(); }
+  toast.last = text;
+  Sonner.toast(text);
+}
+// para las pruebas: el texto del aviso de adelante, ya dibujado (Sonner lo pone en pantalla en la vuelta siguiente)
+async function lastToast() {
+  const front = () => document.querySelector('#toasts [data-sonner-toast][data-front="true"] [data-title]')?.textContent ?? "";
+  for (let i = 0; i < 40 && front() !== toast.last; i++) await new Promise(r => setTimeout(r, 25));
+  return front();
+}
+
+// el archivo lo arma editor_server.py desde la maestra de 16 bits, con los mismos ajustes; aca solo se elige y se mira
+const FORMATS = [
+  { id: "png", label: "PNG", bits: 16 },
+  { id: "tiff", label: "TIFF", bits: 16 },
+  { id: "webp", label: "WebP", bits: 8 },  // sin perdida
+  { id: "jpeg", label: "JPG", bits: 8 },   // calidad 95, color 4:4:4: lo que acepta cualquier sitio
+];
+const SIZES = [1024, 2048, 4096, "full"];
+// el recorte, como el de Fotos: un marco sobre la foto entera que se mueve y se estira con el mouse. Free lo deja de
+// cualquier forma; una proporcion lo fija (y al elegirla, el marco mas grande que entra, centrado en las caras)
+const CROPS = [
+  { id: "free", label: "Free" }, { id: "1:1", label: "1:1", r: 1 }, { id: "4:5", label: "4:5", r: 4 / 5 },
+  { id: "3:2", label: "3:2", r: 3 / 2 }, { id: "16:9", label: "16:9", r: 16 / 9 },
+];
+const FULL = { mode: "free", rect: [0, 0, 1, 1] };  // por foto: la proporcion y el marco, en fracciones de la foto
+const WEB_HEAVY = 15e6;  // un WebP o JPG mas pesado que esto tarda en cargar en una pagina
+const SAVED = "studio-export-v1";
+const opts = { crops: {}, format: "png", size: "full", ...JSON.parse(localStorage.getItem(SAVED) || "{}") };
+if (!FORMATS.some(f => f.id === opts.format)) opts.format = "png";
+for (const k of ["area", "crop", "at"]) delete opts[k];  // los recortes de antes
+const cropOf = p => opts.crops[p.key] ?? FULL;
+const crop = () => CROPS.find(c => c.id === cropOf(P()).mode) ?? CROPS[0];
+
+const dialog = $("dialog");
+const panelOpen = () => dialog.open;
+const fmt = () => FORMATS.find(f => f.id === opts.format);
+const image = () => (mode() === "raw" ? "raw" : "edit");
+// el centro de las caras (los ojos de cada una): una sola queda un poco arriba del medio, como en un retrato
+function faceCenter(p) {
+  if (!p.eyes?.length) return [0.5, 0.5];
+  const xs = p.eyes.flatMap(e => [e.x, e.x + e.w]), ys = p.eyes.map(e => e.y + e.h / 2);
+  const cy = (Math.min(...ys) + Math.max(...ys)) / 2 + (p.eyes.length === 1 ? p.h * 0.08 : 0);
+  return [(Math.min(...xs) + Math.max(...xs)) / 2 / p.w, cy / p.h];
+}
+// el marco en pixeles de la foto, entero y adentro
+function box() {
+  const p = P(), [fx, fy, fw, fh] = cropOf(p).rect;
+  const w = Math.max(1, Math.min(p.w, Math.round(fw * p.w))), h = Math.max(1, Math.min(p.h, Math.round(fh * p.h)));
+  return [Math.min(Math.max(Math.round(fx * p.w), 0), p.w - w), Math.min(Math.max(Math.round(fy * p.h), 0), p.h - h), w, h];
+}
+function setRect(p, [x, y, w, h], mode = cropOf(p).mode) {
+  opts.crops[p.key] = { mode, rect: [x / p.w, y / p.h, w / p.w, h / p.h] };
+}
+// elegir una proporcion: el marco mas grande que entra, centrado en las caras. Free suelta el que hay
+function pickCrop(id) {
+  const p = P(), r = CROPS.find(c => c.id === id).r;
+  if (!r) { setRect(p, box(), "free"); return setOpt("crops", opts.crops); }
+  const w = Math.min(p.w, p.h * r), h = w / r, [fx, fy] = faceCenter(p);
+  setRect(p, [Math.min(Math.max(fx * p.w - w / 2, 0), p.w - w), Math.min(Math.max(fy * p.h - h / 2, 0), p.h - h), w, h], id);
+  setOpt("crops", opts.crops);
+}
+// arrastrar desde el marco de inicio S (pixeles de la foto) con el desplazamiento total dx, dy. edge: que bordes se
+// estiran ({l, r, t, b}); sin bordes, se mueve entero. Con proporcion, el lado opuesto (o la esquina opuesta) queda fijo
+// y el marco nunca sale de la foto
+function dragRect(S, edge, dx, dy) {
+  const p = P(), W = p.w, H = p.h, ratio = crop().r, MIN = Math.max(W, H) * 0.05;
+  const [x0, y0, w0, h0] = S, L = x0, R = x0 + w0, T = y0, B = y0 + h0;
+  const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
+  if (!edge.l && !edge.r && !edge.t && !edge.b) return [clamp(x0 + dx, 0, W - w0), clamp(y0 + dy, 0, H - h0), w0, h0];
+  if (!ratio) {
+    const l = edge.l ? clamp(L + dx, 0, R - MIN) : L, r = edge.r ? clamp(R + dx, L + MIN, W) : R;
+    const t = edge.t ? clamp(T + dy, 0, B - MIN) : T, b = edge.b ? clamp(B + dy, T + MIN, H) : B;
+    return [l, t, r - l, b - t];
+  }
+  const sideX = edge.l || edge.r, sideY = edge.t || edge.b;
+  const ax = edge.l ? R : L, ay = edge.t ? B : T, sx = edge.l ? -1 : 1, sy = edge.t ? -1 : 1;
+  const wx = w0 + sx * dx, wy = (h0 + sy * dy) * ratio;
+  if (sideX && sideY) {  // esquina: manda el eje que mas se movio
+    const w = clamp(Math.abs(dx) >= Math.abs(dy) * ratio ? wx : wy, Math.min(MIN, w0), Math.min(sx > 0 ? W - ax : ax, (sy > 0 ? H - ay : ay) * ratio));
+    return [sx > 0 ? ax : ax - w, sy > 0 ? ay : ay - w / ratio, w, w / ratio];
+  }
+  if (sideX) {  // borde izquierdo o derecho: crece hacia arriba y abajo por igual
+    const cy = T + h0 / 2, w = clamp(wx, Math.min(MIN, w0), Math.min(sx > 0 ? W - ax : ax, 2 * Math.min(cy, H - cy) * ratio));
+    return [sx > 0 ? ax : ax - w, cy - w / ratio / 2, w, w / ratio];
+  }
+  const cx = L + w0 / 2, h = clamp(wy / ratio, Math.min(MIN, h0), Math.min(sy > 0 ? H - ay : ay, 2 * Math.min(cx, W - cx) / ratio));
+  return [cx - (h * ratio) / 2, sy > 0 ? ay : ay - h, h * ratio, h];
+}
+// nunca se agranda: un tamano mayor que el recorte sale al tamano del recorte
+function outDims() {
+  const [, , w, h] = box(), long = Math.max(w, h);
+  const out = opts.size === "full" ? long : Math.min(opts.size, long);
+  return [Math.max(1, Math.round((w * out) / long)), Math.max(1, Math.round((h * out) / long))];
+}
+const adjusted = () => KEYS.some(k => settings.adjust[k]) || BG_KEYS.some(k => settings.background[k]);
+const request = () => {
+  const edit = image() === "edit";
+  return { photo: P().key, image: image(), box: box(), size: opts.size, format: opts.format,
+           under_eyes: edit ? settings.levels : null, adjust: edit ? settings.adjust : null,
+           background: edit ? settings.background : null, version: edit ? activeVersion() : null };
+};
+const bytes = n => (n < 1e6 ? `${Math.round(n / 1e3)} KB` : `${(n / 1e6).toFixed(1)} MB`);
+const OFFLINE = "Open Abrir editor.command to export";
+// un servidor abierto antes de este editor exporta sin los ajustes: hay que reabrirlo
+const OUTDATED = "Reopen Abrir editor.command to export these settings";
+const OUTDATED_SAVE = "Reopen Abrir editor.command to keep versions";
+const RENDERING = "Waiting for the render to finish";
+
+// --- vista previa: el mismo shader, dibujado aparte y leido. Entra entera en el cuadro, y un archivo mas chico que el
+// cuadro se ve a su tamano. No hace zoom: para mirar de cerca esta el editor
+let drawQueued = false;
+// la vista de la vista previa: centro (pixeles de la foto) y zoom z (pixeles del lienzo por pixel de la foto). null = la
+// foto entera. El zoom es para mirar: lo que se exporta es siempre el marco del recorte
+let pview = null;
+function pvGeom() {
+  const p = P(), D = Math.round($("preview").clientWidth * dpr()), fit = Math.min(D / p.w, D / p.h);
+  const CW = Math.round(p.w * fit), CH = Math.round(p.h * fit), v = pview ?? { cx: p.w / 2, cy: p.h / 2, z: fit };
+  const z = Math.min(Math.max(v.z, fit), Math.max(fit, 4 * dpr()));  // de la foto entera al 400 %
+  const hw = CW / z / 2, hh = CH / z / 2;
+  const cx = Math.min(Math.max(v.cx, hw), p.w - hw), cy = Math.min(Math.max(v.cy, hh), p.h - hh);
+  return { p, fit, CW, CH, z, cx, cy, x0: cx - hw, y0: cy - hh };
+}
+// acercar o alejar a z dejando quieto el punto de la foto ax, ay (el que esta bajo el puntero)
+function zoomPreview(z, ax, ay) {
+  const g = pvGeom(), nz = Math.min(Math.max(z, g.fit), Math.max(g.fit, 4 * dpr()));
+  const x0 = ax - (ax - g.x0) * (g.z / nz), y0 = ay - (ay - g.y0) * (g.z / nz);
+  pview = nz <= g.fit * 1.001 ? null : { z: nz, cx: x0 + g.CW / nz / 2, cy: y0 + g.CH / nz / 2 };
+  drawPreview();
+}
+function panPreview(dx, dy) {  // en pixeles del lienzo
+  if (!pview) return;
+  const g = pvGeom();
+  pview = { z: g.z, cx: g.cx + dx / g.z, cy: g.cy + dy / g.z };
+  drawPreview();
+}
+// la pastilla: Fit, o el porcentaje (100 % es un pixel de la foto por pixel de la pantalla). Se pinta tambien al abrir,
+// antes del primer dibujo: si no, mostraria un instante el zoom de la vez anterior
+function paintPvZoom(z = pvGeom().z) {
+  const zb = $("pvZoom");
+  zb.textContent = pview ? `${Math.round((z / dpr()) * 100)}%` : "Fit";
+  zb.dataset.tip = pview ? "Zoom to fit" : "Zoom to 100%";
+}
+let cropDragging = false;
+const pvBuffer = document.createElement("canvas");
+let pvKey = null, pvImage = null;  // la foto que ya se leyo de la placa, y para que vista
+function drawPreview() {
+  if (drawQueued) return;
+  drawQueued = true;
+  requestAnimationFrame(() => {
+    drawQueued = false;
+    if (!renderer || !panelOpen()) return;
+    // lo que se ve de la foto, con el marco del recorte; afuera, oscurecido. Nunca con mas detalle que el archivo: con un
+    // Size chico se dibuja a la resolucion que va a tener y se estira (de cerca, en pixeles), asi se ve lo que se pierde
+    const c = $("previewCanvas"), G = pvGeom(), { p, CW, CH, z, x0, y0 } = G, [ow] = outDims(), [, , bw0] = box();
+    const r = Math.min(z, ow / bw0), BW = Math.max(1, Math.round((CW * r) / z)), BH = Math.max(1, Math.round((CH * r) / z));
+    const s = scene(p, { cx: G.cx, cy: G.cy, size: CW / z }, BW, { scale: r, look: image() === "raw" ? RAW_LOOK : liveLook() });
+    if (needsFull(p, r) && !s.full) loadFull(p, s.bg.on);  // de cerca hace falta la entera; mientras, la de pantalla
+    if (!sceneReady(s)) return;
+    if (c.width !== CW || c.height !== CH) { c.width = CW; c.height = CH; }
+    c.style.width = `${CW / dpr()}px`; c.style.height = `${CH / dpr()}px`;
+    const g = c.getContext("2d");
+    const key = JSON.stringify([s, BW, BH]), same = BW === CW && BH === CH;
+    if (key !== pvKey) {
+      pvImage = new ImageData(renderer.read(s, BW, BH), BW, BH);
+      if (!same) {
+        if (pvBuffer.width !== BW || pvBuffer.height !== BH) { pvBuffer.width = BW; pvBuffer.height = BH; }
+        pvBuffer.getContext("2d").putImageData(pvImage, 0, 0);
+      }
+      pvKey = key;
+    }
+    // 1:1 se pega tal cual (drawImage corre algunos pixeles hasta 4 niveles); si no, se estira
+    if (same) g.putImageData(pvImage, 0, 0);
+    else {
+      g.imageSmoothingEnabled = z / r < 2; g.imageSmoothingQuality = "high";  // al doble o mas, los pixeles del archivo
+      g.drawImage(pvBuffer, 0, 0, BW, BH, 0, 0, CW, CH);
+    }
+    const line = dpr(), [X, Y, W, H] = box(), bx = (X - x0) * z, by = (Y - y0) * z, bw = W * z, bh = H * z;
+    g.fillStyle = "rgb(0 0 0 / 0.6)";
+    g.beginPath(); g.rect(0, 0, CW, CH); g.rect(bx, by, bw, bh); g.fill("evenodd");
+    if (cropDragging) {  // los tercios, solo mientras se arrastra
+      g.strokeStyle = "rgb(255 255 255 / 0.4)"; g.lineWidth = line;
+      g.beginPath();
+      for (const t of [1 / 3, 2 / 3]) { g.moveTo(bx + bw * t, by); g.lineTo(bx + bw * t, by + bh); g.moveTo(bx, by + bh * t); g.lineTo(bx + bw, by + bh * t); }
+      g.stroke();
+    }
+    g.strokeStyle = "rgb(255 255 255 / 0.9)"; g.lineWidth = line;
+    g.strokeRect(bx + line / 2, by + line / 2, bw - line, bh - line);
+    // las esquinas, para agarrar: una L de 3 px por 14 px de pantalla
+    const t = 3 * line, len = Math.min(14 * line, bw / 3, bh / 3);
+    g.fillStyle = "white";
+    for (const [cx, cy, sx, sy] of [[bx, by, 1, 1], [bx + bw, by, -1, 1], [bx, by + bh, 1, -1], [bx + bw, by + bh, -1, -1]]) {
+      g.fillRect(sx > 0 ? cx : cx - len, sy > 0 ? cy : cy - t, len, t);
+      g.fillRect(sx > 0 ? cx : cx - t, sy > 0 ? cy : cy - len, t, len);
+    }
+    paintPvZoom(z);
+  });
+}
+
+// --- el archivo: se prepara en el servidor apenas cambia algo, y la descarga sale al instante ----
+let prepared = null, inflight = null, timer = null;
+const keyOf = r => JSON.stringify(r);
+const sleep = (ms, signal) => new Promise((ok, fail) => {
+  const t = setTimeout(ok, ms);
+  signal.addEventListener("abort", () => { clearTimeout(t); fail(new DOMException("aborted", "AbortError")); }, { once: true });
+});
+// 409: otro pedido le gano el turno (otra pestana). 503: grade.py esta escribiendo esa maestra. Los dos se reintentan.
+// Un servidor de antes del fondo arma el archivo sin el: contesta sin "backdrop"
+async function post(key, signal) {
+  const req = JSON.parse(key);
+  const bg = req.image === "edit" && BG_KEYS.some(k => req.background?.[k]);
+  const custom = req.image === "edit" && (Object.values(req.under_eyes ?? {}).some(l => l !== EYE_DEFAULT) || KEYS.some(k => req.adjust[k]) || req.version || bg);
+  for (let lost = 0; ; ) {
+    const res = await fetch("api/prepare", { method: "POST", headers: { "Content-Type": "application/json" }, body: key, signal });
+    if (res.ok) {
+      const r = await res.json();
+      if ((custom && !("adjusted" in r)) || (bg && !("backdrop" in r))) throw new Error("outdated");
+      return { key, ...r };
+    }
+    if (res.status === 400 && custom) throw new Error("outdated");
+    if (res.status === 409 && ++lost > 20) throw new Error("busy");
+    if (res.status !== 409 && res.status !== 503) throw new Error(res.status);
+    if (res.status === 503 && keyOf(request()) === key) notice(RENDERING);
+    await sleep(res.status === 503 ? 2000 : 50, signal);
+  }
+}
+// las ojeras que no estan en la de siempre: "Under-eyes 150%" si son todas iguales, y si no cara por cara
+function eyesText() {
+  const moved = eyeControls(P()).filter(([, face]) => settings.levels[face] !== EYE_DEFAULT);
+  if (!moved.length) return null;
+  const all = new Set(Object.values(settings.levels));
+  return all.size === 1 ? `Under-eyes ${[...all][0]}%` : `Under-eyes ${moved.map(([name, face]) => `${name} ${settings.levels[face]}%`).join(", ")}`;
+}
+// lo que se baja: que es (la version puesta; en la 1, lo que cambio; o el RAW) y el archivo. El peso llega cuando el
+// servidor lo termina de armar
+function info(r) {
+  const [w, h] = outDims(), edit = image() === "edit", version = edit ? activeVersion() : null;
+  $("what").textContent = !edit ? "RAW original" : version ??
+    ["Version 1", adjusted() && "Adjusted", eyesText()].filter(Boolean).join(" · ");
+  // el aviso se queda hasta que llegue un archivo: borrarlo en cada clic lo hacia parpadear mientras el pedido volvia a
+  // fallar
+  if (!r && $("foot").dataset.state === "warn") return;
+  const bits = r ? r.bits : edit ? fmt().bits : 8;
+  const heavy = r && (opts.format === "webp" || opts.format === "jpeg") && r.bytes > WEB_HEAVY;
+  notice(`${r ? r.w : w} × ${r ? r.h : h} · ${bits}-bit ${fmt().label} · sRGB${r ? ` · ${bytes(r.bytes)}` : ""}${heavy ? " · heavy for a web page" : ""}`);
+  $("info").classList.toggle("heavy", !!heavy);
+}
+// una linea en #info; warn: el archivo no se puede armar, y Download se apaga hasta que algo cambie
+function notice(text, warn = false) {
+  $("info").textContent = text;
+  $("foot").dataset.state = warn ? "warn" : "";
+  $("download").setAttribute("aria-disabled", String(warn));
+}
+function prepare(fresh = false) {
+  const key = keyOf(request());
+  if (!fresh && prepared?.key === key) return Promise.resolve(prepared);
+  if (inflight?.key === key) return inflight.promise;
+  inflight?.abort.abort();
+  const abort = new AbortController(), promise = post(key, abort.signal);
+  inflight = { key, abort, promise };
+  promise.then(r => {
+    if (inflight?.key !== key) return;
+    inflight = null; prepared = r;
+    if (keyOf(request()) === key) info(r);
+  }, err => {
+    if (inflight?.key !== key) return;
+    inflight = null;
+    if (err.name !== "AbortError" && keyOf(request()) === key) notice(err.message === "outdated" ? OUTDATED : OFFLINE, true);
+  });
+  return promise;
+}
+function refreshPanel() {
+  const [, , w, h] = box(), long = Math.max(w, h);
+  document.querySelectorAll("#area button").forEach((b, i) => b.setAttribute("aria-pressed", CROPS[i] === crop()));
+  const pc = $("previewCanvas");
+  pc.tabIndex = 0;
+  pc.setAttribute("aria-label", "Preview. Drag the crop frame, its edges or its corners; the arrow keys move it");
+  document.querySelectorAll("#format button").forEach((b, i) => b.setAttribute("aria-pressed", FORMATS[i].id === opts.format));
+  document.querySelectorAll("#size button").forEach((b, i) => {
+    const s = SIZES[i];
+    b.disabled = s !== "full" && s >= long;
+    b.setAttribute("aria-pressed", s === "full" ? opts.size === "full" || opts.size >= long : opts.size === s);
+  });
+  drawPreview();
+  const key = keyOf(request());
+  if (prepared?.key === key) return info(prepared);
+  info(null);
+  clearTimeout(timer);
+  timer = setTimeout(prepare, 150);
+}
+function setOpt(k, value) { opts[k] = value; localStorage.setItem(SAVED, JSON.stringify(opts)); refreshPanel(); }
+
+// <dialog> nativo: centra, atrapa el foco, Escape cierra y el foco vuelve a Export solo
+function openPanel() { setPeek(false); pview = null; paintPvZoom(); dialog.showModal(); $("export").setAttribute("aria-expanded", "true"); refreshPanel(); }
+const closePanel = () => dialog.close();
+dialog.addEventListener("close", () => {
+  $("export").setAttribute("aria-expanded", "false");
+  clearTimeout(timer); inflight?.abort.abort(); inflight = null;
+});
+$("export").addEventListener("click", openPanel);
+$("close").addEventListener("click", closePanel);
+let downOnBackdrop = false;
+dialog.addEventListener("pointerdown", e => { downOnBackdrop = e.target === dialog; });
+dialog.addEventListener("click", e => { if (downOnBackdrop && e.target === dialog) closePanel(); });
+$("download").addEventListener("click", async () => {
+  const b = $("download");
+  // un segundo clic mientras prepara no baja el archivo dos veces; con el aviso puesto, no hay archivo
+  if (b.disabled || b.getAttribute("aria-disabled") === "true") return;
+  b.disabled = true;
+  clearTimeout(timer);
+  const slow = setTimeout(() => { b.textContent = "Preparing"; }, 120);
+  try {
+    const r = await prepare(true);
+    const a = document.createElement("a");
+    a.href = `api/file/${r.id}`; a.download = r.name; a.click();
+    closePanel();
+    toast(`Saved ${r.name}`);
+  } catch (err) {
+    if (err.name !== "AbortError") toast(err.message === "outdated" ? OUTDATED : OFFLINE);
+  } finally {
+    clearTimeout(slow);
+    b.disabled = false; b.textContent = "Download";
+  }
+});
+
+// --- botones y teclado ---------------------------------------------------------
+function buttons(el, items, onPick, build) {
+  items.forEach((item, i) => { const b = document.createElement("button"); build(b, item); b.addEventListener("click", () => onPick(i)); el.appendChild(b); });
+}
+buttons($("photos"), PHOTOS, pickPhoto, (b, p) => { b.innerHTML = `<img src="editadas/miniaturas/${p.key}.png?v=${DATA.version}" alt=""><span>${p.label}</span>`; });
+// --- sumar fotos: el + o soltarlas sobre la ventana. El servidor las prepara de a una (recipe/import_photo.py); mientras,
+// cada una es una pestana que dice en que paso esta. Terminada, se abre con un click (recarga la pagina, con las
+// versiones ya guardadas). Que acepta y que no lo decide el servidor (recipe/imports.py)
+const IMPORT_ACCEPT = "image/*,.raf,.dng,.cr2,.cr3,.crw,.nef,.nrw,.arw,.srf,.sr2,.orf,.rw2,.raw,.pef,.srw,.x3f,.3fr,.fff,.iiq,.erf,.mef,.mos,.mrw,.kdc,.dcr,.rwl,.gpr,.heic,.heif,.hif,.avif,.psd";
+const STEPS = { queued: "Waiting", waiting: "Mac busy, waiting", develop: "Developing", master: "Developing", screens: "Preparing",
+                faces: "Finding faces", background: "Separating the wall", done: "Ready" };
+const pending = new Map();  // clave -> boton
+const dismissed = new Set(JSON.parse(sessionStorage.getItem("studio-dismissed") ?? "[]"));
+let polling = null;
+const addBtn = document.createElement("button");
+addBtn.className = "add"; addBtn.setAttribute("aria-label", "Add photos");
+addBtn.dataset.tip = "Add photos: RAW, TIFF, PNG, HEIC… Or drop them on the window";
+addBtn.innerHTML = `<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+$("addFiles").accept = IMPORT_ACCEPT;
+addBtn.addEventListener("click", () => $("addFiles").click());
+$("addFiles").addEventListener("change", e => { upload([...e.target.files]); e.target.value = ""; });
+function openImported(key) {
+  flushSaves(true);
+  sessionStorage.setItem("studio-pick", key);
+  location.reload();
+}
+function paintPending(key, s) {
+  let b = pending.get(key);
+  if (!b) {
+    b = document.createElement("button");
+    b.className = "pending";
+    b.addEventListener("click", () => {
+      const st = b.dataset.state;
+      if (st === "done") openImported(key);
+      else if (st === "failed") { dismissed.add(key); sessionStorage.setItem("studio-dismissed", JSON.stringify([...dismissed])); b.remove(); pending.delete(key); }
+    });
+    $("photos").append(b);
+    pending.set(key, b);
+  }
+  b.dataset.state = s.state;
+  b.classList.toggle("ready", s.state === "done");
+  b.classList.toggle("failed", s.state === "failed");
+  const what = s.state === "failed" ? "Failed" : STEPS[s.state === "running" ? s.step : s.state] ?? "Preparing";
+  b.innerHTML = `<span class="dot"></span><span>${s.label} · ${what}</span>`;
+  b.setAttribute("aria-label", `${s.label}: ${what}`);
+  b.dataset.tip = s.state === "failed" ? `${s.error || "It couldn't be prepared"}. Click to hide` : s.state === "done" ? "Click to open it" : `${s.name} is being prepared. The editor keeps working`;
+}
+async function pollImports() {
+  let list = {};
+  try { const r = await fetch("api/imports", { cache: "no-store" }); if (r.ok) list = await r.json(); } catch {}
+  for (const [key, s] of Object.entries(list)) {
+    if (dismissed.has(key) || PHOTOS.some(p => p.key === key)) continue;
+    const was = pending.get(key)?.dataset.state;
+    paintPending(key, s);
+    if (s.state === "done" && was && was !== "done") toast(`${s.label} is ready: click its tab to open it`);
+    if (s.state === "failed" && was && was !== "failed") toast(`${s.label} couldn't be added`);
+  }
+  const working = [...pending.values()].some(b => !["done", "failed"].includes(b.dataset.state));
+  clearTimeout(polling);
+  polling = working ? setTimeout(pollImports, 1000) : null;
+}
+async function upload(files) {
+  for (const f of files) {
+    try {
+      const r = await fetch(`api/import?name=${encodeURIComponent(f.name)}`, { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: f });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { toast(`${f.name}: ${j.error ?? "couldn't be added"}`); continue; }
+      paintPending(j.key, { label: j.label, name: f.name, state: "queued" });
+    } catch { toast(`${f.name}: the editor's server isn't answering`); }
+  }
+  pollImports();
+}
+// soltar archivos: solo cuando lo que se arrastra son archivos
+{
+  let depth = 0;
+  const files = e => [...(e.dataTransfer?.types ?? [])].includes("Files");
+  addEventListener("dragenter", e => { if (!files(e) || dialog.open) return; depth++; $("drop").classList.add("show"); });
+  addEventListener("dragleave", e => { if (!files(e)) return; depth = Math.max(0, depth - 1); if (!depth) $("drop").classList.remove("show"); });
+  addEventListener("dragover", e => { if (files(e) && !dialog.open) { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; } });
+  addEventListener("drop", e => {
+    if (!files(e) || dialog.open) return;
+    e.preventDefault(); depth = 0; $("drop").classList.remove("show");
+    upload([...e.dataTransfer.files]);
+  });
+}
+$("actions").prepend(addBtn);
+buttons($("area"), CROPS, i => pickCrop(CROPS[i].id), (b, c) => { b.textContent = c.label; });
+// el marco con el mouse: adentro se mueve, en un borde o una esquina se estira; al soltar se arma el archivo
+{
+  const pc = $("previewCanvas"), GRAB = 10;  // px de pantalla alrededor de cada borde
+  let drag = null;
+  const perPx = () => dpr() / pvGeom().z;  // pixeles de la foto por pixel de pantalla de la vista previa
+  // donde cae en la foto un punto de la pantalla
+  const toPhoto = e => { const r = pc.getBoundingClientRect(), G = pvGeom(), k = dpr() / G.z; return [G.x0 + (e.clientX - r.left) * k, G.y0 + (e.clientY - r.top) * k]; };
+  function hit(e) {
+    const r = pc.getBoundingClientRect(), G = pvGeom(), k = perPx(), [X, Y, W, H] = box();
+    const x = (X - G.x0) / k, y = (Y - G.y0) / k, w = W / k, h = H / k;
+    const px = e.clientX - r.left, py = e.clientY - r.top;
+    const inY = py > y - GRAB && py < y + h + GRAB, inX = px > x - GRAB && px < x + w + GRAB;
+    const edge = { l: inY && Math.abs(px - x) < GRAB, r: inY && Math.abs(px - x - w) < GRAB,
+                   t: inX && Math.abs(py - y) < GRAB, b: inX && Math.abs(py - y - h) < GRAB };
+    const inside = px > x && px < x + w && py > y && py < y + h;
+    return edge.l || edge.r || edge.t || edge.b || inside ? edge : null;
+  }
+  const CURSOR = { lt: "nwse-resize", rb: "nwse-resize", rt: "nesw-resize", lb: "nesw-resize", l: "ew-resize", r: "ew-resize", t: "ns-resize", b: "ns-resize", "": "grab" };
+  const cursorOf = edge => (edge ? CURSOR[["l", "r"].filter(k => edge[k]).join("") + ["t", "b"].filter(k => edge[k]).join("")] ?? "grab" : "default");
+  pc.addEventListener("pointerdown", e => {
+    const edge = e.button === 0 && hit(e);
+    if (!edge) return;
+    pc.setPointerCapture(e.pointerId);
+    drag = { x: e.clientX, y: e.clientY, S: box(), edge };
+    cropDragging = true;
+    if (cursorOf(edge) === "grab") pc.style.cursor = "grabbing";
+    drawPreview();
+  });
+  pc.addEventListener("pointermove", e => {
+    if (!drag) return void (pc.style.cursor = cursorOf(hit(e)));
+    const k = perPx();
+    setRect(P(), dragRect(drag.S, drag.edge, (e.clientX - drag.x) * k, (e.clientY - drag.y) * k));
+    drawPreview();
+  });
+  const end = e => {
+    if (!drag) return;
+    drag = null; cropDragging = false;
+    pc.style.cursor = cursorOf(hit(e));
+    setOpt("crops", opts.crops);
+  };
+  pc.addEventListener("pointerup", end);
+  pc.addEventListener("pointercancel", end);
+  // pellizco (o ⌘/ctrl + rueda) acerca donde esta el puntero; la rueda sola, acercado, recorre
+  $("preview").addEventListener("wheel", e => {
+    e.preventDefault();
+    if (e.ctrlKey || e.metaKey) zoomPreview(pvGeom().z * Math.exp(-e.deltaY * 0.01), ...toPhoto(e));
+    else panPreview(e.deltaX * dpr(), e.deltaY * dpr());
+  }, { passive: false });
+  let pinch = null;  // Safari: el pellizco llega como gesture*, con la escala desde que empezo
+  $("preview").addEventListener("gesturestart", e => { e.preventDefault(); pinch = { z: pvGeom().z, at: toPhoto(e) }; });
+  $("preview").addEventListener("gesturechange", e => { e.preventDefault(); if (pinch) zoomPreview(pinch.z * e.scale, ...pinch.at); });
+  $("preview").addEventListener("gestureend", e => { e.preventDefault(); pinch = null; });
+  // doble clic y el boton: al 100 % (donde se hizo clic) y de vuelta a la foto entera
+  const toggle = at => (pview ? ((pview = null), drawPreview()) : zoomPreview(dpr(), ...at));
+  pc.addEventListener("dblclick", e => toggle(toPhoto(e)));
+  $("pvZoom").addEventListener("click", () => { const G = pvGeom(); toggle([G.cx, G.cy]); });
+  pc.addEventListener("keydown", e => {
+    const step = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+    if (!step) return;
+    e.preventDefault(); e.stopPropagation();
+    const d = Math.max(P().w, P().h) * (e.shiftKey ? 0.1 : 0.02);
+    setRect(P(), dragRect(box(), {}, step[0] * d, step[1] * d));
+    setOpt("crops", opts.crops);
+  });
+}
+buttons($("format"), FORMATS, i => setOpt("format", FORMATS[i].id), (b, f) => { b.textContent = f.label; });
+buttons($("size"), SIZES, i => setOpt("size", SIZES[i]), (b, s) => { b.textContent = s === "full" ? "Full" : s; });
+
+// Espacio, mantenido, muestra el RAW desde cualquier lado salvo donde se escribe, y solo sobre la version (en el RAW y en
+// el antes y despues no hace nada, pedido del fotografo): se toma antes que los controles, asi un boton con foco no se aprieta. Las flechas, sobre un control, son del control
+const typing = t => t instanceof Element && !!t.closest("input, textarea, select, [contenteditable], [role=menu]");
+document.addEventListener("keydown", e => {
+  // ⌘+ ⌘- y ⌘0 agrandan la foto, nunca la pagina (en un teclado en espanol el + es su propia tecla)
+  if ((e.metaKey || e.ctrlKey) && !e.altKey && ["=", "+", "-", "_", "0"].includes(e.key)) {
+    e.preventDefault();
+    if (panelOpen()) return previewZoomKey(e.key);
+    if (!zoomable()) return;
+    if (e.key === "0") return animateTo(fitView(P()));
+    return zoomStep(e.key === "-" || e.key === "_" ? -1 : 1);
+  }
+  if (panelOpen() || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === " ") {
+    if (typing(e.target)) return;
+    e.preventDefault(); e.stopPropagation();
+    if (!e.repeat && mode() === "edit") setPeek(true);
+    return;
+  }
+  if (typing(e.target) || e.target instanceof Element && e.target.closest(".dialkit-root, select, .knob")) return;  // la perilla corre la barra
+  const m = PHOTOS.length;
+  if (e.key === "ArrowRight") { e.preventDefault(); return pickPhoto((state.photo + 1) % m); }
+  if (e.key === "ArrowLeft") { e.preventDefault(); return pickPhoto((state.photo + m - 1) % m); }
+  // ↓ ↑ recorren la lista de versiones, para pasar de una a otra y ver la diferencia
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault();
+    const ids = [...baseItem(dial.id, null), ...store.getPresets(dial.id).map(v => v.id)], at = ids.indexOf(store.getActivePresetId(dial.id));
+    return pickVersion(ids[Math.min(Math.max(at + (e.key === "ArrowDown" ? 1 : -1), 0), ids.length - 1)]);
+  }
+}, true);
+document.addEventListener("keyup", e => {
+  if (e.key !== " " || !state.peek) return;
+  e.preventDefault(); e.stopPropagation();
+  setPeek(false);
+}, true);
+addEventListener("blur", () => setPeek(false));
+addEventListener("resize", () => fit());
+// cambiar de pantalla cambia la densidad: el lienzo se rehace a la nueva
+(function watchDpr() {
+  matchMedia(`(resolution: ${dpr()}dppx)`).addEventListener("change", () => { fit(); watchDpr(); }, { once: true });
+})();
+canvas.addEventListener("webglcontextlost", e => e.preventDefault());
+canvas.addEventListener("webglcontextrestored", () => location.reload());
+
+// --- arranque: las versiones guardadas primero (sin ellas DialKit arrancaria de cero), y la foto 1 -------
+async function boot() {
+  if (!renderer) { toast("This browser can't draw the editor (WebGL2)"); return; }
+  for (const p of PHOTOS) state.views[p.key] = fitView(p);
+  preload(PHOTOS[0]);
+  try {
+    const r = await fetch("api/versions", { cache: "no-store" });
+    if (r.ok) for (const [key, s] of Object.entries((await r.json()).photos ?? {})) {
+      const body = JSON.stringify(s);
+      sessionStorage.setItem(storeKey(key), body);
+      sent[key] = body;
+    }
+  } catch {}
+  migrate();
+  fillEmptyVersions();
+  const pick = sessionStorage.getItem("studio-pick");
+  sessionStorage.removeItem("studio-pick");
+  pickPhoto(Math.max(0, PHOTOS.findIndex(p => p.key === pick)));
+  pollImports();
+}
+boot();
+</script>
+</body>
+</html>
