@@ -1,6 +1,6 @@
 ---
 name: apple-hig
-description: Apple's Human Interface Guidelines (HIG) for iPhone, iPad and Mac apps. Use for any iOS, iPadOS or macOS interface question: designing or reviewing a screen, how a component should look or behave, a size or spec, or what Apple or the HIG says, including for Apple-style web.
+description: "Apple's Human Interface Guidelines (HIG) for iPhone, iPad and Mac apps. Use for any iOS, iPadOS or macOS interface question: designing or reviewing a screen, how a component should look or behave, a size or spec, or what Apple or the HIG says, including for Apple-style web."
 ---
 
 # Apple HIG

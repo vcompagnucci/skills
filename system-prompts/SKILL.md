@@ -1,6 +1,6 @@
 ---
 name: system-prompts
-description: Write, review or migrate the instructions an AI agent runs on: a system prompt, developer message, Agents SDK instructions, AGENTS.md or CLAUDE.md. Use for what the prompt holds, wording rules, procedures and escalation, few-shot examples, tool use and autonomy, progress and stopping, tone, formatting, reply language and voice agents, grounding, prompt layout, operator vs user authority, per-model differences, subagent briefs, and improving or versioning a prompt.
+description: "Write, review or migrate the instructions an AI agent runs on: a system prompt, developer message, Agents SDK instructions, AGENTS.md or CLAUDE.md. Use for what the prompt holds, wording rules, procedures and escalation, few-shot examples, tool use and autonomy, progress and stopping, tone, formatting, reply language and voice agents, grounding, prompt layout, operator vs user authority, per-model differences, subagent briefs, and improving or versioning a prompt."
 ---
 
 # System prompts
