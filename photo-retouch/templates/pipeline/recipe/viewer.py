@@ -20,6 +20,7 @@ import tifffile
 from PIL import Image, ImageOps
 
 import backdrop
+import equivalents
 import imports
 from adjust import TO_LINEAR
 from common import EDITED, ROOT, linear_to_srgb, save_png
@@ -166,6 +167,8 @@ def page_html(names: list[str]) -> str:
         "screen": SCREEN,
         "eyes": {"default": eyes["intensity"], "max": eyes["max"]},
         "photos": [photo(n, eyes) for n in names],
+        # el punto de partida del panel de cada foto (recipe/equivalents.py); sin el archivo, el panel arranca en 0
+        "starts": {n: v for n, v in equivalents.load_starts().items() if n in names},
     }
     return (ROOT / "recipe" / "viewer_template.html").read_text().replace("/*DATA*/", json.dumps(data, ensure_ascii=False))
 

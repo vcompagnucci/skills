@@ -34,6 +34,7 @@
   .seg button:focus-visible, .item:focus-visible, .primary:focus-visible, .close:focus-visible, .knob:focus-visible, .zoom:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   .photos button { gap: 8px; padding: 0 10px 0 3px; }
   .photos img { width: 28px; height: 28px; border-radius: 6px; object-fit: cover; }
+  .photos button[data-flipped] img { scale: -1 1; }  /* con Flip, la miniatura de esa foto tambien espejada */
   /* con muchas fotos la barra se desplaza en vez de empujar Export */
   .photos { min-width: 0; overflow-x: auto; scrollbar-width: none; }
   .photos button { flex: none; }
@@ -265,6 +266,16 @@
     opacity: 0; transition: opacity 240ms var(--ease);
   }
   .frame.moving .grid { opacity: 1; transition-duration: 120ms; }
+  /* la guia de la foto de perfil (2026-10-23): el circulo o el cuadrado mas grande que entra en lo que se ve, centrado, y
+     afuera oscurecido. La sombra se recorta en .mask (el marco no recorta: la manija del antes y despues cuelga en el
+     margen). Apagada por defecto */
+  .mask { position: absolute; inset: 0; pointer-events: none; overflow: clip; border-radius: inherit; container-type: size; opacity: 0; transition: opacity 200ms var(--ease); }
+  .mask::after {
+    content: ""; position: absolute; top: 50%; left: 50%; translate: -50% -50%; width: min(100cqw, 100cqh); aspect-ratio: 1;
+    box-shadow: 0 0 0 9999px rgba(15,15,16,0.62), inset 0 0 0 1px rgba(255,255,255,0.35);
+  }
+  .frame[data-guide] .mask { opacity: 1; }
+  .frame[data-guide="circle"] .mask::after { border-radius: 50%; }
   .loading {
     position: absolute; top: 14px; left: 50%; translate: -50% 0; padding: 5px 10px; border-radius: 20px;
     font-size: 12px; color: var(--dim); background: var(--panel); border: 1px solid var(--line);
@@ -344,6 +355,10 @@
 <body>
 <header>
   <div class="seg photos" id="photos" role="group" aria-label="Photo"></div>
+  <!-- Flip (2026-10-20): la foto espejada, por foto. Todo lo que se ve de esa foto y el export; la guia y los rotulos no -->
+  <!-- la guia de la foto de perfil: el circulo o el cuadrado centrado en lo que se ve; no cambia el archivo -->
+  <div class="seg" id="guide" role="group" aria-label="Crop guide"></div>
+  <div class="seg" role="group" aria-label="Mirror"><button id="flip" aria-pressed="false" data-tip="Mirror the photo (F)">Flip</button></div>
   <div class="spacer"></div>
   <div class="actions" id="actions">
   <button class="primary" id="export" aria-haspopup="dialog" aria-expanded="false" aria-controls="dialog">Export</button>
@@ -367,6 +382,7 @@
     <div class="frame" id="frame">
       <canvas id="canvas" role="img" aria-label="Photo"></canvas>
       <div class="grid"></div>
+      <div class="mask" aria-hidden="true"></div>
       <button class="label before pick" id="beforePick" popovertarget="beforeMenu" aria-haspopup="menu" aria-expanded="false"><span id="beforeName">RAW original</span><svg width="8" height="5" viewBox="0 0 8 5" aria-hidden="true"><path d="M.75.75 4 4 7.25.75" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="label after-label" id="afterLabel">Version 1</span>
       <div class="split" id="split">
         <div class="knob" id="knob" role="slider" tabindex="0" aria-label="Before and after divider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
@@ -388,6 +404,7 @@
       <div class="field"><span>Format</span><div class="seg" id="format" role="group" aria-label="Format"></div></div>
       <div class="field"><span>Size</span><div class="seg" id="size" role="group" aria-label="Size"></div></div>
       <div class="field"><span>Crop</span><div class="seg" id="area" role="group" aria-label="Crop"></div></div>
+      <div class="field"><span>Shape</span><div class="seg" id="shape" role="group" aria-label="Shape"></div></div>
       <div class="foot" id="foot"><div class="summary"><p id="what"></p><p id="info"></p></div><button class="primary" id="download" autofocus>Download</button></div>
     </div>
   </div>
@@ -410,10 +427,17 @@ const PHOTOS = DATA.photos;  // [{key, label, w, h, eyes, top}]
 // lo que se ve es siempre la version puesta (la de la lista de versiones). La vista suma dos maneras de mirarla, que
 // se excluyen: el RAW original, y el antes y despues (a la izquierda el RAW u otra version, a la derecha la puesta).
 // before: por foto, contra que se compara: null = el RAW, "base" = la 1, o el id de otra version
-const state = { photo: -1, raw: false, compare: false, before: {}, views: {}, split: 0.5, peek: false };
+const state = { photo: -1, raw: false, compare: false, before: {}, views: {}, split: 0.5, peek: false, guide: "off" };
 const $ = id => document.getElementById(id);
 const frame = $("frame"), canvas = $("canvas");
 const P = () => PHOTOS[state.photo];
+// Flip (2026-10-20): la foto espejada, por foto, para que la cara mire hacia el texto que va al lado. Todo lo que se ve
+// de esa foto se espeja (version, RAW, antes y despues, vista previa) y el archivo tambien; los rotulos y la guia no.
+// Se recuerda en localStorage, como las opciones del export (depende del puerto). La vista (cx) y el marco del recorte
+// estan siempre en coordenadas de lo que se ve
+const FLIPS = "studio-flip-v1";
+const flips = (() => { try { const v = JSON.parse(localStorage.getItem(FLIPS) || "{}"); return v && typeof v === "object" ? v : {}; } catch { return {}; } })();
+const flipped = (key = P()?.key) => flips[key] === true;
 const mode = () => (state.raw ? "raw" : state.compare ? "compare" : "edit");
 const dpr = () => window.devicePixelRatio || 1;
 // la pantalla: 2560 px de lado largo, achicada en luz lineal desde la maestra (viewer.py). La entera, cuando hace falta
@@ -493,6 +517,7 @@ uniform vec4 u_rect0, u_rect1, u_rect2;
 uniform float u_eyeF0, u_eyeF1, u_eyeF2;
 uniform bool u_eyeFromBase0, u_eyeFromBase1, u_eyeFromBase2, u_adjust, u_tone, u_dither;
 uniform bool u_flip;  // para leer: las filas salen de arriba hacia abajo, como las quiere un ImageData
+uniform bool u_mirror;  // Flip (2026-10-20): la foto espejada; la vista (u_center) esta en coordenadas de lo que se ve
 uniform vec3 u_gain;
 uniform float u_top, u_knee, u_shoulder, u_contrast, u_highlights, u_shadows, u_whites, u_blacks, u_bright, u_sat, u_vib;
 uniform sampler2D u_layer, u_light;
@@ -596,8 +621,10 @@ vec3 adjust(vec3 lin) {
 }
 // el fondo (backdrop.compose): una ganancia por pixel de pared, sobre la foto ya ajustada. La capa trae la pared de
 // atras (RGB) y el alpha: 0 es la pared pura, donde la pared es el pixel mismo; 1, la gente, que queda como la dejo el
-// panel. La luz de la pared, la pared de atras y su parte mas clara pasan por los mismos ajustes que la foto
-vec3 backdrop(vec3 c, vec2 uv, float foot) {
+// panel. La luz de la pared, la pared de atras y su parte mas clara pasan por los mismos ajustes que la foto.
+// uv: donde se leen las capas (espejado con Flip, como la foto); x: la columna de lo que se ve, para la caida, que va
+// siempre hacia el borde derecho de lo que se ve, como en el servidor (backdrop.render con mirror)
+vec3 backdrop(vec3 c, vec2 uv, float x, float foot) {
   vec4 layer = tap4(u_layer, uv, foot);
   if (layer.a >= 1.0) return c;
   vec3 light = textureLod(u_light, uv, 0.0).rgb, b = layer.rgb;
@@ -610,7 +637,7 @@ vec3 backdrop(vec3 c, vec2 uv, float foot) {
   float y = max(dot(light, LUMA), 1e-6), L = 100.0 * toX(y * u_bgEv);
   if (u_bgEven != 0.0) { float t = 100.0 * toX(fromX(top / 100.0) * u_bgEv); L = t + (1.0 - u_bgEven) * (L - t); }
   // la caida: hasta 64 L* en el borde derecho, desde el 35 % del ancho y con potencia 1,82
-  if (u_bgFall != 0.0) { float f = clamp((uv.x - 0.35) / 0.65, 0.0, 1.0); L -= u_bgFall * 64.0 * (f > 0.0 ? pow(f, 1.82) : 0.0); }
+  if (u_bgFall != 0.0) { float f = clamp((x - 0.35) / 0.65, 0.0, 1.0); L -= u_bgFall * 64.0 * (f > 0.0 ? pow(f, 1.82) : 0.0); }
   L = clamp(L, 1.0, 100.0);
   vec3 g = fromX(L / 100.0) / y * u_bgGain;
   if (u_bgSat != 1.0) g *= (y + u_bgSat * (light - y)) / max(light, vec3(1e-6));
@@ -634,16 +661,18 @@ void main() {
   vec2 px = u_center + (dev - 0.5 * u_canvas) / u_scale;
   vec2 uv = px / u_photo;
   if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) { outColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
+  // Flip: la foto se lee espejada (1 - x cae justo en el centro del texel del otro lado: al 1:1 sigue exacto)
+  vec2 tpx = u_mirror ? vec2(u_photo.x - px.x, px.y) : px, tuv = tpx / u_photo;
   float foot = float(textureSize(u_edit, 0).x) / u_photo.x / u_scale;
   vec3 lin;
-  if (u_show == 1) lin = tap(u_raw, uv, foot);
+  if (u_show == 1) lin = tap(u_raw, tuv, foot);
   else {
-    lin = tap(u_edit, uv, foot);
-    lin = face(lin, px, u_rect0, u_eA0, u_eB0, u_eC0, u_eyeF0, u_eyeFromBase0);
-    lin = face(lin, px, u_rect1, u_eA1, u_eB1, u_eC1, u_eyeF1, u_eyeFromBase1);
-    lin = face(lin, px, u_rect2, u_eA2, u_eB2, u_eC2, u_eyeF2, u_eyeFromBase2);
+    lin = tap(u_edit, tuv, foot);
+    lin = face(lin, tpx, u_rect0, u_eA0, u_eB0, u_eC0, u_eyeF0, u_eyeFromBase0);
+    lin = face(lin, tpx, u_rect1, u_eA1, u_eB1, u_eC1, u_eyeF1, u_eyeFromBase1);
+    lin = face(lin, tpx, u_rect2, u_eA2, u_eB2, u_eC2, u_eyeF2, u_eyeFromBase2);
     if (u_adjust) lin = adjust(lin);
-    if (u_bg) lin = backdrop(lin, uv, foot);
+    if (u_bg) lin = backdrop(lin, tuv, uv.x, foot);
   }
   vec3 e = encode(lin);
   if (u_dither) {
@@ -745,6 +774,7 @@ function createRenderer(cv) {
     gl.uniform3f(loc.u_bgGain, ...b.gain);
     gl.uniform1i(loc.u_dither, s.dither);
     gl.uniform1i(loc.u_flip, !!target);
+    gl.uniform1i(loc.u_mirror, !!s.mirror);
     if (clip) { gl.enable(gl.SCISSOR_TEST); gl.scissor(clip[0], 0, Math.max(clip[1] - clip[0], 0), H); }
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     if (clip) gl.disable(gl.SCISSOR_TEST);
@@ -838,7 +868,7 @@ function scene(p, v, W, opts = {}) {
   return {
     edit: (full ? fullUrl : screenUrl)(p, "edit"), raw: (full ? fullUrl : screenUrl)(p, "raw"), full,
     layer: bg.on ? layerUrl(p, full) : null, light: bg.on ? lightUrl(p) : null, bg, bgTop: p.top ?? 0,
-    cx: v.cx, cy: v.cy, pw: p.w, ph: p.h, scale,
+    cx: v.cx, cy: v.cy, pw: p.w, ph: p.h, scale, mirror: flipped(p.key),
     show: look.raw ? 1 : 0,
     eyes,
     adjust: look.raw ? uniforms : look.uniforms, dither: opts.dither ?? true,
@@ -1117,7 +1147,13 @@ function render() {
   if (mode() !== "edit") setPeek(false);
   $("peekKey").hidden = mode() !== "edit";
   frame.classList.toggle("compare", mode() === "compare");
-  document.querySelectorAll("#photos button").forEach((b, i) => b.setAttribute("aria-pressed", i === state.photo));
+  if (state.guide === "off") delete frame.dataset.guide; else frame.dataset.guide = state.guide;
+  document.querySelectorAll("#guide button").forEach((b, i) => b.setAttribute("aria-pressed", String(GUIDES[i] === state.guide)));
+  document.querySelectorAll("#photos button").forEach((b, i) => {
+    b.setAttribute("aria-pressed", i === state.photo);
+    b.toggleAttribute("data-flipped", !!PHOTOS[i] && !b.classList.contains("pending") && flipped(PHOTOS[i].key));
+  });
+  $("flip").setAttribute("aria-pressed", String(flipped()));
   $("rawView").setAttribute("aria-pressed", String(state.raw));
   $("compareView").setAttribute("aria-pressed", String(state.compare));
   $("controls").inert = state.raw;
@@ -1181,6 +1217,7 @@ beforeMenu.addEventListener("keydown", e => {
 addEventListener("resize", () => { if (beforeMenu.matches(":popover-open")) beforeMenu.hidePopover(); });
 // la vista: RAW original y Before / after se prenden y se apagan, y prender uno apaga el otro. Los dos apagados = la
 // version puesta
+$("flip").addEventListener("click", toggleFlip);
 $("rawView").addEventListener("click", () => { state.raw = !state.raw; if (state.raw) state.compare = false; render(); });
 $("compareView").addEventListener("click", () => { state.compare = !state.compare; if (state.compare) state.raw = false; render(); });
 // cambiar de foto: el lienzo toma su tamano, el panel la suya y se dibuja en el mismo cuadro, sin pasar por negro
@@ -1191,6 +1228,20 @@ function pickPhoto(i) {
   const p = P();
   holding = true;
   try { fit(); mountControls(p); swapFull(p); } finally { holding = false; }
+  render();
+}
+// Flip: espeja la foto puesta, su vista y su marco de recorte, asi queda en cuadro la misma parte de la cara
+function toggleFlip() {
+  if (state.photo < 0) return;
+  const p = P(), k = p.key;
+  if (flipped(k)) delete flips[k]; else flips[k] = true;
+  try { localStorage.setItem(FLIPS, JSON.stringify(flips)); } catch {}
+  const v = view();
+  state.views[k] = { ...v, cx: p.w - v.cx };
+  const c = opts.crops[k];
+  if (c) { const [x, y, w, h] = c.rect; opts.crops[k] = { ...c, rect: [1 - x - w, y, w, h] }; localStorage.setItem(SAVED, JSON.stringify(opts)); }
+  stopAnim();
+  paintZoom(view());
   render();
 }
 function setPeek(on) {
@@ -1234,15 +1285,35 @@ const panelId = key => `edit-${key}`;
 DialKit.createDialRoot({ mode: "inline", target: $("controls"), theme: "dark" });
 let dial = null;
 
+// el punto de partida del panel de cada foto (recipe/equivalents.py): los ajustes con los que el RAW original queda mas
+// cerca de la maestra. La maestra se ve tal cual; Light y Color arrancan en estos valores, y lo que se aplica (shader y
+// servidor) es la diferencia con ellos. Las versiones guardan los valores del panel. Sin el dato, 0: el panel de siempre
+const STARTS = DATA.starts ?? {};
+const startOf = p => Object.fromEntries(KEYS.map(k => [k, STARTS[p.key]?.[k] ?? 0]));
+// de los valores del panel a lo que se aplica sobre la maestra: al paso de cada control y dentro del rango de adjust.py
+// (un punto de partida recalculado puede dejar una version guardada mas lejos que eso)
+const deltaOf = (abs, start) => Object.fromEntries(KEYS.map(k => {
+  const limit = k === "exposure" ? 2 : 100, d = abs[k] - start[k], v = k === "exposure" ? Math.round(d * 100) / 100 : Math.round(d);
+  return [k, Math.min(limit, Math.max(-limit, v)) || 0];  // || 0: sin -0
+}));
+// cada control llega a 100 (2 pasos en Exposure) de cada lado del punto de partida: la diferencia cabe siempre en el
+// rango de adjust.py, que en 0 no hace nada
+const around = (controls, start) => Object.fromEntries(Object.entries(controls).map(([name, [, min, max, step]]) => {
+  // redondeado al paso: 0.93 - 2 da -1.0699999999999998, y DialKit saca de ahi cuantos decimales mostrar
+  const v = start[name.toLowerCase()], fix = x => +(Math.round(x / step) * step).toFixed(2);
+  return [name, [fix(v), fix(v + min), fix(v + max), step]];
+}));
 function fromValues(v, p) {
-  const L = v.Light, C = v.Color, B = v.Background ?? {}, r = x => Math.round(x ?? 0);
+  const L = v.Light ?? {}, C = v.Color ?? {}, B = v.Background ?? {}, r = x => Math.round(x ?? 0), s = startOf(p);
+  const at = (x, k) => (typeof x === "number" ? x : s[k]);  // un control que no esta vale su punto de partida (diferencia 0)
   return {
     levels: Object.fromEntries(eyeControls(p).map(([name, face]) => [face, r(v["Under-eyes"]?.[name] ?? EYE_DEFAULT)])),
-    adjust: {
-      exposure: Math.round(L.Exposure * 100) / 100, brightness: r(L.Brightness), contrast: r(L.Contrast),
-      highlights: r(L.Highlights), shadows: r(L.Shadows), whites: r(L.Whites), blacks: r(L.Blacks),
-      temperature: r(C.Temperature), tint: r(C.Tint), vibrance: r(C.Vibrance), saturation: r(C.Saturation),
-    },
+    adjust: deltaOf({
+      exposure: at(L.Exposure, "exposure"), brightness: at(L.Brightness, "brightness"), contrast: at(L.Contrast, "contrast"),
+      highlights: at(L.Highlights, "highlights"), shadows: at(L.Shadows, "shadows"), whites: at(L.Whites, "whites"),
+      blacks: at(L.Blacks, "blacks"), temperature: at(C.Temperature, "temperature"), tint: at(C.Tint, "tint"),
+      vibrance: at(C.Vibrance, "vibrance"), saturation: at(C.Saturation, "saturation"),
+    }, s),
     background: {
       exposure: Math.round((B.Exposure ?? 0) * 100) / 100, evenness: r(B.Evenness), smoothing: r(B.Smoothing), falloff: r(B.Falloff),
       temperature: r(B.Temperature), tint: r(B.Tint), saturation: r(B.Saturation),
@@ -1252,7 +1323,8 @@ function fromValues(v, p) {
 // una foto importada todavia sin ojeras inventariadas no tiene Under-eyes, y sin pared de estudio no tiene Background
 const configFor = p => ({
   ...(p.eyes?.length ? { "Under-eyes": Object.fromEntries(eyeControls(p).map(([name]) => [name, [EYE_DEFAULT, 0, EYE_MAX, 1]])) } : {}),
-  ...Object.fromEntries(Object.entries(CONFIG).filter(([k]) => k !== "Background" || p.top != null)),
+  ...Object.fromEntries(Object.entries(CONFIG).filter(([k]) => k !== "Background" || p.top != null)
+    .map(([k, c]) => [k, k === "Light" || k === "Color" ? around(c, startOf(p)) : c])),
 });
 function mountControls(p) {
   dial?.destroy();
@@ -1326,7 +1398,7 @@ function renderVersions() {
 }
 // las versiones son las mismas en todas las fotos (pedido del fotografo, 2026-10-19: "si se elimina de una se elimina de todas"): la
 // lista (id, nombre y orden) es una sola; los valores son de cada foto, porque el fondo de cada estilo esta afinado por
-// foto. Guardar en una la suma a las demas con sus valores tal cual; borrar en una la saca de todas. DialKit guarda el
+// foto. Guardar en una la suma a las demas con sus valores; borrar en una la saca de todas. DialKit guarda el
 // estado de cada foto en memoria si ya se abrio (y esa manda al volver) y en sessionStorage, que es lo que viaja al
 // servidor: se escriben los dos
 const COPY = "Copy to other photos";
@@ -1334,6 +1406,16 @@ const others = () => PHOTOS.filter(q => q.key !== P().key);
 const flatDefaults = q => Object.fromEntries(Object.entries(defaultsFor(q)).flatMap(([f, c]) => Object.entries(c).map(([k, v]) => [`${f}.${k}`, v])));
 // unos valores, con las claves de la foto q: lo que trae `values`, si no lo que tenia (own), y si no el de siempre. Un
 // "Under-eyes.Intensity" (de antes de las ojeras por cara) vale para cada cara que no traiga la suya
+// Light y Color de una foto a otra: cada foto arranca en su punto de partida (recipe/equivalents.py), asi que lo que
+// viaja es lo movido desde ahi. Una version con +0.5 de Exposure en una foto entra con +0.5 en las demas
+function moved(values, from, to) {
+  const a = startOf(from), b = startOf(to), out = { ...values };
+  for (const k of KEYS) for (const f of ["Light", "Color"]) {
+    const key = `${f}.${k[0].toUpperCase()}${k.slice(1)}`;
+    if (typeof out[key] === "number") out[key] = +(out[key] - a[k] + b[k]).toFixed(2);
+  }
+  return out;
+}
 function valuesFor(q, values, own = {}) {
   const all = values["Under-eyes.Intensity"] ?? own["Under-eyes.Intensity"];
   return Object.fromEntries(Object.entries(flatDefaults(q)).map(([k, d]) =>
@@ -1370,19 +1452,20 @@ function mirrorVersions() {
   const list = store.getPresets(dial.id);
   for (const q of others()) {
     const s = photoState(q), own = new Map(s.presets.map(v => [v.id, v]));
-    const presets = list.map(v => own.has(v.id) ? { ...own.get(v.id), name: v.name } : { id: v.id, name: v.name, values: valuesFor(q, v.values) });
+    const presets = list.map(v => own.has(v.id) ? { ...own.get(v.id), name: v.name } : { id: v.id, name: v.name, values: valuesFor(q, moved(v.values, P(), q)) });
     if (JSON.stringify(presets.map(v => [v.id, v.name])) === JSON.stringify(s.presets.map(v => [v.id, v.name]))) continue;
     writeState(q, s, presets, presets.some(v => v.id === s.active) ? s.active : presets[0]?.id ?? null);
   }
 }
-// al abrir: una foto sin versiones (recien importada) recibe la lista de la primera que tenga, con esos valores
+// al abrir: una foto sin versiones (recien importada) recibe la lista de la primera que tenga, con lo movido en esa
 function fillEmptyVersions() {
-  const from = PHOTOS.map(photoState).find(s => s.presets.length);
-  if (!from) return;
+  const source = PHOTOS.find(q => photoState(q).presets.length);
+  if (!source) return;
+  const from = photoState(source);
   for (const q of PHOTOS) {
     const s = photoState(q);
     if (s.presets.length) continue;
-    const presets = from.presets.map(v => ({ ...v, values: valuesFor(q, v.values) }));
+    const presets = from.presets.map(v => ({ ...v, values: valuesFor(q, moved(v.values, source, q)) }));
     writeState(q, s, presets, presets.some(v => v.id === from.active) ? from.active : presets[0].id);
   }
 }
@@ -1399,7 +1482,7 @@ function copyToOthers() {
   mirrorVersions();
   for (const q of others()) {
     // las caras que esta foto tiene y la de origen no (de un retrato a una de grupo) quedan con lo suyo
-    const s = photoState(q), values = valuesFor(q, v.values, s.presets.find(x => x.id === id)?.values);
+    const s = photoState(q), values = valuesFor(q, moved(v.values, P(), q), s.presets.find(x => x.id === id)?.values);
     writeState(q, s, s.presets.map(x => x.id === id ? { ...x, values } : x), id, values);
   }
   toast(`${v.name} copied to the other ${others().length} photos`);
@@ -1592,12 +1675,18 @@ async function lastToast() {
 
 // el archivo lo arma editor_server.py desde la maestra de 16 bits, con los mismos ajustes; aca solo se elige y se mira
 const FORMATS = [
-  { id: "png", label: "PNG", bits: 16 },
-  { id: "tiff", label: "TIFF", bits: 16 },
-  { id: "webp", label: "WebP", bits: 8 },  // sin perdida
+  { id: "png", label: "PNG", bits: 16, alpha: true },
+  { id: "tiff", label: "TIFF", bits: 16, alpha: true },
+  { id: "webp", label: "WebP", bits: 8, alpha: true },  // sin perdida
   { id: "jpeg", label: "JPG", bits: 8 },   // calidad 95, color 4:4:4: lo que acepta cualquier sitio
+  // el "RAW" que se pidio dos veces: un DNG lineal con la edicion adentro (Lightroom lo abre como RAW). Los mismos datos
+  // que el TIFF, sin mas calidad; ultimo, asi los otros cuatro quedan donde estaban
+  { id: "dng", label: "DNG", bits: 16, linear: true },
 ];
 const SIZES = [1024, 2048, 4096, "full"];
+// la forma: el circulo es la foto de perfil, con las esquinas transparentes. Va con un recorte cuadrado y un formato con
+// transparencia; si no, sale cuadrada (JPG y DNG no tienen transparencia)
+const SHAPES = ["square", "circle"];
 // el recorte, como el de Fotos: un marco sobre la foto entera que se mueve y se estira con el mouse. Free lo deja de
 // cualquier forma; una proporcion lo fija (y al elegirla, el marco mas grande que entra, centrado en las caras)
 const CROPS = [
@@ -1607,8 +1696,9 @@ const CROPS = [
 const FULL = { mode: "free", rect: [0, 0, 1, 1] };  // por foto: la proporcion y el marco, en fracciones de la foto
 const WEB_HEAVY = 15e6;  // un WebP o JPG mas pesado que esto tarda en cargar en una pagina
 const SAVED = "studio-export-v1";
-const opts = { crops: {}, format: "png", size: "full", ...JSON.parse(localStorage.getItem(SAVED) || "{}") };
+const opts = { crops: {}, format: "png", size: "full", shape: "square", ...JSON.parse(localStorage.getItem(SAVED) || "{}") };
 if (!FORMATS.some(f => f.id === opts.format)) opts.format = "png";
+if (!SHAPES.includes(opts.shape)) opts.shape = "square";
 for (const k of ["area", "crop", "at"]) delete opts[k];  // los recortes de antes
 const cropOf = p => opts.crops[p.key] ?? FULL;
 const crop = () => CROPS.find(c => c.id === cropOf(P()).mode) ?? CROPS[0];
@@ -1617,17 +1707,26 @@ const dialog = $("dialog");
 const panelOpen = () => dialog.open;
 const fmt = () => FORMATS.find(f => f.id === opts.format);
 const image = () => (mode() === "raw" ? "raw" : "edit");
+const cut = () => { const [, , w, h] = box(); return opts.shape === "circle" && fmt().alpha && w === h ? "circle" : "square"; };
+// el circulo pide un recorte cuadrado: elegirlo con otro recorte pone 1:1, centrado en las caras
+function pickShape(id) {
+  const [, , w, h] = box();
+  if (id === "circle" && w !== h) pickCrop("1:1");
+  setOpt("shape", id);
+}
 // el centro de las caras (los ojos de cada una): una sola queda un poco arriba del medio, como en un retrato
 function faceCenter(p) {
   if (!p.eyes?.length) return [0.5, 0.5];
   const xs = p.eyes.flatMap(e => [e.x, e.x + e.w]), ys = p.eyes.map(e => e.y + e.h / 2);
   const cy = (Math.min(...ys) + Math.max(...ys)) / 2 + (p.eyes.length === 1 ? p.h * 0.08 : 0);
-  return [(Math.min(...xs) + Math.max(...xs)) / 2 / p.w, cy / p.h];
+  const fx = (Math.min(...xs) + Math.max(...xs)) / 2 / p.w;
+  return [flipped(p.key) ? 1 - fx : fx, cy / p.h];  // con Flip, las caras estan del otro lado
 }
 // el marco en pixeles de la foto, entero y adentro
 function box() {
   const p = P(), [fx, fy, fw, fh] = cropOf(p).rect;
-  const w = Math.max(1, Math.min(p.w, Math.round(fw * p.w))), h = Math.max(1, Math.min(p.h, Math.round(fh * p.h)));
+  let w = Math.max(1, Math.min(p.w, Math.round(fw * p.w))), h = Math.max(1, Math.min(p.h, Math.round(fh * p.h)));
+  if (crop().r === 1) w = h = Math.min(w, h);  // 1:1 siempre cuadrado: redondear cada lado aparte podia dejar un pixel de mas
   return [Math.min(Math.max(Math.round(fx * p.w), 0), p.w - w), Math.min(Math.max(Math.round(fy * p.h), 0), p.h - h), w, h];
 }
 function setRect(p, [x, y, w, h], mode = cropOf(p).mode) {
@@ -1679,7 +1778,7 @@ const request = () => {
   const edit = image() === "edit";
   return { photo: P().key, image: image(), box: box(), size: opts.size, format: opts.format,
            under_eyes: edit ? settings.levels : null, adjust: edit ? settings.adjust : null,
-           background: edit ? settings.background : null, version: edit ? activeVersion() : null };
+           background: edit ? settings.background : null, version: edit ? activeVersion() : null, flip: flipped(), shape: cut() };
 };
 const bytes = n => (n < 1e6 ? `${Math.round(n / 1e3)} KB` : `${(n / 1e6).toFixed(1)} MB`);
 const OFFLINE = "Open Abrir editor.command to export";
@@ -1758,7 +1857,10 @@ function drawPreview() {
     }
     const line = dpr(), [X, Y, W, H] = box(), bx = (X - x0) * z, by = (Y - y0) * z, bw = W * z, bh = H * z;
     g.fillStyle = "rgb(0 0 0 / 0.6)";
-    g.beginPath(); g.rect(0, 0, CW, CH); g.rect(bx, by, bw, bh); g.fill("evenodd");
+    g.beginPath(); g.rect(0, 0, CW, CH);
+    if (cut() === "circle") g.ellipse(bx + bw / 2, by + bh / 2, bw / 2, bh / 2, 0, 0, 2 * Math.PI);  // las esquinas salen transparentes
+    else g.rect(bx, by, bw, bh);
+    g.fill("evenodd");
     if (cropDragging) {  // los tercios, solo mientras se arrastra
       g.strokeStyle = "rgb(255 255 255 / 0.4)"; g.lineWidth = line;
       g.beginPath();
@@ -1795,10 +1897,13 @@ async function post(key, signal) {
     const res = await fetch("api/prepare", { method: "POST", headers: { "Content-Type": "application/json" }, body: key, signal });
     if (res.ok) {
       const r = await res.json();
-      if ((custom && !("adjusted" in r)) || (bg && !("backdrop" in r))) throw new Error("outdated");
+      // y uno de antes de Flip lo arma sin espejar: contesta sin "flip"
+      // y uno de antes de la forma, cuadrado: contesta sin "shape"
+      const round = req.shape === "circle";
+      if ((custom && !("adjusted" in r)) || (bg && !("backdrop" in r)) || (req.flip && !("flip" in r)) || (round && !("shape" in r))) throw new Error("outdated");
       return { key, ...r };
     }
-    if (res.status === 400 && custom) throw new Error("outdated");
+    if (res.status === 400 && (custom || req.flip || req.shape === "circle")) throw new Error("outdated");
     if (res.status === 409 && ++lost > 20) throw new Error("busy");
     if (res.status !== 409 && res.status !== 503) throw new Error(res.status);
     if (res.status === 503 && keyOf(request()) === key) notice(RENDERING);
@@ -1816,14 +1921,14 @@ function eyesText() {
 // servidor lo termina de armar
 function info(r) {
   const [w, h] = outDims(), edit = image() === "edit", version = edit ? activeVersion() : null;
-  $("what").textContent = !edit ? "RAW original" : version ??
-    ["Version 1", adjusted() && "Adjusted", eyesText()].filter(Boolean).join(" · ");
+  $("what").textContent = [!edit ? "RAW original" : version ??
+    ["Version 1", adjusted() && "Adjusted", eyesText()].filter(Boolean).join(" · "), flipped() && "Flipped"].filter(Boolean).join(" · ");
   // el aviso se queda hasta que llegue un archivo: borrarlo en cada clic lo hacia parpadear mientras el pedido volvia a
   // fallar
   if (!r && $("foot").dataset.state === "warn") return;
   const bits = r ? r.bits : edit ? fmt().bits : 8;
   const heavy = r && (opts.format === "webp" || opts.format === "jpeg") && r.bytes > WEB_HEAVY;
-  notice(`${r ? r.w : w} × ${r ? r.h : h} · ${bits}-bit ${fmt().label} · sRGB${r ? ` · ${bytes(r.bytes)}` : ""}${heavy ? " · heavy for a web page" : ""}`);
+  notice(`${r ? r.w : w} × ${r ? r.h : h} · ${bits}-bit ${fmt().label} · ${fmt().linear ? "linear sRGB" : "sRGB"}${r ? ` · ${bytes(r.bytes)}` : ""}${heavy ? " · heavy for a web page" : ""}`);
   $("info").classList.toggle("heavy", !!heavy);
 }
 // una linea en #info; warn: el archivo no se puede armar, y Download se apaga hasta que algo cambie
@@ -1857,6 +1962,10 @@ function refreshPanel() {
   pc.tabIndex = 0;
   pc.setAttribute("aria-label", "Preview. Drag the crop frame, its edges or its corners; the arrow keys move it");
   document.querySelectorAll("#format button").forEach((b, i) => b.setAttribute("aria-pressed", FORMATS[i].id === opts.format));
+  document.querySelectorAll("#shape button").forEach((b, i) => {
+    b.disabled = SHAPES[i] === "circle" && !fmt().alpha;
+    b.setAttribute("aria-pressed", SHAPES[i] === cut());
+  });
   document.querySelectorAll("#size button").forEach((b, i) => {
     const s = SIZES[i];
     b.disabled = s !== "full" && s >= long;
@@ -1908,6 +2017,8 @@ $("download").addEventListener("click", async () => {
 function buttons(el, items, onPick, build) {
   items.forEach((item, i) => { const b = document.createElement("button"); build(b, item); b.addEventListener("click", () => onPick(i)); el.appendChild(b); });
 }
+const GUIDES = ["off", "circle", "square"];
+buttons($("guide"), GUIDES, i => { state.guide = GUIDES[i]; render(); }, (b, g) => { b.textContent = g === "off" ? "Off" : g === "circle" ? "Circle" : "Square"; });
 buttons($("photos"), PHOTOS, pickPhoto, (b, p) => { b.innerHTML = `<img src="editadas/miniaturas/${p.key}.png?v=${DATA.version}" alt=""><span>${p.label}</span>`; });
 // --- sumar fotos: el + o soltarlas sobre la ventana. El servidor las prepara de a una (recipe/import_photo.py); mientras,
 // cada una es una pestana que dice en que paso esta. Terminada, se abre con un click (recarga la pagina, con las
@@ -2058,6 +2169,7 @@ buttons($("area"), CROPS, i => pickCrop(CROPS[i].id), (b, c) => { b.textContent 
 }
 buttons($("format"), FORMATS, i => setOpt("format", FORMATS[i].id), (b, f) => { b.textContent = f.label; });
 buttons($("size"), SIZES, i => setOpt("size", SIZES[i]), (b, s) => { b.textContent = s === "full" ? "Full" : s; });
+buttons($("shape"), SHAPES, i => pickShape(SHAPES[i]), (b, c) => { b.textContent = c === "circle" ? "Circle" : "Square"; });
 
 // Espacio, mantenido, muestra el RAW desde cualquier lado salvo donde se escribe, y solo sobre la version (en el RAW y en
 // el antes y despues no hace nada, pedido del fotografo): se toma antes que los controles, asi un boton con foco no se aprieta. Las flechas, sobre un control, son del control
@@ -2079,6 +2191,7 @@ document.addEventListener("keydown", e => {
     return;
   }
   if (typing(e.target) || e.target instanceof Element && e.target.closest(".dialkit-root, select, .knob")) return;  // la perilla corre la barra
+  if (e.key === "f" || e.key === "F") { e.preventDefault(); return toggleFlip(); }
   const m = PHOTOS.length;
   if (e.key === "ArrowRight") { e.preventDefault(); return pickPhoto((state.photo + 1) % m); }
   if (e.key === "ArrowLeft") { e.preventDefault(); return pickPhoto((state.photo + m - 1) % m); }

@@ -379,7 +379,8 @@ async function runCell(browser, engine, vp) {
       // las flechas sobre Contrast
       await slider("Contrast").focus();
       await page.keyboard.press("ArrowRight"); await page.keyboard.press("ArrowRight");
-      const c = await ev(`[settings.adjust.contrast, document.querySelector('#controls .dialkit-slider[aria-label="Contrast"]').getAttribute("aria-valuenow"), state.photo].join()`);
+      // el control dice el valor del panel; lo que se aplica es la diferencia con el punto de partida (recipe/equivalents.py)
+      const c = await ev(`[settings.adjust.contrast, document.querySelector('#controls .dialkit-slider[aria-label="Contrast"]').getAttribute("aria-valuenow") - startOf(P()).contrast, state.photo].join()`);
       check("arrow keys move Contrast (not the photo)", Number(c.split(",")[0]) > 0 && c.split(",")[0] === c.split(",")[1] && c.endsWith(",0"), c);
       // clic en el numero para escribirlo (DialKit lo habilita despues de 800 ms con el puntero encima)
       const value = s.locator(".dialkit-slider-value");
@@ -387,9 +388,11 @@ async function runCell(browser, engine, vp) {
       const typing = await ev(`document.activeElement?.classList.contains("dialkit-slider-input")`);
       await page.keyboard.press("Meta+a"); await page.keyboard.type("0.5"); await page.keyboard.press("Enter");
       await wait(300);
+      // 0.5 es el valor del panel: se aplica 0.5 menos el punto de partida
       const typed = await ev(`[settings.adjust.exposure, __last?.gain.map(g => g.toFixed(3)).join("/")].join(" ")`);
-      const want = (await ev(`adjustUniforms({ ...settings.adjust, exposure: 0.5 }).gain.map(g => g.toFixed(3)).join("/")`));
-      check("click-to-type sets Exposure 0.5 and the shader gets its gain", typing && typed === `0.5 ${want}`, `${typing} ${typed} want ${want}`);
+      const delta = await ev(`+(0.5 - startOf(P()).exposure).toFixed(2)`);
+      const want = (await ev(`adjustUniforms({ ...settings.adjust, exposure: ${delta} }).gain.map(g => g.toFixed(3)).join("/")`));
+      check("click-to-type sets Exposure 0.5 and the shader gets its gain", typing && typed === `${delta} ${want}`, `${typing} ${typed} want ${delta} ${want}`);
       await tapButton("Reset"); await wait(500);
     });
 
@@ -446,6 +449,24 @@ async function runCell(browser, engine, vp) {
       for (let i = 1; i <= 5; i++) await page.mouse.move(x + dx * i / 5, y + dy * i / 5);
       await page.mouse.up(); await wait(100);
     };
+    // la guia de la foto de perfil (2026-10-23) y Flip (2026-10-20), con clics y teclas de verdad
+    await step("guide and flip", async () => {
+      const guide = () => ev(`(() => { const m = document.querySelector(".mask"), a = getComputedStyle(m, "::after"), f = frame.getBoundingClientRect(), side = Math.min(f.width, f.height);
+        return [getComputedStyle(m).opacity, a.borderTopLeftRadius, Math.abs(parseFloat(a.width) - side) < 1 && Math.abs(parseFloat(a.height) - side) < 1].join(); })()`);
+      await page.click("#guide button:nth-child(2)"); await wait(300);
+      const circle = await guide();
+      await page.click("#guide button:nth-child(3)"); await wait(300);
+      const square = await guide();
+      await page.click("#guide button:nth-child(1)"); await wait(300);
+      const off = await guide();
+      check("guide: Circle and Square, the largest centered fit; Off hides it", circle === "1,50%,true" && square === "1,0px,true" && off.startsWith("0,"), `${circle} / ${square} / ${off}`);
+      await page.click("#flip");
+      const on = await ev(`[$("flip").getAttribute("aria-pressed"), flipped(), scene(P(), view(), 64).mirror].join()`);
+      await blur();
+      await page.keyboard.press("f");
+      const back = await ev(`[$("flip").getAttribute("aria-pressed"), flipped(), scene(P(), view(), 64).mirror].join()`);
+      check("Flip: the button mirrors the photo, F turns it back", on === "true,true,true" && back === "false,false,false", `${on} / ${back}`);
+    });
     await step("export dialog", async () => {
       phase = "export";
       await openDialog();
@@ -576,6 +597,22 @@ async function runCell(browser, engine, vp) {
       const reopened = await ev(`[pview, $("pvZoom").textContent].join()`);
       check("preview: back to Fit on reopen", zoomedText !== "Fit" && reopened === ",Fit", `${zoomedText} → ${reopened}`);
       cell.pillOnReopen = first;
+    });
+    // Shape: Circle pone 1:1 y pide el circulo; JPG lo apaga. Vuelve a Square y al recorte de antes
+    await step("export shape", async () => {
+      if (!(await ev(`dialog.open`))) await openDialog();
+      const before = await ev(`JSON.stringify(cropOf(P()))`);
+      await page.click("#shape button:nth-child(2)");
+      const s = await summary();
+      const c = await ev(`(() => { const [, , w, h] = box(); return [cropOf(P()).mode, w === h, request().shape, $("shape").children[1].getAttribute("aria-pressed")].join(); })()`);
+      check("Shape Circle: 1:1 crop, request asks for the circle", c === "1:1,true,circle,true" && s.req.shape === "circle", `${c} · ${s.text}`);
+      await page.click("#format button:nth-child(4)");
+      const jpg = await ev(`[$("shape").children[1].disabled, request().shape].join()`);
+      check("Shape: Circle disabled in the 8-bit lossy format, the file goes square", jpg === "true,square", jpg);
+      await page.click("#format button:nth-child(1)");
+      await page.click("#shape button:nth-child(1)");
+      await ev(`opts.crops[P().key] = JSON.parse(${JSON.stringify(before)}); setOpt("crops", opts.crops)`);
+      await summary();
     });
     await step("download", async () => {
       phase = "download";

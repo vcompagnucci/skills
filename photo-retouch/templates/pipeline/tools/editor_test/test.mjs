@@ -2,12 +2,15 @@
 // solo dibujo, la vista (RAW original y Before / after), Espacio y las flechas, los ajustes que llegan al render, las
 // versiones (Save version, cambiar, recorrerlas con ↓ ↑, borrar, y que vuelvan al recargar y en otro puerto), el antes y
 // despues entre versiones (su menu con el mouse y el teclado), el export igual a lo que se ve (y su resumen, sin zoom
-// al pasar el puntero y con Download apagado sin servidor), el panel de export (Format, Size, Crop: los cuatro formatos,
+// al pasar el puntero y con Download apagado sin servidor), el panel de export (Format, Size, Crop: los cinco formatos,
 // el JPG solo en memoria; el marco del recorte con el mouse y las flechas; el zoom de la vista previa, que nunca muestra
 // mas detalle que el archivo), que los parches de ojeras no dejen bordes, el zoom
 // (pellizco en cualquier parte sin agrandar la pagina, el boton y ⌘+ ⌘- ⌘0) y la barra del antes y despues (correrla
 // nunca corre la foto, y en los bordes se sigue agarrando) y el fondo (la carpeta Background: solo la pared, y a 1:1
-// igual al archivo del servidor).
+// igual al archivo del servidor), Flip (el boton y la F, por foto: la vista, el shader espejado exacto y el archivo
+// espejado igual a lo que se ve) y la forma (la guia Off, Circle, Square, y el Shape del export: el circulo transparente), y el punto de
+// partida del panel (recipe/equivalents.py: el panel arranca en los ajustes que mas se parecen a la maestra y aplica la
+// diferencia).
 // Uso: node tools/editor_test/test.mjs [pagina]   (editor.html si no se dice)
 // Arranca dos servidores propios (8792 y 8793) y los apaga siempre al final. editadas/versiones.json no se toca: los
 // servidores guardan en work/editor-test/versiones-test.json (EDITOR_VERSIONS), que arranca vacio. Asi se puede correr
@@ -66,6 +69,9 @@ try {
     await page.click(r.x, r.y);
   };
   // las ojeras van por cara: look() da la intensidad si todas son iguales; allEyes(n), todas las caras de la foto a n
+  // Light y Color arrancan en el punto de partida de la foto (recipe/equivalents.py; sin el, 0): REL pone esos valores
+  // sumados a el, asi lo que se aplica sobre la maestra es lo que dice la prueba
+  const REL = `(v => { const s = startOf(P()); for (const f of ["Light", "Color"]) for (const k in v[f] ?? {}) v[f][k] = +(s[k.toLowerCase()] + v[f][k]).toFixed(2); return dial.setValues(v); })`;
   const look = () => ev(`[settings.adjust.exposure, [...new Set(Object.values(settings.levels))].join("/")].join()`);
   const allEyes = n => `Object.fromEntries(eyeControls(P()).map(([k]) => [k, ${n}]))`;
   const saved = cond => until(`fetch("api/versions", { cache: "no-store" }).then(r => r.json()).then(d => { const s = d.photos?.[P().key]; return !!s && (${cond}); })`);
@@ -246,7 +252,7 @@ try {
   const tapVersion = name => tapAt(rowOf(name));
   const deleteVersion = name => tapAt(`${rowOf(name)}.closest(".version").querySelector(".del")`);
   const toastSaid = () => ev(`lastToast()`);
-  await ev(`dial.setValues({ Light: { Exposure: 0.5 } })`);
+  await ev(`${REL}({ Light: { Exposure: 0.5 } })`);
   await tapButton("Save version");
   const said = await toastSaid();
   const onBase = { list: await versions(), current: await ev(`$("versions").querySelectorAll('[aria-current="true"]').length`), after: await ev(`$("afterLabel").textContent`) };
@@ -259,7 +265,7 @@ try {
   await tapButton("Save version");
   const said3 = await toastSaid();
   check(await versions() === "Version 2*, Version 3" && said3 === "Version 3 saved in all photos", "Save version guarda la 3 y se sigue en la 2", `${await versions()} · ${said3}`);
-  await ev(`dial.setValues({ Light: { Exposure: -0.4 }, "Under-eyes": ${allEyes(150)} })`);
+  await ev(`${REL}({ Light: { Exposure: -0.4 }, "Under-eyes": ${allEyes(150)} })`);
   await tapVersion("Version 3");
   const v3 = await look();
   await tapVersion("Version 2");
@@ -350,8 +356,9 @@ try {
         "con la 3 puesta, la 2 a la izquierda tambien (elegida con Enter, ↓ y Enter), al pixel", `${flipped} · ${JSON.stringify(reverse)}`);
   await page.key("ArrowUp", { keyCode: 38 });
   await tap("#compareView");
-  check(await saved(`s.presets.length === 2 && s.activePresetId === s.presets[0].id && Object.values(s.presets[1].values).includes(0.5) &&
-                     Object.values(s.presets[0].values).includes(-0.4)`),
+  // el archivo guarda los valores del panel: el punto de partida (recipe/equivalents.py) mas lo movido
+  check(await saved(`s.presets.length === 2 && s.activePresetId === s.presets[0].id && (e => s.presets[1].values["Light.Exposure"] === e(0.5) &&
+                     s.presets[0].values["Light.Exposure"] === e(-0.4))(x => +(startOf(P()).exposure + x).toFixed(2))`),
         "se guardan en el archivo de versiones (la copia de la prueba)");
   await open(PORTS[0]);
   check(await versions() === "Version 2*, Version 3" && await look() === "-0.4,150", "al recargar vuelven, con la 2 puesta", await versions());
@@ -365,7 +372,8 @@ try {
   // una foto con versiones y ninguna puesta abre en la primera: se le copian las de esta a la ultima, sin la puesta
   const lastKey = await ev(`PHOTOS.at(-1).key`);
   const posted = await ev(`fetch("api/versions", { cache: "no-store" }).then(r => r.json()).then(d => fetch("api/versions", { method: "POST",
-    headers: { "Content-Type": "application/json" }, body: JSON.stringify({ photo: ${JSON.stringify(lastKey)}, state: { ...d.photos[P().key], activePresetId: null } }) }).then(r => r.ok))`);
+    headers: { "Content-Type": "application/json" }, body: JSON.stringify({ photo: ${JSON.stringify(lastKey)}, state: { ...d.photos[P().key], activePresetId: null,
+      presets: d.photos[P().key].presets.map(v => ({ ...v, values: moved(v.values, P(), PHOTOS.at(-1)) })) } }) }).then(r => r.ok))`);
   await open(PORTS[1]);
   await ev(`pickPhoto(PHOTOS.length - 1)`);
   const opensFirst = [await versions(), await look()].join(" ");
@@ -397,7 +405,7 @@ try {
   // archivo se compara en WebP (8 bits redondeados): un PNG de 16 bits, Chrome lo lee cortando bits (v >> 8)
   await tapButton("Save version");
   await tapVersion("Version 2");
-  await ev(`dial.setValues({ "Under-eyes": ${allEyes(150)}, Light: { Exposure: 0.3, Brightness: 10, Contrast: 20, Highlights: -30, Shadows: 25, Whites: 10, Blacks: -10 },
+  await ev(`${REL}({ "Under-eyes": ${allEyes(150)}, Light: { Exposure: 0.3, Brightness: 10, Contrast: 20, Highlights: -30, Shadows: 25, Whites: 10, Blacks: -10 },
                              Color: { Temperature: 15, Tint: -10, Vibrance: 20, Saturation: -10 } })`);
   await ev(`setOpt("size", 1024)`);
   await tap("#export");
@@ -460,22 +468,24 @@ try {
              lines: [...side.querySelectorAll("p, small, .hint")].map(p => p.id).join(), gone: /Reset|Visible area|Long edge|preset/i.test(side.textContent),
              buttons: [...side.querySelectorAll("button")].filter(b => !b.closest(".seg")).map(b => b.id).join() };
   })()`);
-  check(fields.labels === "Format,Size,Crop" && fields.format === "PNG,TIFF,WebP,JPG" && fields.size === "1024,2048,4096,Full" &&
+  check(fields.labels === "Format,Size,Crop,Shape" && fields.format === "PNG,TIFF,WebP,JPG,DNG" && fields.size === "1024,2048,4096,Full" &&
         fields.crop === "Free,1:1,4:5,3:2,16:9" && fields.lines === "what,info" && !fields.gone && fields.buttons === "close,download",
-        "export: Format, Size y Crop con sus opciones; sin presets, ayudas ni Reset", JSON.stringify(fields));
+        "export: Format, Size, Crop y Shape con sus opciones; sin presets, ayudas ni Reset", JSON.stringify(fields));
   // cada formato: el resumen (medida del archivo, bits, formato, sRGB y peso), la extension, y el pedido lleva box, size y format.
   // El JPG se mira en memoria (empieza con FF D8): nunca se escribe en el proyecto
-  for (const [id, label, ext, bits] of [["png", "PNG", "png", 16], ["tiff", "TIFF", "tif", 16], ["webp", "WebP", "webp", 8], ["jpeg", "JPG", "jpg", 8]]) {
+  // El DNG ("RAW export"): 16 bits en luz lineal, el resumen dice "linear sRGB" y el archivo empieza como un TIFF (II*)
+  for (const [id, label, ext, bits] of [["png", "PNG", "png", 16], ["tiff", "TIFF", "tif", 16], ["webp", "WebP", "webp", 8], ["jpeg", "JPG", "jpg", 8], ["dng", "DNG", "dng", 16]]) {
     await tapAt(seg("format", label));
     const done = await preparedNow();
     const got = await ev(`(async () => {
       const req = JSON.parse(prepared.key), [w, h] = outDims();
-      const head = ${id === "jpeg"} ? [...new Uint8Array(await (await fetch("api/file/" + prepared.id)).arrayBuffer()).slice(0, 2)].join() : "";
+      const head = ${id === "jpeg" || id === "dng"} ? [...new Uint8Array(await (await fetch("api/file/" + prepared.id)).arrayBuffer()).slice(0, 3)].join() : "";
       return { info: $("info").textContent, want: w + " × " + h, name: prepared.name, bits: prepared.bits, head, pressed: ${seg("format", label)}.getAttribute("aria-pressed"),
                req: JSON.stringify(req.box) === JSON.stringify(box()) && req.size === opts.size && req.format === ${JSON.stringify(id)} };
     })()`);
-    const line = new RegExp(`^${got.want} · ${bits}-bit ${label} · sRGB · [\\d.]+ (KB|MB)$`);
-    check(done && line.test(got.info) && got.name.endsWith(`.${ext}`) && got.bits === bits && got.req && got.pressed === "true" && (id !== "jpeg" || got.head === "255,216"),
+    const line = new RegExp(`^${got.want} · ${bits}-bit ${label} · ${id === "dng" ? "linear sRGB" : "sRGB"} · [\\d.]+ (KB|MB)$`);
+    check(done && line.test(got.info) && got.name.endsWith(`.${ext}`) && got.bits === bits && got.req && got.pressed === "true" &&
+          (id !== "jpeg" || got.head.startsWith("255,216")) && (id !== "dng" || got.head === "73,73,42"),
           `export en ${label}: el resumen, la extension y el pedido con box, size y format`, JSON.stringify(got));
   }
   // el aviso de un WebP o un JPG pesado para una pagina (mas de 15 MB), en ambar; un PNG igual de pesado no lo lleva
@@ -792,7 +802,7 @@ try {
     const rawBg = await ev(`(() => { state.raw = true; render(); const s = scene(P(), view(), 96); state.raw = false; render(); return [s.show, s.bg.on].join(); })()`);
     check(rawBg === "1,false", "el RAW no lleva el fondo", rawBg);
 
-    await ev(`dial.setValues({ Light: { Exposure: 0.3, Brightness: 10, Contrast: 20, Highlights: -30, Shadows: 25, Whites: 10, Blacks: -10 },
+    await ev(`${REL}({ Light: { Exposure: 0.3, Brightness: 10, Contrast: 20, Highlights: -30, Shadows: 25, Whites: 10, Blacks: -10 },
                                Color: { Temperature: 15, Tint: -10, Vibrance: 20, Saturation: -10 },
                                Background: { Exposure: 0.45, Evenness: 65, Falloff: 30, Temperature: 40, Tint: -12, Saturation: -100 } })`);
     const BOXES = [["pelo", 848, 438, 1024, 1024], ["hueco", 3365, 3765, 120, 160], ["pared", ...WALL]];
@@ -840,6 +850,256 @@ try {
     await ev(`pickPhoto(1)`);
     check(!await ev(`renderer.ready(layerUrl(PHOTOS[0], true))`), "al cambiar de foto, la capa entera de la otra se suelta");
     await ev(`pickPhoto(0)`);
+  }
+
+  // cerrar el export y esperar a que salga de la capa de arriba (sale con una transicion: un clic antes cae en el fondo)
+  const closeDialog = async () => { await page.key("Escape", { keyCode: 27 }); await until(`!dialog.open`, 3000); await sleep(250); };
+
+  // 14. Flip (2026-10-20): el boton (despues de la guia) y la F espejan la foto puesta, por foto y recordado al recargar.
+  // La vista va al espejo y vuelve exacta; con el foco en DialKit la F es del panel. El shader espejado es el espejo exacto
+  // de la caja espejada (el estilo con ajustes y ojeras, y el RAW). El export dice Flipped, lleva flip y -flip, la caja
+  // en lo que se ve, y a 1:1 es lo que se ve con el fondo y su caida (la misma vara que en el 13). Un servidor de antes de
+  // Flip contesta sin "flip": el aviso de reabrir
+  {
+    await ev(`pickPhoto(0); state.raw = false; state.compare = false; render(); dial.setValues(defaultsFor(P())); document.activeElement?.blur()`);
+    await ev(`localStorage.removeItem(FLIPS); for (const k in flips) delete flips[k]; render()`);
+    const head = await ev(`(() => {
+      const kids = [...document.querySelector("header").children], b = $("flip"), g = document.querySelector("#guide button");
+      return [kids.indexOf(b.closest(".seg")) === kids.indexOf($("guide")) + 1, b.textContent, b.getAttribute("aria-pressed"),
+              getComputedStyle(b).height === getComputedStyle(g).height, getComputedStyle(b).borderRadius === getComputedStyle(g).borderRadius].join();
+    })()`);
+    check(head === "true,Flip,false,true,true", "Flip: en la barra, despues de la guia y con su forma, apagado al abrir", head);
+    // con zoom y corrida a un lado: la vista va a p.w - cx (la misma parte de la foto en cuadro) y la F la devuelve
+    await ev(`(stopAnim(), setView(clampView({ cx: P().w * 0.3, cy: P().h * 0.4, size: P().w / 2 })))`);
+    const v0 = await ev(`JSON.stringify(view())`);
+    await tap("#flip");
+    const on = await ev(`[$("flip").getAttribute("aria-pressed"), flipped(), JSON.parse(localStorage.getItem(FLIPS))[P().key],
+      [...$("photos").querySelectorAll("button:not(.pending) img")].map((im, i) => getComputedStyle(im).scale === (i === 0 ? "-1 1" : "none")).every(Boolean),
+      (() => { const a = ${v0}, b = view(); return Math.abs(b.cx - (P().w - a.cx)) < 1e-6 && b.cy === a.cy && b.size === a.size; })()].join()`);
+    await ev(`document.activeElement?.blur()`);
+    await page.key("f", { keyCode: 70, text: "f" });
+    const off = await ev(`(() => { const a = ${v0}, b = view(); return [$("flip").getAttribute("aria-pressed"), flipped(),
+      Math.abs(b.cx - a.cx) < 1e-6 && b.cy === a.cy && b.size === a.size].join(); })()`);
+    check(on === "true,true,true,true,true" && off === "false,false,true", "Flip y F: la vista va a p.w − cx (y la miniatura se espeja) y vuelve", `${on} / ${off}`);
+    await ev(`$("controls").querySelector(".dialkit-slider")?.focus()`);
+    await page.key("f", { keyCode: 70, text: "f" });
+    const kept = await ev(`flipped()`);
+    await ev(`document.activeElement?.blur()`);
+    check(kept === false, "F con el foco en un control de DialKit no espeja");
+
+    // el shader: a 1:1 y sin dither, la caja espejada con Flip es el espejo exacto de la caja sin Flip
+    await ev(`${REL}({ "Under-eyes": ${allEyes(150)}, Light: { Exposure: 0.2, Contrast: 15 } })`);
+    const mirrored = await ev(`(async () => {
+      const p = P(), e = p.eyes[0], side = 256, x = Math.min(Math.max(Math.round(e.x + e.w / 2 - side / 2), 0), p.w - side), y = Math.min(Math.max(Math.round(e.y), 0), p.h - side), out = [];
+      loadFull(p);
+      while (!renderer.ready(fullUrl(p, "edit")) || !renderer.ready(fullUrl(p, "raw"))) await new Promise(r => setTimeout(r, 100));
+      for (const [name, look] of [["live", liveLook()], ["raw", RAW_LOOK]]) {
+        const grab = (cx, on) => { flips[p.key] = on; const s = scene(p, { cx, cy: y + side / 2, size: side }, side, { scale: 1, dither: false, look });
+                                   return s.full && sceneReady(s) ? renderer.read(s, side, side).slice() : null; };
+        const a = grab(x + side / 2, false), b = grab(p.w - x - side / 2, true);
+        if (!a || !b) { out.push(name + ":sin la entera"); continue; }
+        let max = 0;
+        for (let r = 0; r < side; r++) for (let c = 0; c < side; c++) for (let k = 0; k < 3; k++)
+          max = Math.max(max, Math.abs(a[(r * side + c) * 4 + k] - b[(r * side + side - 1 - c) * 4 + k]));
+        out.push(name + ":" + max);
+      }
+      delete flips[p.key];
+      return out.join(" ");
+    })()`);
+    check(mirrored === "live:0 raw:0", "shader espejado = espejo exacto: el estilo con ajustes y ojeras, y el RAW", mirrored);
+    await tapButton("Reset");
+
+    // el export con Flip: el resumen, el pedido, el nombre, y el recorte (uno libre a un costado) espejado con la foto
+    await toFit();
+    await ev(`setRect(P(), [500, 600, 1500, 1500], "free"); setOpt("crops", opts.crops)`);
+    await tap("#export");
+    await preparedNow();
+    const ex0 = await ev(`({ what: $("what").textContent, name: prepared.name, box: box() })`);
+    await closeDialog();
+    await tap("#flip");
+    await tap("#export");
+    await preparedNow();
+    const ex = await ev(`(() => { const req = JSON.parse(prepared.key); return { what: $("what").textContent, flip: req.flip, name: prepared.name, rflip: prepared.flip, box: box() }; })()`);
+    await closeDialog();
+    await tap("#flip");
+    const W = await ev(`P().w`);
+    check(ex.what === ex0.what + " · Flipped" && !ex0.what.includes("Flipped") && ex.flip === true && ex.rflip === true && /-flip-crop-\d+x\d+\.png$/.test(ex.name)
+          && ex0.name === ex.name.replace("-flip", "") && JSON.stringify(ex0.box) === "[500,600,1500,1500]" && JSON.stringify(ex.box) === JSON.stringify([W - 2000, 600, 1500, 1500]),
+          "export con Flip: dice Flipped, pide flip, -flip en el nombre y el recorte espejado con la foto", `${JSON.stringify(ex)} / ${JSON.stringify(ex0)}`);
+    await ev(`opts.crops[P().key] = FULL; setOpt("crops", opts.crops)`);
+
+    // a 1:1 con Flip, el lienzo es el archivo: con los ajustes y el fondo con caida, en el pelo y en la pared de la
+    // derecha del 13, ahora del otro lado de lo que se ve
+    await tap("#flip");
+    await ev(`${REL}({ Light: { Exposure: 0.3, Contrast: 20, Shadows: 25 }, Background: { Exposure: 0.45, Evenness: 65, Falloff: 30, Temperature: 40 } })`);
+    const fparity = await ev(`(async () => {
+      const p = P(), out = [];
+      loadFull(p, true);
+      while (![fullUrl(p, "edit"), fullUrl(p, "raw"), layerUrl(p, true), lightUrl(p)].every(renderer.ready)) await new Promise(r => setTimeout(r, 100));
+      for (const [name, X, y, w, h] of [["pelo", 848, 438, 1024, 1024], ["pared", 2585, 100, 256, 256]]) {
+        const x = p.w - X - w;  // la misma parte de la foto, en lo que se ve espejado
+        const s = scene(p, { cx: x + w / 2, cy: y + h / 2, size: w }, w, { scale: 1, dither: false, look: liveLook() });
+        if (!s.full || !s.mirror || !sceneReady(s)) { out.push({ name, error: "sin la entera" }); continue; }
+        const mine = renderer.read(s, w, h).slice();
+        const r = await post(JSON.stringify({ ...request(), box: [x, y, w, h], size: "full", format: "webp" }), new AbortController().signal);
+        const bmp = await createImageBitmap(await (await fetch("api/file/" + r.id)).blob(), { colorSpaceConversion: "none", premultiplyAlpha: "none" });
+        const c = new OffscreenCanvas(w, h).getContext("2d");
+        c.drawImage(bmp, 0, 0);
+        const theirs = c.getImageData(0, 0, w, h).data;
+        let max = 0, sum = 0, bias = 0;
+        for (let i = 0; i < mine.length; i += 4) for (let k = 0; k < 3; k++) { const d = mine[i + k] - theirs[i + k]; max = Math.max(max, Math.abs(d)); sum += Math.abs(d); bias += d; }
+        const n = w * h * 3;
+        out.push({ name, flip: r.flip, backdrop: r.backdrop, file: r.name, max, mean: +(sum / n).toFixed(3), bias: +(bias / n).toFixed(3) });
+      }
+      return out;
+    })()`);
+    for (const b of fparity)
+      check(!b.error && b.flip === true && b.backdrop === true && b.file.includes("-flip-") && b.max <= 3 && b.mean < 0.7 && Math.abs(b.bias) < 0.1,
+            `Flip a 1:1 con fondo, ${b.name}: el lienzo es el archivo espejado`, JSON.stringify(b));
+    await page.shot("editor-prueba-flip");
+
+    // un servidor de antes de Flip contesta sin "flip" (y no espeja): el aviso de reabrir, Download apagado
+    await tap("#export");
+    await ev(`window.__fetch = fetch; window.fetch = async (u, o) => { const r = await __fetch(u, o);
+      if (!String(u).startsWith("api/prepare") || !r.ok) return r; const j = await r.json(); delete j.flip; return new Response(JSON.stringify(j), { status: 200 }); }`);
+    await ev(`setOpt("size", 2048)`);
+    const told = await until(`$("info").textContent === OUTDATED && $("foot").dataset.state === "warn" && $("download").getAttribute("aria-disabled") === "true"`, 30000);
+    await ev(`window.fetch = __fetch; setOpt("size", "full")`);
+    await closeDialog();
+    check(told, "un servidor de antes de Flip: el aviso de reabrir y Download apagado");
+    await tapButton("Reset");
+    await tap("#flip");
+
+    // por foto y recordado: la segunda espejada vuelve espejada al recargar; la primera no
+    await ev(`pickPhoto(1)`);
+    await tap("#flip");
+    await open(PORTS[0]);
+    await ev(`pickPhoto(1)`);
+    const back = await ev(`[$("flip").getAttribute("aria-pressed"), flipped(PHOTOS[1].key), flipped(PHOTOS[0].key),
+      $("photos").querySelectorAll("button")[1].hasAttribute("data-flipped")].join()`);
+    check(back === "true,true,false,true", "por foto y recordado: la segunda vuelve espejada al recargar, la primera no", back);
+    await tap("#flip");
+    await ev(`pickPhoto(0)`);
+    check(!await ev(`Object.keys(JSON.parse(localStorage.getItem(FLIPS) || "{}")).length`), "al terminar, ninguna foto espejada");
+  }
+
+  // 15. la forma (2026-10-23, la foto de perfil). La guia de arriba (Off, Circle, Square): el circulo o el cuadrado mas
+  // grande que entra en lo que se ve, centrado, afuera oscurecido; no toca el archivo. En el export, Shape: el circulo
+  // pide un recorte cuadrado (elegirlo con otro pone 1:1), se apaga en JPG y DNG, y el archivo lleva las esquinas
+  // transparentes con los colores del cuadrado; la vista previa oscurece afuera del circulo. Un servidor de antes de la
+  // forma contesta sin "shape": el aviso de reabrir
+  {
+    await ev(`pickPhoto(0); state.raw = false; state.compare = false; render(); dial.setValues(defaultsFor(P())); document.activeElement?.blur()`);
+    await toFit();
+    const guide = () => ev(`(() => { const m = document.querySelector(".mask"), a = getComputedStyle(m, "::after"), f = frame.getBoundingClientRect();
+      return { pressed: [...$("guide").querySelectorAll("button")].map(b => b.textContent + ":" + b.getAttribute("aria-pressed")).join(), opacity: getComputedStyle(m).opacity,
+               radius: a.borderTopLeftRadius, round: Math.abs(parseFloat(a.width) - Math.min(f.width, f.height)) < 1 && Math.abs(parseFloat(a.height) - Math.min(f.width, f.height)) < 1,
+               request: keyOf(request()) }; })()`);
+    const g0 = await guide();
+    await tapAt(`[...$("guide").querySelectorAll("button")][1]`); await sleep(300);
+    const g1 = await guide();
+    await page.shot("editor-prueba-guia-circulo");
+    await tapAt(`[...$("guide").querySelectorAll("button")][2]`); await sleep(300);
+    const g2 = await guide();
+    await tapAt(`[...$("guide").querySelectorAll("button")][0]`); await sleep(300);
+    const g3 = await guide();
+    check(g0.pressed === "Off:true,Circle:false,Square:false" && g0.opacity === "0" && g1.pressed === "Off:false,Circle:true,Square:false" && g1.opacity === "1"
+          && g1.radius === "50%" && g1.round && g2.radius === "0px" && g2.round && g2.opacity === "1" && g3.opacity === "0"
+          && g1.request === g0.request && g2.request === g0.request,
+          "guia: apagada al abrir; Circle y Square, el mas grande que entra, centrado; no cambia el archivo",
+          JSON.stringify({ g0: [g0.pressed, g0.opacity], g1: [g1.pressed, g1.opacity, g1.radius, g1.round], g2: [g2.radius, g2.round], g3: g3.opacity }));
+
+    await tap("#export");
+    await preparedNow();
+    const shapeField = await ev(`[[...document.querySelectorAll("#dialog .field > span")].map(s => s.textContent).join(), [...$("shape").querySelectorAll("button")].map(b => b.textContent + ":" + b.getAttribute("aria-pressed")).join(), cut()].join(" | ")`);
+    check(shapeField === "Format,Size,Crop,Shape | Square:true,Circle:false | square", "export: Shape despues de Crop, en Square", shapeField);
+    const disabledIn = async label => { await tapAt(seg("format", label)); return ev(`[${seg("shape", "Circle")}.disabled, cut()].join()`); };
+    const jpg = await disabledIn("JPG"), dng = await disabledIn("DNG"), png = await disabledIn("PNG");
+    check(jpg === "true,square" && dng === "true,square" && png === "false,square", "Circle se apaga en JPG y DNG (sin transparencia)", `${jpg} ${dng} ${png}`);
+    // con el recorte Free (la foto entera, no cuadrada), Circle pone 1:1
+    await tapAt(seg("shape", "Circle"));
+    await preparedNow();
+    const c1 = await ev(`(() => { const [, , w, h] = box(), req = JSON.parse(prepared.key); return { mode: cropOf(P()).mode, square: w === h, shape: req.shape, rshape: prepared.shape, name: prepared.name,
+      pressed: ${seg("shape", "Circle")}.getAttribute("aria-pressed"), saved: JSON.parse(localStorage.getItem("studio-export-v1")).shape }; })()`);
+    check(c1.mode === "1:1" && c1.square && c1.shape === "circle" && c1.rshape === "circle" && c1.name.endsWith("-circle.png") && c1.pressed === "true" && c1.saved === "circle",
+          "Circle con la foto entera: pone 1:1, pide shape circle y el archivo termina en -circle", JSON.stringify(c1));
+    // el archivo, en WebP (8 bits, se lee sin cortar): esquinas transparentes, el medio entero, el circulo (1 − π/4
+    // transparente) y los colores del cuadrado donde el circulo es entero
+    await tapAt(seg("format", "WebP"));
+    await preparedNow();
+    const file = await ev(`(async () => {
+      const read = async id => { const bmp = await createImageBitmap(await (await fetch("api/file/" + id)).blob(), { colorSpaceConversion: "none", premultiplyAlpha: "none" });
+                                 const c = new OffscreenCanvas(bmp.width, bmp.height).getContext("2d"); c.drawImage(bmp, 0, 0); return { w: bmp.width, d: c.getImageData(0, 0, bmp.width, bmp.height).data }; };
+      const round = await read(prepared.id);
+      const sq = await post(JSON.stringify({ ...request(), shape: "square" }), new AbortController().signal);
+      const plain = await read(sq.id), n = round.w, at = (x, y) => (y * n + x) * 4;
+      let clear = 0, rgb = 0;
+      for (let i = 0; i < n * n; i++) {
+        if (round.d[i * 4 + 3] === 0) clear++;
+        if (round.d[i * 4 + 3] === 255) for (let k = 0; k < 3; k++) rgb = Math.max(rgb, Math.abs(round.d[i * 4 + k] - plain.d[i * 4 + k]));
+      }
+      return { name: prepared.name, square: sq.name, n, corners: [at(0, 0), at(n - 1, 0), at(0, n - 1), at(n - 1, n - 1)].map(i => round.d[i + 3]).join(),
+               center: round.d[at(n >> 1, n >> 1) + 3], clear: +(clear / (n * n)).toFixed(4), rgb, plainAlpha: plain.d[3] };
+    })()`);
+    check(file.name.endsWith("-circle.webp") && !file.square.includes("-circle") && file.corners === "0,0,0,0" && file.center === 255
+          && Math.abs(file.clear - (1 - Math.PI / 4)) < 0.005 && file.rgb === 0 && file.plainAlpha === 255,
+          "el archivo con Circle: esquinas transparentes, el circulo, y los colores del cuadrado", JSON.stringify(file));
+    // la vista previa: justo adentro de la esquina del recorte, mas oscuro con el circulo que con el cuadrado
+    const corner = () => ev(`new Promise(ok => requestAnimationFrame(() => requestAnimationFrame(() => { const G = pvGeom(), [X, Y] = box(), c = $("previewCanvas"),
+      px = c.getContext("2d").getImageData(Math.round((X - G.x0) * G.z) + 12, Math.round((Y - G.y0) * G.z) + 12, 1, 1).data; ok(px[0] + px[1] + px[2]); })))`);
+    const dark = await corner();
+    await tapAt(seg("shape", "Square"));
+    const light = await corner();
+    check(dark < light * 0.5, "vista previa: afuera del circulo oscurecido, como afuera del recorte", `${dark} contra ${light}`);
+    // otra proporcion: sale cuadrada (sin perder la eleccion); 1:1 de nuevo, circulo
+    await tapAt(seg("shape", "Circle"));
+    await tapAt(seg("area", "4:5"));
+    await preparedNow();
+    const r45 = await ev(`[cut(), JSON.parse(prepared.key).shape, prepared.name.includes("-circle"), ${seg("shape", "Square")}.getAttribute("aria-pressed"), opts.shape].join()`);
+    await tapAt(seg("area", "1:1"));
+    await preparedNow();
+    const r11 = await ev(`[cut(), prepared.name.endsWith("-circle.webp")].join()`);
+    check(r45 === "square,square,false,true,circle" && r11 === "circle,true", "con 4:5 sale cuadrada; de vuelta en 1:1, el circulo", `${r45} / ${r11}`);
+    // un servidor de antes de la forma contesta sin "shape" (y cuadrado): el aviso de reabrir
+    await ev(`window.__fetch = fetch; window.fetch = async (u, o) => { const r = await __fetch(u, o);
+      if (!String(u).startsWith("api/prepare") || !r.ok) return r; const j = await r.json(); delete j.shape; return new Response(JSON.stringify(j), { status: 200 }); }`);
+    await ev(`setOpt("size", 2048)`);
+    const toldShape = await until(`$("info").textContent === OUTDATED && $("foot").dataset.state === "warn" && $("download").getAttribute("aria-disabled") === "true"`, 30000);
+    await ev(`window.fetch = __fetch; setOpt("size", "full"); setOpt("shape", "square"); setOpt("format", "png"); opts.crops[P().key] = FULL; setOpt("crops", opts.crops)`);
+    await closeDialog();
+    check(toldShape, "un servidor de antes de la forma: el aviso de reabrir y Download apagado");
+  }
+
+  // 16. el punto de partida (recipe/equivalents.py): Light y Color arrancan en los ajustes que mas se parecen a la
+  // maestra, con 100 (2 pasos en Exposure) de cada lado. La maestra se ve tal cual (nada que aplicar), y lo que se
+  // aplica y se pide al servidor es la diferencia con el punto de partida. Reset vuelve ahi; una version guarda los
+  // valores del panel. Sin recipe/equivalents.json, todo arranca en 0, como siempre
+  {
+    await ev(`pickPhoto(0); state.raw = false; state.compare = false; render(); dial.setValues(defaultsFor(P())); document.activeElement?.blur()`);
+    const sliders = `(() => { const out = {}; for (const k of KEYS) { const name = k[0].toUpperCase() + k.slice(1);
+      const el = document.querySelector('#controls .dialkit-slider[aria-label="' + name + '"]');  // Light y Color van antes que Background
+      out[k] = ["aria-valuemin", "aria-valuenow", "aria-valuemax"].map(a => +el.getAttribute(a)); } return out; })()`;
+    const at = await ev(`(() => { const s = startOf(P()), sl = ${sliders}, fix = (k, x) => +x.toFixed(2);
+      return { has: !!DATA.starts?.[P().key], start: s,
+               panel: KEYS.every(k => { const r = k === "exposure" ? 2 : 100; return sl[k][1] === s[k] && sl[k][0] === fix(k, s[k] - r) && sl[k][2] === fix(k, s[k] + r); }),
+               applied: KEYS.every(k => settings.adjust[k] === 0) && !uniforms.on && KEYS.every(k => request().adjust[k] === 0), sl }; })()`);
+    check(at.panel && at.applied, `punto de partida${at.has ? "" : " (sin recipe/equivalents.json: 0)"}: el panel arranca ahi, a ±100 (±2 en Exposure), y no se aplica nada`,
+          JSON.stringify({ start: at.start, exposure: at.sl.exposure, contrast: at.sl.contrast }));
+    await ev(`${REL}({ Light: { Exposure: 0.3, Contrast: 20 }, Color: { Tint: -7 } })`);
+    const moved = await ev(`(() => { const s = startOf(P()), sl = ${sliders}, req = request().adjust;
+      return { adjust: JSON.stringify(settings.adjust), req: JSON.stringify(req), panel: [sl.exposure[1], sl.contrast[1], sl.tint[1]].join(),
+               want: [+(s.exposure + 0.3).toFixed(2), s.contrast + 20, s.tint - 7].join() }; })()`);
+    const wantAdjust = JSON.stringify({ exposure: 0.3, brightness: 0, contrast: 20, highlights: 0, shadows: 0, whites: 0, blacks: 0, temperature: 0, tint: -7, vibrance: 0, saturation: 0 });
+    check(moved.adjust === wantAdjust && moved.req === wantAdjust && moved.panel === moved.want,
+          "el panel dice el valor (punto de partida + lo movido); el shader y el pedido llevan solo lo movido", JSON.stringify(moved));
+    await tapButton("Save version");
+    const kept = await ev(`(() => { const s = startOf(P()), v = store.getPresets(dial.id).at(-1);
+      return { exposure: v.values["Light.Exposure"], contrast: v.values["Light.Contrast"], tint: v.values["Color.Tint"],
+               want: [+(s.exposure + 0.3).toFixed(2), s.contrast + 20, s.tint - 7].join(), look: JSON.stringify(versionLook(v.id).uniforms) === JSON.stringify(uniforms) }; })()`);
+    check([kept.exposure, kept.contrast, kept.tint].join() === kept.want && kept.look, "Save version guarda los valores del panel, y la version se dibuja con la diferencia", JSON.stringify(kept));
+    await tapButton("Reset");
+    const reset = await ev(`(() => { const s = startOf(P()), sl = ${sliders}; return KEYS.every(k => sl[k][1] === s[k] && settings.adjust[k] === 0); })()`);
+    check(reset, "Reset vuelve al punto de partida (nada que aplicar)");
   }
 
   check(!await ev("saveWarned"), "ningun guardado fallo");

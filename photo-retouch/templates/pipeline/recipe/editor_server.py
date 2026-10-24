@@ -4,8 +4,11 @@ Uso: .venv/bin/python recipe/editor_server.py [puerto]   (lo arranca Abrir edito
 
 El editor muestra los PNG de 8 bits de editadas/; exportar desde el navegador seria recortar
 esos 8 bits. Aca el recorte sale del TIFF de 16 bits que escribe grade.py, se achica en luz
-lineal y se codifica sin perdida: PNG y TIFF a 16 bits, WebP sin perdida a 8. Sin JPEG.
+lineal y se codifica sin perdida: PNG y TIFF a 16 bits, WebP sin perdida a 8, DNG lineal a 16.
 El RAW original ("antes") solo existe en PNG de 8 bits: se exporta a 8 bits.
+
+DNG ("RAW export", pedido dos veces): un DNG lineal con los mismos datos que el TIFF (encode_dng). No suma calidad:
+suma que Lightroom lo abra como RAW.
 
 El navegador pide /api/prepare apenas cambian las opciones; el archivo queda hecho en memoria y
 la descarga (/api/file/<id>) sale al instante. Solo escucha en 127.0.0.1.
@@ -22,6 +25,18 @@ activa; se aplican sobre el recorte de 16 bits despues de las ojeras. Con todos 
 Fondo: y la carpeta Background (backdrop.py), con las capas de editadas/fondo/: backdrop.render hace los
 ajustes de la foto y despues la pared, como el shader. Sin fondo (o en 0), lo mismo que antes. La respuesta
 dice "backdrop": un servidor de antes ignora el campo, y asi el editor se entera.
+
+Espejo (Flip, 2026-10-20): con "flip": true el archivo sale de la foto espejada, para que la cara mire hacia el texto
+que va al lado. La caja llega en coordenadas de lo que se ve (la foto ya espejada): se arma la caja espejada de la
+foto de siempre (ojeras, ajustes y fondo como siempre, con la caida del fondo hacia el borde derecho de lo que se ve) y
+el recorte se espeja antes de achicarlo. El DNG lleva los pixeles espejados como cualquier otro formato, sin el tag
+Orientation. Sin "flip" (o en false), el camino de siempre, byte a byte. La respuesta dice "flip": un servidor de antes
+ignora el campo, y asi el editor se entera.
+
+Forma (2026-10-23, la foto de perfil): con "shape": "circle" el archivo lleva el circulo inscripto como transparencia
+(circle_alpha, el borde suavizado a un pixel) y los colores de la caja cuadrada sin tocar debajo. Solo con una caja
+cuadrada (otra cosa: 400) y en los formatos con transparencia (PNG, TIFF, WebP); en JPG y DNG sale cuadrada, como en
+el dialogo. El nombre termina en -circle. Sin "shape" (o "square"), el camino de siempre. La respuesta dice "shape".
 
 Versiones: /api/versions guarda el estado del panel de cada foto en editadas/versiones.json (GET lo lee,
 POST reemplaza el de una foto y deja las otras). Se escribe entero a un temporal y se cambia de una vez;
@@ -73,7 +88,11 @@ FORMATS = {  # extension, tipo, bits del archivo
     "webp": ("webp", "image/webp", 8),
     # pedido del fotografo el 2026-10-19 para entregar: solo sale por la descarga, nunca se escribe en el proyecto (.sin-jpg)
     "jpeg": ("jpg", "image/jpeg", 8),
+    # el "RAW" que se pidio dos veces: un DNG lineal con la edicion adentro (encode). Los mismos datos que el TIFF
+    "dng": ("dng", "image/x-adobe-dng", 16),
 }
+ALPHA = ("png", "tiff", "webp")  # los que guardan transparencia: el circulo sale en estos
+SHAPES = ("square", "circle")
 JPEG_QUALITY = 95  # con color a resolucion completa (4:4:4): sin perdida visible, la mitad que a 100
 IMAGES = ("edit", "raw")
 EYES = EDITED / "ojeras"
@@ -243,6 +262,14 @@ def resample(crop: np.ndarray, out_w: int, out_h: int) -> np.ndarray:
     return (small * 65535 + 0.5).astype(np.uint16)
 
 
+def circle_alpha(out: int) -> np.ndarray:
+    """El circulo inscripto, con el borde suavizado por la distancia de cada pixel al radio."""
+    c = out / 2
+    y, x = np.ogrid[:out, :out]
+    d = np.hypot(x + 0.5 - c, y + 0.5 - c)
+    return (np.clip(c + 0.5 - d, 0, 1) * 65535 + 0.5).astype(np.uint16)[..., None]
+
+
 def png_with_srgb(data: bytes) -> bytes:
     """OpenCV no marca el espacio de color: se agrega el bloque sRGB despues del encabezado."""
     chunk = b"sRGB" + b"\x00"
@@ -250,18 +277,60 @@ def png_with_srgb(data: bytes) -> bytes:
     return data[:33] + block + data[33:]
 
 
+# DNG lineal (LinearRaw), como el que escriben Lightroom Enhance o DxO: el formato RAW con la edicion adentro. Un RAW
+# de sensor no puede llevar una edicion; esto si. Los datos son los mismos del TIFF pasados a luz lineal: no suma
+# calidad, suma que Lightroom lo abra como RAW. Las matrices son las de sRGB (D65), asi que el balance neutro es 1, 1, 1.
+# Medido: LibRaw lo lee a 2 de 65535 como mucho; el motor RAW de macOS, 0,5 % mas oscuro
+XYZ_TO_SRGB = [[3.2404542, -1.5371385, -0.4985314], [-0.9692660, 1.8760108, 0.0415560], [0.0556434, -0.2040259, 1.0572252]]
+SRGB_TO_XYZ_D50 = [[0.4360747, 0.3850649, 0.1430804], [0.2225045, 0.7168786, 0.0606169], [0.0139322, 0.0971045, 0.7141733]]
+
+
+def srational(matrix: list[list[float]]) -> list[int]:
+    return [v for row in matrix for x in row for v in (round(x * 10000), 10000)]
+
+
+DNG_TAGS = [
+    (50706, 1, 4, (1, 4, 0, 0), True),  # DNGVersion
+    (50707, 1, 4, (1, 1, 0, 0), True),  # DNGBackwardVersion
+    (50708, 2, 0, "Photo editor", True),  # UniqueCameraModel
+    (50714, 4, 3, (0, 0, 0), True),  # BlackLevel
+    (50717, 4, 3, (65535, 65535, 65535), True),  # WhiteLevel
+    (50721, 10, 9, srational(XYZ_TO_SRGB), True),  # ColorMatrix1
+    (50964, 10, 9, srational(SRGB_TO_XYZ_D50), True),  # ForwardMatrix1
+    (50778, 3, 1, 21, True),  # CalibrationIlluminant1: D65
+    (50728, 5, 3, (1, 1, 1, 1, 1, 1), True),  # AsShotNeutral
+    (50730, 10, 1, (0, 1), True),  # BaselineExposure
+    (50936, 2, 0, "Embedded", True),  # ProfileName
+    (50940, 11, 4, (0.0, 0.0, 1.0, 1.0), True),  # ProfileToneCurve: recta, sin la curva que agrega Adobe
+    (51110, 4, 1, 1, True),  # DefaultBlackRender: sin negro automatico
+]
+
+
+def encode_dng(img: np.ndarray) -> bytes:
+    """img: uint16 sRGB. Sin perfil ICC (el color lo dicen las matrices) y sin el tag Orientation."""
+    buf = io.BytesIO()
+    linear = (TO_LINEAR[img] * 65535 + 0.5).astype(np.uint16)
+    tifffile.imwrite(buf, linear, photometric=tifffile.PHOTOMETRIC.LINEAR_RAW, planarconfig="contig",
+                     subfiletype=0, metadata=None, extratags=DNG_TAGS)
+    return buf.getvalue()
+
+
 def encode(img: np.ndarray, fmt: str, bits: int) -> bytes:
-    """img: uint16 RGB. bits: los del origen; el RAW original (8) se escribe a 8, como dice el dialogo."""
+    """img: uint16 RGB, o RGBA con el circulo (nunca en JPG ni DNG). bits: los del origen; el RAW original (8) se escribe a 8, como dice el dialogo. El DNG va
+    siempre a 16 en luz lineal: el RAW original entra con sus 8 bits llevados a 16 (x 257), sin inventar nada."""
+    if fmt == "dng":
+        return encode_dng(img)
     if bits == 8 or fmt in ("webp", "jpeg"):
         img = ((img.astype(np.uint32) + 128) // 257).astype(np.uint8)
     if fmt == "png":
-        bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        bgr = cv2.cvtColor(img, cv2.COLOR_RGBA2BGRA if img.shape[2] == 4 else cv2.COLOR_RGB2BGR)
         # compresion 1: sin perdida igual que la 3, 1 % mas pesado y medio segundo menos en la entera
         return png_with_srgb(cv2.imencode(".png", bgr, [cv2.IMWRITE_PNG_COMPRESSION, 1])[1].tobytes())
     if fmt == "tiff":
         buf = io.BytesIO()
+        extra = {"extrasamples": ["unassalpha"]} if img.shape[2] == 4 else {}  # sin premultiplicar: el color queda entero
         tifffile.imwrite(buf, img, photometric="rgb", compression="zlib", compressionargs={"level": 3},
-                         predictor=True, iccprofile=ICC, resolution=(300, 300), resolutionunit="INCH")
+                         predictor=True, iccprofile=ICC, resolution=(300, 300), resolutionunit="INCH", **extra)
         return buf.getvalue()
     buf = io.BytesIO()
     if fmt == "jpeg":
@@ -278,7 +347,7 @@ def slug(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")[:40].strip("-")
 
 
-def parse(req: dict) -> tuple[str, str, tuple[int, int, int, int], int | str, str, int | dict | None, dict, dict, str | None]:
+def parse(req: dict) -> tuple[str, str, tuple[int, int, int, int], int | str, str, int | dict | None, dict, dict, str | None, bool, bool]:
     photo, image = req.get("photo"), req.get("image")
     if photo not in PHOTOS or image not in IMAGES:
         raise ValueError("foto invalida")
@@ -307,7 +376,17 @@ def parse(req: dict) -> tuple[str, str, tuple[int, int, int, int], int | str, st
         raise ValueError("version invalida")
     if image == "raw":  # el RAW original sale como es: ni ajustes, ni fondo, ni version
         params, bg, version = adjust.parse(None), backdrop.parse(None), None
-    return photo, image, tuple(box), size, fmt, level, params, bg, (slug(version) or None) if version else None  # "!!!" no deja nombre: va como sin version
+    flip = req.get("flip", False)
+    if type(flip) is not bool:  # 1 o "true" no pasan
+        raise ValueError("flip invalido")
+    shape = req.get("shape", "square")
+    if shape not in SHAPES:
+        raise ValueError("forma invalida")
+    if shape == "circle" and box[2] != box[3]:
+        raise ValueError("el circulo va con una caja cuadrada")
+    circle = shape == "circle" and fmt in ALPHA  # JPG y DNG no tienen transparencia: salen cuadrados
+    # "!!!" no deja nombre: va como sin version
+    return photo, image, tuple(box), size, fmt, level, params, bg, (slug(version) or None) if version else None, flip, circle
 
 
 def take_ticket() -> int:
@@ -318,7 +397,7 @@ def take_ticket() -> int:
 
 
 def prepare(req: dict, ticket: int) -> dict:
-    photo, image, (x, y, w, h), size, fmt, level, params, bg, version = parse(req)
+    photo, image, (x, y, w, h), size, fmt, level, params, bg, version, flip, circle = parse(req)
     with_bg = not backdrop.is_neutral(bg)
     adjusted = not adjust.is_neutral(params) or with_bg
     path, bits, sig = source(photo, image)
@@ -336,7 +415,8 @@ def prepare(req: dict, ticket: int) -> dict:
             raise ValueError("intensidad de ojeras invalida")
         level = {f: level[f] for f in faces}  # en el orden de ojeras.json: la clave del pedido no depende del navegador
     key = json.dumps([photo, image, x, y, w, h, size, fmt, level, sig, eyes_sig, [params[k] for k in adjust.KEYS],
-                      [bg[k] for k in backdrop.KEYS], bg_sig, version])
+                      [bg[k] for k in backdrop.KEYS], bg_sig, version] + ([True] if flip else [])
+                     + (["circle"] if circle else []))  # sin flip ni circulo, la clave de siempre
     with work:
         if key in by_request and by_request[key]["id"] in files:
             return by_request[key]
@@ -349,9 +429,13 @@ def prepare(req: dict, ticket: int) -> dict:
         long = max(w, h)
         out = long if size == "full" else min(size, long)  # nunca se agranda
         out_w, out_h = max(1, round(w * out / long)), max(1, round(h * out / long))
+        if flip:  # la caja espejada en la foto de siempre: el recorte se espeja al final, antes de achicarlo
+            x = W - x - w
         # la foto entera ajustada se guarda: con el mismo ajuste, otro formato, tamano o recorte sale de ahi. Cada pixel
         # se calcula igual entero que recortado (export_identical.py lo comprueba)
-        look = json.dumps([photo, sig, eyes_sig, level, [params[k] for k in adjust.KEYS], [bg[k] for k in backdrop.KEYS], bg_sig])
+        # con Flip y fondo, la caida va al otro lado: es otra foto entera
+        look = json.dumps([photo, sig, eyes_sig, level, [params[k] for k in adjust.KEYS], [bg[k] for k in backdrop.KEYS], bg_sig]
+                          + ([True] if flip and with_bg else []))
         whole_img = rendered.get(look) if image == "edit" else None
         if whole_img is not None:
             rendered.move_to_end(look)
@@ -361,14 +445,19 @@ def prepare(req: dict, ticket: int) -> dict:
             if image == "edit":
                 crop = blend_eyes(crop, photo, x, y, level, manifest)
                 if with_bg:
-                    crop = backdrop.render(crop, x, y, (H, W), layers(photo, bg_sig), params, bg)
+                    crop = backdrop.render(crop, x, y, (H, W), layers(photo, bg_sig), params, bg, mirror=flip)
                 elif adjusted:
                     crop = adjust.adjust_uint16(crop, params)
                 if (w, h) == (W, H) and crop is not img:
                     rendered[look] = crop
                     while len(rendered) > KEEP_RENDERED:
                         rendered.popitem(last=False)
-        data = encode(resample(crop, out_w, out_h), fmt, bits)
+        if flip:
+            crop = np.ascontiguousarray(crop[:, ::-1])
+        pixels = resample(crop, out_w, out_h)
+        if circle:  # la transparencia, despues de achicar: el borde suavizado queda a un pixel del archivo
+            pixels = np.concatenate([pixels, circle_alpha(out_w)], axis=2)
+        data = encode(pixels, fmt, bits)
         ext, mime, file_bits = FORMATS[fmt]
         whole = (w, h) == (W, H)
         if image == "raw":
@@ -381,7 +470,7 @@ def prepare(req: dict, ticket: int) -> dict:
             eyes = "" if not moved else f"-under-eyes-{level[faces[0]]}" if len(same) == 1 else \
                 "-under-eyes-" + "-".join(f"{f}-{v}" for f, v in moved.items())
             tag = ("-adjusted" if adjusted else "") + eyes
-        name = f"{photo}{tag}{'' if whole else '-crop'}-{out_w}x{out_h}.{ext}"
+        name = f"{photo}{tag}{'-flip' if flip else ''}{'' if whole else '-crop'}-{out_w}x{out_h}{'-circle' if circle else ''}.{ext}"
         fid = uuid.uuid4().hex
         files[fid] = (data, name, mime)
         while len(files) > KEEP_FILES:
@@ -389,7 +478,8 @@ def prepare(req: dict, ticket: int) -> dict:
             for k in [k for k, v in by_request.items() if v["id"] == gone]:
                 del by_request[k]
         result = {"id": fid, "name": name, "bytes": len(data), "w": out_w, "h": out_h, "bits": min(bits, file_bits),
-                  "under_eyes": level, "adjusted": adjusted, "backdrop": with_bg, "version": version}
+                  "under_eyes": level, "adjusted": adjusted, "backdrop": with_bg, "version": version, "flip": flip,
+                  "shape": "circle" if circle else "square"}
         by_request[key] = result
         return result
 

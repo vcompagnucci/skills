@@ -14,7 +14,7 @@ Read this at SKILL.md step 4 when the photographer names a brand or page, or gav
 
 - **A style is global light settings plus background-only ones; temperature and tint stay off people.** Global tints turned black shirts brown and tanned the skin.
 - **From a reference take the background and direction, never its light.** Copying its light clipped 12–16 % of the frame and looked washed out or muddy ("no es poner el filtro y ya"). Exposure and blacks are then fitted per photo (`tools/look_fit.py`).
-- **Write the skin histogram match yourself, with its slope capped at 2.5.** Uncapped, it matched exactly and left dark islands. The 3.0 of `MAX_SLOPE` in `portrait-qa/recipe/tone.py` caps fitted tone curves, a different operation.
+- **Match skin histograms with the slope capped at 2.5** (`recipe/exacta.py`). Uncapped, it matched exactly and left dark islands. The 3.0 of `MAX_SLOPE` in `portrait-qa/recipe/tone.py` caps fitted tone curves, a different operation.
 
 ## Tolerances
 

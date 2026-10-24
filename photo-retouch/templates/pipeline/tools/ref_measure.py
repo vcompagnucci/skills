@@ -120,12 +120,19 @@ def hue(a: float, b: float) -> float:
     return float(np.degrees(np.arctan2(b, a)) % 360)
 
 
+def skin_mask(Lab: np.ndarray, reg: Regions) -> np.ndarray:
+    """La piel que se mide: la elipse achicada, de la nariz para arriba, y con color de piel (sin ojos, cejas ni pelo).
+    recipe/exacta.py iguala su histograma con esta misma mascara."""
+    L, a, b = Lab[..., 0], Lab[..., 1], Lab[..., 2]
+    C = np.hypot(a, b)
+    h = np.degrees(np.arctan2(b, a)) % 360
+    return ellipses(L.shape, reg.faces, FACE_SHRINK) & upper_face(L.shape, reg.faces) & (C > 5) & (h > 20) & (h < 90) & (L > 25) & (L < 97)
+
+
 def measure(lin: np.ndarray, reg: Regions) -> dict:
     """lin: luz lineal float32 (h, w, 3) a la escala a comparar; reg en esa misma escala."""
     Lab = lab(lin)
     L, a, b = Lab[..., 0], Lab[..., 1], Lab[..., 2]
-    C = np.hypot(a, b)
-    h = np.degrees(np.arctan2(b, a)) % 360
     out = {"tone": [float(v) for v in np.percentile(L, [1, 5, 50, 95, 99])]}
 
     walls = [(float(np.median(L[s])), float(np.median(a[s])), float(np.median(b[s]))) for s in boxes(L.shape, reg.walls)]
@@ -139,8 +146,7 @@ def measure(lin: np.ndarray, reg: Regions) -> dict:
         hp = L - cv2.GaussianBlur(L, (0, 0), GRAIN_SIGMA)
         out["grain"] = float(hp[core].std()) if core.any() else None
 
-    # piel: la elipse achicada, de la nariz para arriba, y con color de piel (sin ojos, cejas ni pelo)
-    skin = ellipses(L.shape, reg.faces, FACE_SHRINK) & upper_face(L.shape, reg.faces) & (C > 5) & (h > 20) & (h < 90) & (L > 25) & (L < 97)
+    skin = skin_mask(Lab, reg)
     if skin.sum() > 200:
         Ls = L[skin]
         ma, mb = float(np.median(a[skin])), float(np.median(b[skin]))

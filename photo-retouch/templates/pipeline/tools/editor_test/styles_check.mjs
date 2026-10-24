@@ -53,7 +53,9 @@ try {
                   tint: "Color.Tint", vibrance: "Color.Vibrance", saturation: "Color.Saturation" };
   const BACKGROUND = { exposure: "Background.Exposure", evenness: "Background.Evenness", smoothing: "Background.Smoothing", falloff: "Background.Falloff",
                        temperature: "Background.Temperature", tint: "Background.Tint", saturation: "Background.Saturation" };
-  const same = (got, map, want) => Object.entries(map).every(([k, flat]) => Math.abs(got[k] - (want[flat] ?? 0)) < 1e-9);
+  // Light y Color se guardan como valor del panel (el punto de partida de la foto, recipe/equivalents.py, mas lo del
+  // estilo) y se aplica lo movido: lo aplicado tiene que ser el del estilo, el mismo con que styles.py hizo su maestra
+  const same = (got, map, want, start = {}) => Object.entries(map).every(([k, flat]) => Math.abs(got[k] - ((want[flat] ?? start[k] ?? 0) - (start[k] ?? 0))) < 1e-9);
 
   // solo las fotos que tienen los tres: en una de la sesion original el fotografo dejo seis versiones suyas, sin estos estilos
   const photos = await ev(`PHOTOS.map(p => p.key)`);
@@ -76,7 +78,7 @@ try {
       await tap(name);
       const want = saved.presets.find(v => v.name === name).values;
       const got = JSON.parse(await ev(`JSON.stringify({ adjust: settings.adjust, background: settings.background, levels: Object.fromEntries(eyeControls(P()).map(([k, face]) => [k, settings.levels[face]])), on: bgU.on })`));
-      const ok = same(got.adjust, LIGHT, want) && same(got.background, BACKGROUND, want) && Object.entries(got.levels).every(([k, l]) => l === (want[`Under-eyes.${k}`] ?? want["Under-eyes.Intensity"])) && got.on;
+      const ok = same(got.adjust, LIGHT, want, await ev(`startOf(P())`)) && same(got.background, BACKGROUND, want) && Object.entries(got.levels).every(([k, l]) => l === (want[`Under-eyes.${k}`] ?? want["Under-eyes.Intensity"])) && got.on;
       check(ok, `${key}: ${name} pone su luz, su color y su fondo`, ok ? "" : JSON.stringify(got));
       if (key === SHOT) {
         await page.waitFor(`sceneReady(scene(P(), view(), canvas.width))`, 10000);

@@ -299,9 +299,12 @@ def toned_top(layers: Layers, params: dict) -> float:
 
 
 def render(img16: np.ndarray, x0: int, y0: int, size: tuple[int, int], layers: Layers, params: dict, bg: dict,
-           a16: np.ndarray | None = None, behind16: np.ndarray | None = None) -> np.ndarray:
+           a16: np.ndarray | None = None, behind16: np.ndarray | None = None, mirror: bool = False) -> np.ndarray:
     """El recorte img16 (uint16 sRGB, ojeras incluidas) en (x0, y0) de una foto de size = (alto, ancho), con los
     ajustes del panel y el fondo. Devuelve uint16 sRGB.
+
+    mirror: la foto se va a mostrar espejada (Flip del editor): la caida va hacia el borde derecho de lo que se ve, que
+    en la foto de siempre es el izquierdo. Lo demas del fondo es por pixel y se espeja igual que la foto.
 
     La gente (alpha 1) sale con los mismos codigos que sin fondo (adjust_uint16, o la maestra si no hay
     ajustes); lo demas, de compose() en luz lineal. a16 y behind16: la capa a otra escala (el piloto)."""
@@ -316,6 +319,8 @@ def render(img16: np.ndarray, x0: int, y0: int, size: tuple[int, int], layers: L
     lh, lw = layers.light.shape[:2]
     wx = bilinear(lw, W, x0, w).T.copy()
     u = ((np.arange(x0, x0 + w, dtype=np.float32) + 0.5) / W)[None, :]
+    if mirror:
+        u = 1 - u
     top = toned_top(layers, params)
 
     def strip(y: int) -> None:

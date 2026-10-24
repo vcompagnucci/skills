@@ -189,6 +189,14 @@ Rules for all of them: [editor.md](editor.md).
 - **Copy to other photos** (copiá a las otras): overwrites that version's values in the other photos; values otherwise stay per photo. Rename and Delete from all photos also act on every photo. `copyToOthers()` in `recipe/viewer_template.html`, 2026-10-19. Editor only.
 - **Import a photo** (sumá una foto, importá): any RAW LibRaw reads or image macOS opens, to 16-bit sRGB through ColorSync; JPEG refused in a `.sin-jpg` project; faces placed by the macOS detector only. Retouch and under-eyes stay off until the hand inventory. `/api/import` in `recipe/editor_server.py`, `recipe/import_photo.py`, 2026-10-19. Then SKILL.md step 2 for that photo.
 - **Export** (exportá, bajala): Format, Size and Crop (2026-10-18). The export branch and [delivery.md](delivery.md) > Exports.
+- **Flip** (espejala, espejar, dar vuelta, mirror; 2026-10-20): the Flip button (F) mirrors one photo so the face looks toward the text beside it: every view of it and its export, never the labels or the guide. Stored per photo in the browser; the server takes `"flip": true`. `toggleFlip()` in `recipe/viewer_template.html`, `recipe/editor_server.py`. Editor only.
+- **Circle or square** (en círculo, foto de perfil, cuadrada): the Crop guide (Off, Circle, Square) frames the crop on screen; Export > Shape Circle writes the inscribed circle as transparency in PNG, TIFF and WebP, needs a square crop, and names the file `-circle`. JPEG and DNG come out square. `"shape"` in `recipe/editor_server.py`, 2026-10-23. Editor only.
+- **DNG** ("RAW export", el RAW): Export > Format DNG, a linear 16-bit DNG with the TIFF's data. Say it holds no more quality ([delivery.md](delivery.md) > Exports).
+
+## Panel and exact versions
+
+- **Panel at each photo's equivalent settings** (que el panel arranque donde está la foto; 2026-10-17): `recipe/equivalents.py [photo ...]` fits the eleven Light and Color controls closest to each master by least squares and writes `recipe/equivalents.json`; the editor starts the panel there and applies only the difference from it. Without the file the panel starts at 0. Run it after a master changes, then reload the editor. It rewrites saved versions once, with a backup in `respaldos/`. Check: `tools/equivalents_check.py`; rule: [editor.md](editor.md) > Screen equals export.
+- **Exact versions** (las exactas, igual a la referencia; 2026-10-15): `recipe/exacta.py <photo> [style ...] [--n 1536]` matches each style's skin L* percentiles to its reference, slope capped at 2.5, moving only L* inside a skin-and-neck brush that leaves black clothes and hair alone. It writes `editadas/<photo>-<style>-exacta.tif` and `.png` beside the style's master, which stays untouched, and its numbers to `proceso-notas/exacta/`. Needs the reference imported (step 4). Check: `tools/exacta_check.py`. It can't darken skin toward a darker reference (the JSON shows the gap left), and it looks flatter and paler than the master, so show both and let the photographer choose. ~35 s and 2.6 GB per master.
 
 ## Profile styles (portrait-qa)
 
@@ -197,13 +205,3 @@ Port first ([templates/README.md](../templates/README.md) > Porting). Their edge
 - **Light-background profile styles** (estilos de perfil, fondo claro, blanco y negro): `ref-a` high-key, `ref-b` light grey with grain, `ref-c` editorial white. Each copies its reference by measurement: a tone curve with three anchors, a face shadow fill capped at `FILL_EV = 1.2`, local contrast per band, the wall brightened additively through the matte. `STYLES`, `fit_params()` and `edit_wall()` in `portrait-qa/recipe/styles.py`. Approved in v7, 2026-10-12.
 - **Camera color** ("prefiero original", el color de la cámara): the person as the camera JPEG rendered them (matrix, tone curve, chroma per brightness), with only the wall and the spots changed. `Style("color", ..., camera_look=True)` and `portrait-qa/recipe/camera_color.py`, 2026-10-12. The per-photo 3D LUT for reds (`camera_lut()` in `camera_lut.py`) reads `recipe/luts/<photo>-color.npy`; no LUT and no fit script ship, so it applies none. A LUT goes in only where it passes three checks; one photo got none.
 - **Film grain** (ponele grano, grano de película, "como en los perfiles"): Newson's boolean grain on the master at its real size, half on skin. `film_grain()` and `finish()` in `portrait-qa/recipe/styles.py` (`GRAIN_R = 0.05`, `GRAIN_SKIN = 0.5`, `GRAIN_BIN`), only in `ref-b`; build `portrait-qa/tools/film_grain/` with `make` (OpenMP flags: its `makefile`). Seed fixed per channel since 2026-10-15 ([speed.md](speed.md)). A pipeline project has no grain hook or editor control: wiring it in is new code (on the sRGB render, after sharpening); say so before building it.
-
-## Not in the templates
-
-Say the operation isn't in the templates; build it only when asked.
-
-- **Flip** (espejala, espejar, dar vuelta, mirror; 2026-10-20, project 1's viewer): nothing in the templates mirrors a photo. Built, it is an editor change ([editor.md](editor.md)).
-- **Circle or square shape guide** of project 1's viewer.
-- **Panel start at each style's equivalent settings** (least-squares fit, 2026-10-17): the rule is in [editor.md](editor.md) > Screen equals export; the fit is not in the code.
-- **"Exact" versions** (las exactas; 2026-10-15): the skin histogram match capped at slope 2.5 is to be written ([measurement.md](measurement.md) > Building a style).
-- **DNG "RAW export":** described in [delivery.md](delivery.md) > Exports; the pipeline server exports PNG, TIFF, WebP and JPEG.

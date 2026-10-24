@@ -2,7 +2,8 @@
 // borrar en una la saca de todas, y cada foto conserva sus valores en las que ya tenia. "Copy to other photos" pasa los
 // valores de la version que se ve a esa misma version de las otras. Prueba la foto ya abierta (DialKit la retiene en
 // memoria) y la que nunca se abrio (sale de sessionStorage), que llega al servidor y que sobrevive a recargar. Tambien
-// los tooltips. Servidor propio (8796) con una copia de editadas/versiones.json (EDITOR_VERSIONS): las versiones del
+// los tooltips. Light y Color viajan como lo movido desde el punto de partida de cada foto (recipe/equivalents.py): una
+// version con Exposure 0.77 en la 0 llega a otra con 0.77 - el de la 0 + el suyo. Servidor propio (8796) con una copia de editadas/versiones.json (EDITOR_VERSIONS): las versiones del
 // fotografo no se tocan.
 // Uso: node tools/editor_test/apply_version.mjs
 import { spawn } from "node:child_process";
@@ -44,6 +45,10 @@ try {
   const same = (a, b) => Object.keys(b).every(k => typeof b[k] === "object" || a[k] === b[k] || (k.startsWith("Under-eyes.") && !(k in a)));
   await open();
   const keys = await page.evaluate(() => PHOTOS.map(p => p.key));
+  // el valor del panel de la 0 en la foto i, a mano y con moved() (que pasa todas las claves de Light y Color)
+  const starts = await page.evaluate(() => PHOTOS.map(p => startOf(p).exposure));
+  const expo = (x, i) => +(x - starts[0] + starts[i]).toFixed(2);
+  const movedTo = (values, i) => page.evaluate(([v, i]) => moved(v, PHOTOS[0], PHOTOS[i]), [values, i]);
 
   // la 1 se abre y se deja (queda retenida en memoria); la 2 y la 3 nunca se abren antes de guardar
   await at(1);
@@ -62,7 +67,7 @@ try {
   for (const i of [1, 2, 3]) {
     const s = await at(i), v = s.list.find(x => x.id === made.id);
     check(ids(s) === ids(src), `guardar ${s.key}: misma lista, mismo orden`);
-    check(v && v.name === made.name && same(v.values, made.values), `guardar ${s.key}: la nueva llega con los valores de la que la guardo`);
+    check(v && v.name === made.name && same(v.values, await movedTo(made.values, i)) && v.values["Light.Exposure"] === expo(0.77, i), `guardar ${s.key}: la nueva llega con los valores de la que la guardo`);
     const kept = before[s.key].every(o => same(s.list.find(x => x.id === o.id)?.values ?? {}, o.values));
     check(kept, `guardar ${s.key}: sus valores en las que ya tenia quedan intactos`);
   }
@@ -153,7 +158,8 @@ try {
   check(/copied to the other 3 photos/.test(copied.toast) && copied.values["Light.Exposure"] === 0.66, "copiar: el aviso dice a cuantas", copied.toast);
   for (const i of [1, 2, 3]) {
     const s = await at(i), v = s.list.find(x => x.id === shared.id);
-    check(s.active === shared.name && same(s.values, copied.values) && same(v.values, copied.values), `copiar ${s.key}: queda puesta con los valores copiados`);
+    const want = await movedTo(copied.values, i);
+    check(s.active === shared.name && same(s.values, want) && same(v.values, want) && v.values["Light.Exposure"] === expo(0.66, i), `copiar ${s.key}: queda puesta con los valores copiados`);
     check(s.list.length === zero.list.length, `copiar ${s.key}: no suma versiones`);
   }
 
@@ -166,7 +172,7 @@ try {
   check(keys.every(k => saved.photos[k].presets.find(v => v.id === zero.list[1].id)?.name === "Studio white"), "servidor: el nombre nuevo en las cuatro");
   for (const k of keys) {
     const st = saved.photos[k], v = st.presets.find(x => x.id === st.activePresetId);
-    check(v?.id === shared.id && v.values["Light.Exposure"] === 0.66, `servidor: ${k} tiene puesta la copiada`, v?.name);
+    check(v?.id === shared.id && v.values["Light.Exposure"] === expo(0.66, keys.indexOf(k)), `servidor: ${k} tiene puesta la copiada`, v?.name);
   }
 
   // y sobrevive a recargar (sessionStorage nuevo desde el servidor)
@@ -174,7 +180,7 @@ try {
   await open();
   for (const i of [3, 2]) {
     const s = await at(i);
-    check(s.active === shared.name && s.values["Light.Exposure"] === 0.66 && ids(s) === lists[0], `${s.key}: despues de recargar sigue igual`, s.active);
+    check(s.active === shared.name && s.values["Light.Exposure"] === expo(0.66, i) && ids(s) === lists[0], `${s.key}: despues de recargar sigue igual`, s.active);
   }
 } finally {
   await browser.close();

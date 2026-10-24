@@ -3,8 +3,8 @@
 Por combinacion pide el archivo a /api/prepare (lo mismo que manda el editor) y mira el archivo que llega, en memoria
 (nunca se escribe a disco: el proyecto es .sin-jpg y el JPG solo sale por la descarga):
   - medidas: las que dice el editor (el lado largo del recorte al tamano pedido, nunca agrandado);
-  - formato real del archivo, extension del nombre y bits (16 en PNG y TIFF, 8 en WebP y JPG);
-  - perfil de color: sRGB marcado (bloque sRGB en PNG, ICC en los demas);
+  - formato real del archivo, extension del nombre y bits (16 en PNG, TIFF y DNG, 8 en WebP y JPG);
+  - perfil de color: sRGB marcado (bloque sRGB en PNG, ICC en los demas; en el DNG, lineal, las matrices de sRGB);
   - pixeles: contra la referencia, el PNG de 16 bits de la foto entera con los mismos ajustes, recortado al mismo marco
     y achicado igual que el servidor (en luz lineal). Diferencia en niveles de 8 bits: media y percentil 99.
 
@@ -42,8 +42,9 @@ BACKGROUND = {"exposure": 0.2, "evenness": 50, "smoothing": 100}
 CROPS = {"whole": [0, 0, W, H], "free": [round(W * 0.12), round(H * 0.11), round(W * 0.72), round(H * 0.67)],
          "16:9": [0, (H - _H169) // 4, W, _H169]}
 SIZES = [1024, 2048, "full"]
-FORMATS = {"png": (16, "PNG", ".png"), "tiff": (16, "TIFF", ".tif"), "webp": (8, "WEBP", ".webp"), "jpeg": (8, "JPEG", ".jpg")}
-LIMIT = {"png": (0.05, 1), "tiff": (0.05, 1), "webp": (0.6, 1), "jpeg": (1.5, 6)}  # media y p99 maximos, niveles de 8 bits
+FORMATS = {"png": (16, "PNG", ".png"), "tiff": (16, "TIFF", ".tif"), "webp": (8, "WEBP", ".webp"), "jpeg": (8, "JPEG", ".jpg"),
+           "dng": (16, "DNG", ".dng")}
+LIMIT = {"png": (0.05, 1), "tiff": (0.05, 1), "webp": (0.6, 1), "jpeg": (1.5, 6), "dng": (0.05, 1)}  # media y p99 maximos, niveles de 8 bits
 
 
 def fetch(fmt: str, box: list, size) -> tuple[dict, bytes]:
@@ -72,6 +73,14 @@ def is_srgb(icc: bytes | None) -> bool:
 
 def decode(fmt: str, data: bytes) -> tuple[np.ndarray, int, bool, str]:
     """pixeles uint16 (0-65535), bits del archivo, si marca sRGB, y el formato que dice el propio archivo"""
+    if fmt == "dng":  # luz lineal sin ICC: el color lo dicen las matrices de sRGB; se pasa a sRGB para comparar
+        with tifffile.TiffFile(io.BytesIO(data)) as t:
+            page = t.pages[0]
+            img, tags = page.asarray(), page.tags
+            kind = "DNG" if int(page.photometric) == 34892 and 50706 in tags else "TIFF"
+        bits = 16 if img.dtype == np.uint16 else 8
+        srgb16 = (linear_to_srgb(img.astype(np.float32) / 65535) * 65535 + 0.5).astype(np.uint16)
+        return srgb16, bits, 50721 in tags and 50964 in tags and 34675 not in tags, kind
     if fmt == "tiff":
         with tifffile.TiffFile(io.BytesIO(data)) as t:
             img, icc = t.asarray(), t.pages[0].tags.get("InterColorProfile")

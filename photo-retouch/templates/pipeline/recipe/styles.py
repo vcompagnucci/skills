@@ -53,6 +53,7 @@ import tifffile
 from PIL import Image
 
 import backdrop
+import equivalents
 from adjust import KEYS as LIGHT_KEYS
 from adjust import TO_LINEAR, from_x, to_x
 from common import EDITED, NOTES, ROOT, _srgb_icc, lab, linear_to_srgb, save_png, to_uint8, to_uint16
@@ -297,20 +298,25 @@ RETIRED = {"preset-apple_lab"}
 def seed(table: dict = STYLES, update_only: bool = False) -> None:
     """Las versiones de una tabla (STYLES o LOOKS) en cada foto de editadas/versiones.json. Una version del mismo
     nombre se reemplaza; las demas, y lo que este abierto, quedan como estaban. update_only: solo se reemplazan las
-    que la foto ya tiene, asi una version que el fotografo borro en una foto no vuelve."""
+    que la foto ya tiene, asi una version que el fotografo borro en una foto no vuelve. Con punto de partida
+    (recipe/equivalents.py), Light y Color se guardan sumados a el: las versiones guardan los valores del panel y el
+    editor aplica la diferencia, que es la del estilo."""
     level = json.loads(EYES.read_text())["intensity"] if EYES.exists() else 100
     zero = ui_values({k: 0.0 for k in LIGHT_KEYS}, {k: 0.0 for k in backdrop.KEYS}, level)
+    starts = equivalents.load_starts()
     names = {s["name"] for s in table.values()}
     # primero lo lento (las capas de cada foto) y recien despues leer y escribir el archivo: el editor puede estar
     # guardando, y asi la ventana en la que se pisaria un cambio suyo es de milisegundos
     made = {}
     for name in STUDIO:
         layers = backdrop.load_layers(name)
-        made[name] = [{"id": f"preset-{key}", "name": s["name"], "values": ui_values(*preset(name, key, layers), level)}
+        made[name] = [{"id": f"preset-{key}", "name": s["name"],
+                       "values": equivalents.shifted(ui_values(*preset(name, key, layers), level), starts.get(name, {}))}
                       for key, s in table.items()]
     data = json.loads(VERSIONS.read_text()) if VERSIONS.exists() else {"photos": {}}
     for name in STUDIO:
-        state = data["photos"].get(name) or {"version": 1, "values": dict(zero), "baseValues": dict(zero),
+        base = equivalents.shifted(zero, starts.get(name, {}))
+        state = data["photos"].get(name) or {"version": 1, "values": dict(base), "baseValues": dict(base),
                                              "presets": [], "activePresetId": None}
         if update_only:
             new = {p["id"]: p for p in made[name]}

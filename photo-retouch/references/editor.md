@@ -15,7 +15,7 @@ The promise is that the file downloaded is what the screen showed. Each rule bel
 
 - **One reference implementation.** The server's Python is the reference; the shader is a line-by-line copy of it. Change one, change the other, run `tools/download_parity.mjs`. Measured at most 1 level of 255 apart on the same input.
 - **Export from the 16-bit master on the server**, applying the adjustments in linear light. The canvas works from a dithered 8-bit copy; the file must carry the master's full precision.
-- **Start the panel at the master.** Styles made with curves, local light and grain can't be written as panel values (mean error 1.7–4.2 L*). So the starting values are the panel settings closest to the master, solved per photo and style by least squares and rounded to each control's step, and the editor applies only the difference from that start over the untouched master.
+- **Start the panel at the master.** Styles made with curves, local light and grain can't be written as panel values (mean error 1.7–4.2 L*). So the starting values are the panel settings closest to the master, solved per photo by least squares (`recipe/equivalents.py`, into `recipe/equivalents.json`) and rounded to each control's step, and the editor applies only the difference from that start over the untouched master. Copying a version to other photos carries its difference from the start, so +0.5 Exposure lands as +0.5 on each.
 - **Versions store absolute values.** When starting values are recomputed, check the saved versions: each one now applies a different difference.
 - **Feed the browser rounded 8-bit copies of 16-bit PNG layers.** Chrome reads 16-bit PNG as `v>>8` without rounding, which biased the wall layers.
 
