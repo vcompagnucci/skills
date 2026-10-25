@@ -38,7 +38,7 @@ Read this for photos without a seamless wall, faces or black clothing, or from a
 
 - **Develop.** rawpy reads any RAW (step 1 above). An iPhone ProRAW DNG arrives already demosaiced and linear, so it only needs white balance and tone. `wall` in `recipe/photos.py` holds the patches of the confirmed neutral, whatever it is.
 - **No seamless wall:** leave `wall_marks` empty in `recipe/photos.py` and skip `neutral_stains` in `recipe/retouch.py`. **No black clothing:** skip the three lint calls there. **No faces:** `"faces": []` is required.
-- **No seamless wall or no faces:** use `np.ones(img.shape[:2], np.float32)` for `evening_gain` in `recipe/grade.py` and `tools/color_check.py`: it evens the wall toward the light at the faces, and with no faces it returns NaN.
+- **No seamless wall:** use `np.ones(img.shape[:2], np.float32)` for `evening_gain` in `recipe/grade.py` and `tools/color_check.py`: it fits the wall's light and evens it toward the faces. With no faces it already returns gain 1.
 - Set grade.py's `EXPOSURE`, `CURVE`, `CHROMA` and `SKIN_HUE` per session (step 3 above); `SKIN_HUE` also turns wood.
 
 ### Tests

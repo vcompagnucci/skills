@@ -98,9 +98,9 @@ def lids(name: str) -> None:
 
 def zones_sheet(name: str) -> None:
     """La linea de pestanas medida (amarillo), la zona de la ojera (celeste, mitad de la mascara)
-    y la mejilla de referencia (magenta), sobre cada ojo de cerca."""
+    y el anillo de piel de referencia (magenta), sobre cada ojo de cerca."""
     from faces import window
-    from undereye import lid_curve, skin_weight, zones
+    from undereye import geometry, lid_curve, params, skin_weight
 
     img = load_linear(name, "base")
     for face in PHOTOS[name]["faces"]:
@@ -111,9 +111,8 @@ def zones_sheet(name: str) -> None:
         lids = face["lids"]
         tiles = []
         for i, (e, points) in enumerate(zip(face["features"][:2], lids)):
-            other_x = float(np.mean([p[0] for p in lids[1 - i]]))
-            zone, band = zones(crop.shape[:2], points, other_x, origin)
-            zone = zone * skin
+            g = geometry(crop.shape[:2], face, i, origin, params(face, i))
+            zone, band = g["zone"] * skin, g["ring"].astype(np.float32)
             lid = lid_curve(points, origin)
             cx, cy, rx, ry = e[0] - origin[1], e[1] - origin[0], e[2], e[3]
             x0, x1 = int(cx - 1.35 * rx), int(cx + 1.35 * rx)

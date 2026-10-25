@@ -35,7 +35,7 @@ READ_ONLY = {"find", "ls", "grep", "rg", "pgrep", "stat", "file", "mdls", "test"
              "open", "du", "head", "tail", "cat", "which", "echo", "sed", "awk", "cd", "pwd", "printf",
              "basename", "dirname", "realpath", "shasum", "md5", "sort", "uniq", "diff", "cmp", "jq", "less"}
 PREFIX = {"do", "then", "else", "!", "{", "(", "time"}  # not the command: look at the next word
-SPLIT_RE = re.compile(r"&&|\|\||[;|\n]")
+SPLIT_RE = re.compile(r"&&|\|\||(?<![>&])&(?![>&])|[;|\n]")  # a lone & runs the next command too; 2>&1 and &> stay
 
 
 def projects_in(text: str, cwd: str) -> set:

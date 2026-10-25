@@ -71,6 +71,8 @@ def light_field(img: np.ndarray, name: str) -> np.ndarray:
 def evening_log(field: np.ndarray, name: str) -> np.ndarray:
     """Correccion en pasos (log2), a 1/16: la pared va a medias hacia su nivel a la altura de las caras."""
     h, w = field.shape
+    if not PHOTOS[name]["faces"]:  # sin caras no hay altura a la que igualar: la pared queda como esta
+        return np.zeros_like(field, dtype=np.float32)
     at_faces = [field[min(int(f["oval"][1] / DOWN), h - 1), min(int(f["oval"][0] / DOWN), w - 1)] for f in PHOTOS[name]["faces"]]
     return np.clip(EVEN * (float(np.mean(at_faces)) - field), -EVEN_LIMIT, EVEN_LIMIT).astype(np.float32)
 
