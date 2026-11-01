@@ -1,6 +1,6 @@
 # Sources
 
-329 sources read in full on 2026-10-22: 103 from OpenAI (docs, the Model Spec, cookbooks, prompting guides and the Codex repo), 69 from Anthropic (docs, engineering posts, the constitution and its published app prompts), 43 from other labs (Google, Microsoft, xAI, Meta, Mistral, Cohere, Amazon, DeepSeek, Qwen, Moonshot) and 114 from open-source agents, practitioners, support vendors and research. 48 of them are published system prompts or prompt files, read at a recorded commit: Codex, the Claude apps, Gemini CLI, OpenHands, Cline, OpenCode, goose, Aider, Roo Code, Kilo Code, Grok, Copilot, Zed and others. Dated sources run from 2024-02-14 to 2026-10-21, 148 of them from 2026; 114 are live docs pages without a date. Every one is listed by slug in `article-index.md`.
+330 sources read in full: 329 on 2026-10-22 and the 2026-10-29 Model Spec on 2026-11-01, when the update run also re-read 8 changed pages and files. 104 from OpenAI (docs, the Model Spec, cookbooks, prompting guides and the Codex repo), 69 from Anthropic (docs, engineering posts, the constitution and its published app prompts), 43 from other labs (Google, Microsoft, xAI, Meta, Mistral, Cohere, Amazon, DeepSeek, Qwen, Moonshot) and 114 from open-source agents, practitioners, support vendors and research. 48 of them are published system prompts or prompt files, read at a recorded commit: Codex, the Claude apps, Gemini CLI, OpenHands, Cline, OpenCode, goose, Aider, Roo Code, Kilo Code, Grok, Copilot, Zed and others. Dated sources run from 2024-02-14 to 2026-10-30, 149 of them from 2026; 114 are live docs pages without a date. Every one is listed by slug in `article-index.md`.
 
 ## How the claims were chosen
 
@@ -15,7 +15,7 @@
 
 On the 1st and 15th of each month an updater checks three kinds of source and opens a PR when a change alters the advice:
 
-- the 48 published prompt files the skill read, Codex first, for a new commit;
+- the 48 published prompt files the skill read (50 watched paths: the Claude Code plugin prompts sit in three folders), Codex first, for a new commit;
 - 25 prompting guides and published Claude system prompts from Anthropic, OpenAI and Google, for an edit;
 - new prompting pages in Anthropic's, OpenAI's and Google's docs, Anthropic's site, OpenAI's news and developer blog, and Simon Willison's system-prompts tag.
 

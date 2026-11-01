@@ -75,7 +75,7 @@ What are you working on?
 │   in a text channel → voice-and-output.md
 ├── Which language to answer in, switching, register, translation → language.md
 ├── A spoken agent, or moving a chat agent to the phone: sentence caps, turn-taking, numbers
-│   read aloud, preambles, barge-in → voice-agents.md, then language.md "Language on a voice channel"
+│   read aloud, preambles, barge-in, backchannels → voice-agents.md, then language.md "Language on a voice channel"
 │   (voice-and-output.md is for text channels)
 ├── Answering only from sources, citations, "I don't know", reports on its own work → grounding.md
 ├── The prompt's own layout: roles, sections and delimiters, long documents, templates
@@ -102,7 +102,7 @@ Before the order, two checks:
 
 Then:
 
-1. **The newest date wins, whoever published it.** Give its date and name the rule here that it replaces. An undated docs page counts as read on 2026-10-22.
+1. **The newest date wins, whoever published it.** Give its date and name the rule here that it replaces. An undated docs page counts as read on the date its bullet gives, or on 2026-10-22 when the bullet gives none.
 2. **Dates don't settle it → Anthropic and OpenAI win** over everyone else.
 3. **Anthropic and OpenAI disagree and nothing settles it → report both side by side.** The skill's own ties sit under "Where the answer depends on the case" in rule-sets.md, examples.md, structure.md and iterate.md; open the one for the question at hand.
 
