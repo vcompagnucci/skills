@@ -5,7 +5,7 @@ description: Build and run evals for any AI agent (coding, browser, data, assist
 
 # Agent evals
 
-A process for evaluating any AI agent that looks things up, decides and takes actions: a coding agent, a browser or data agent, an assistant, a support agent. Most examples come from customer support, where the method was tested hardest, and the rules hold for the rest. It merges Hamel Husain and Shreya Shankar's method with what labs, eval vendors and support teams published up to early October 2026.
+A process for evaluating any AI agent that looks things up, decides and takes actions: a coding agent, a browser or data agent, an assistant, a support agent. Most examples come from customer support, where the method was tested hardest, and the rules hold for the rest. It merges Hamel Husain and Shreya Shankar's method with what labs, eval vendors and support teams published up to late October 2026.
 
 ## Where are you?
 
@@ -37,6 +37,7 @@ Inheriting an eval setup, or unsure you can trust it? → references/audit.md fi
 Improving the agent against the eval (what to fix first, prompt or tool or harness, an automated prompt optimizer such as GEPA,
   keep or revert, when to stop, comparing models on accuracy and cost)? → references/improve.md
 Shipping any change (prompt, model, tools), live or not? → references/testing.md, "Release gates"
+Sharing results with stakeholders (a dashboard, a report, one number)? → references/testing.md, "Release gates"
 Computing an interval, sizing a sample, or comparing two versions? → references/statistics.md
 Simulated users, replaying real conversations, forecasting a version on live traffic? → references/simulation.md
 Red teaming the agent (injection, exfiltration, attack success rates)? → references/red-team.md
