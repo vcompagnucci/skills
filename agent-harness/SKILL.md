@@ -17,7 +17,7 @@ Do you have a harness yet?
     ├── Turns, endings, step caps, the turn budget, mid-turn messages, concurrency limits, back-office runs longer than one window → references/loop.md
     ├── Retries, timeouts, streams, reconnecting, failover, refusals → references/failures.md
     ├── Sessions, the log, checkpoints, webhooks, hooks versus checks, runs in flight, realtime → references/state.md
-    ├── Versions, model changes, model routing, latency, cost, spend caps → references/operations.md
+    ├── Versions, rolling out by traffic share or by scope, model changes, model routing, latency, cost, spend caps → references/operations.md
     ├── Pausing for a person or an approval, escalation, a person taking over, cancelling, when a conversation ends → references/humans.md
     ├── Which tools, their descriptions and arguments, what they return, MCP, handles and tasks that carry state across calls → references/tools.md
     ├── What the model sees each turn, caching → references/context.md
