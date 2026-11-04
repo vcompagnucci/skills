@@ -13,7 +13,7 @@ npx skills@latest add vcompagnucci/skills
 - **[agent-harness](./agent-harness/SKILL.md).** The loop, tools, state and human handoffs around any agent, and when to buy one instead.
 - **[agent-evals](./agent-evals/SKILL.md).** Evals from the first traces to production, on Hamel Husain and Shreya Shankar's method.
 - **[agent-security](./agent-security/SKILL.md).** Keeping an agent that reads untrusted text and calls tools from being turned against its users. 312 sources.
-- **[system-prompts](./system-prompts/SKILL.md).** Writing, reviewing and migrating the system prompt and instruction files an agent runs on. 329 sources.
+- **[system-prompts](./system-prompts/SKILL.md).** Writing, reviewing and migrating the system prompt and instruction files an agent runs on. 330 sources.
 - **[agent-trust](./agent-trust/SKILL.md).** Lauren Tan's method for trusting an agent's work enough to leave it alone, for coding and support agents alike. Every claim is dated and linked, and where she changed her mind the newest position wins.
 
 ## Design

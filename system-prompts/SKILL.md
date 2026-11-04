@@ -102,7 +102,7 @@ Before the order, two checks:
 
 Then:
 
-1. **The newest date wins, whoever published it.** Give its date and name the rule here that it replaces. An undated docs page counts as read on 2026-10-22.
+1. **The newest date wins, whoever published it.** Give its date and name the rule here that it replaces. An undated docs page counts as read on the date its bullet gives, or on 2026-10-22 when the bullet gives none.
 2. **Dates don't settle it → Anthropic and OpenAI win** over everyone else.
 3. **Anthropic and OpenAI disagree and nothing settles it → report both side by side.** The skill's own ties sit under "Where the answer depends on the case" in rule-sets.md, examples.md, structure.md and iterate.md; open the one for the question at hand.
 
