@@ -1,6 +1,6 @@
 ---
 name: agent-harness
-description: Build the harness around an AI agent. Use when choosing to build or buy one (Managed Agents, Agents API, a vertical vendor such as a CX platform), or designing its loop and stop conditions, retries, timeouts and streams, durable state, sessions and webhooks, versions, model changes and cost, pausing for a human, a takeover or a cancel, tools and what they return, context and caching, compaction, memory across conversations, or splitting work across agents.
+description: Build the harness around an AI agent. Use when choosing to build or buy one (Managed Agents, Agents API, a vertical vendor such as a CX platform), or designing its loop and stop conditions, retries, timeouts and streams, durable state, sessions and webhooks, versions, model changes and cost, pausing for a human, a takeover or a cancel, tools and what they return, context, the knowledge base and caching, compaction, memory across conversations, or splitting work across agents.
 ---
 
 # Agent harness
@@ -20,7 +20,7 @@ Do you have a harness yet?
     ├── Versions, model changes, model routing, latency, cost, spend caps → references/operations.md
     ├── Pausing for a person or an approval, escalation, a person taking over, cancelling, when a conversation ends → references/humans.md
     ├── Which tools, their descriptions and arguments, what they return, MCP, handles and tasks that carry state across calls → references/tools.md
-    ├── What the model sees each turn, caching → references/context.md
+    ├── What the model sees each turn, the knowledge base, caching → references/context.md
     ├── Long conversations: clearing, compaction, summaries → references/compaction.md
     ├── What the agent remembers across conversations → references/memory.md
     └── More than one agent → references/multi-agent.md
