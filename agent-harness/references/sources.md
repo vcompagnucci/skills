@@ -34,6 +34,7 @@ Most rules come from Anthropic's and OpenAI's own posts, docs, cookbooks and cod
 - Armin Ronacher: [Absurd in production](https://lucumr.pocoo.org/2026/4/4/absurd-in-production/) (2026-04-04, Postgres durability), [Better models, worse tools](https://lucumr.pocoo.org/2026/7/4/better-models-worse-tools/) (2026-07-04, strict schemas).
 - Temporal: [Durable, flexible multi-agent systems](https://temporal.io/blog/durable-flexible-multi-agent-systems) (2026-08-06, waiting at zero compute). Vercel: [AI SDK 7](https://vercel.com/blog/ai-sdk-7) (2026-06-25) and [durable execution](https://vercel.com/blog/a-new-programming-model-for-durable-execution) (2026-04-16, runs finish on their version). Inngest: [durable execution](https://www.inngest.com/blog/durable-execution-key-to-harnessing-ai-agents) (2026-02-19, replay from checkpoint).
 - LangChain: [The runtime behind production deep agents](https://www.langchain.com/blog/runtime-behind-production-deep-agents) (2026-04-20, messages that arrive mid-turn), [Organizing context in a multi-agent harness](https://www.langchain.com/blog/organizing-context-in-a-multi-agent-harness) (2026-09-08).
+- Karri Saarinen (Linear): [Retire the word context](https://x.com/karrisaarinen/status/2118057321654046811) (2026-11-04, a stale source misleads more than a missing one; the takeover brief).
 - Manus: [Context engineering lessons](https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus) (2025-07-18, reversible compaction, masking tools).
 
 ## Added on 2026-10-01, second pass
