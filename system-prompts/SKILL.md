@@ -75,7 +75,7 @@ What are you working on?
 │   in a text channel → voice-and-output.md
 ├── Which language to answer in, switching, register, translation → language.md
 ├── A spoken agent, or moving a chat agent to the phone: sentence caps, turn-taking, numbers
-│   read aloud, preambles, barge-in, backchannels → voice-agents.md, then language.md "Language on a voice channel"
+│   read aloud, preambles, barge-in → voice-agents.md, then language.md "Language on a voice channel"
 │   (voice-and-output.md is for text channels)
 ├── Answering only from sources, citations, "I don't know", reports on its own work → grounding.md
 ├── The prompt's own layout: roles, sections and delimiters, long documents, templates
