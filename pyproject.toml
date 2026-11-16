@@ -20,63 +20,64 @@ ignore = [
     # Rules the code fails today, with the number of violations on 2026-11-16 (ruff 0.17.5). Fix a rule's violations,
     # delete its line, and CI keeps it passing from then on.
     "PLR2004", # 382 magic-value-comparison
-    "E501",    # 352 line-too-long
-    "D103",    # 253 undocumented-public-function
+    "D103",    # 257 undocumented-public-function
     "N806",    # 155 non-lowercase-variable-in-function
-    "T201",    # 122 print
-    "RUF100",  # 120 unused-noqa
-    "ANN001",  # 106 missing-type-function-argument
+    "T201",    # 123 print
+    "RUF100",  # 121 unused-noqa
+    "ANN001",  # 119 missing-type-function-argument
     "D205",    # 82 missing-blank-line-after-summary
-    "CPY001",  # 76 missing-copyright-notice
+    "CPY001",  # 77 missing-copyright-notice
     "INP001",  # 74 implicit-namespace-package
+    "E501",    # 71 line-too-long
     "D209",    # 64 new-line-after-last-paragraph
     "TRY003",  # 50 raise-vanilla-args
+    "ANN201",  # 40 missing-return-type-public-function
     "EM101",   # 38 raw-string-in-exception
     "N803",    # 33 invalid-argument-name
     "I001",    # 31 unsorted-imports
-    "ANN201",  # 29 missing-return-type-public-function
     "PLC0415", # 26 import-outside-top-level
     "FBT001",  # 23 boolean-type-hint-positional-argument
     "SIM300",  # 23 yoda-conditions
     "B905",    # 22 zip-without-explicit-strict
+    "D102",    # 20 undocumented-public-method
     "PLR0913", # 19 too-many-arguments
     "PLR0917", # 19 too-many-positional-arguments
     "C408",    # 18 unnecessary-collection-call
     "RUF046",  # 16 unnecessary-cast-to-int
-    "E701",    # 15 multiple-statements-on-one-line-colon
-    "D102",    # 14 undocumented-public-method
     "B023",    # 13 function-uses-loop-variable
     "E741",    # 12 ambiguous-variable-name
     "EM102",   # 12 f-string-in-exception
+    "UP031",   # 12 printf-string-formatting
     "FBT002",  # 11 boolean-default-value-positional-argument
+    "S603",    # 11 subprocess-without-shell-equals-true
+    "S607",    # 11 start-process-with-partial-path
     "ANN202",  # 10 missing-return-type-private-function
     "PLR0915", # 10 too-many-statements
-    "S603",    # 10 subprocess-without-shell-equals-true
-    "S607",    # 10 start-process-with-partial-path
+    "D101",    # 9 undocumented-public-class
+    "D401",    # 9 non-imperative-mood
     "BLE001",  # 8 blind-except
-    "D101",    # 8 undocumented-public-class
-    "D401",    # 8 non-imperative-mood
-    "E702",    # 8 multiple-statements-on-one-line-semicolon
+    "PTH118",  # 8 os-path-join
     "RUF059",  # 8 unused-unpacked-variable
     "C420",    # 7 unnecessary-dict-comprehension-for-iterable
     "PTH105",  # 7 os-replace
-    "PTH118",  # 7 os-path-join
+    "PTH123",  # 7 builtin-open
     "RUF005",  # 7 collection-literal-concatenation
     "C901",    # 6 complex-structure
+    "E731",    # 6 lambda-assignment
     "F401",    # 6 unused-import
     "PLW1510", # 6 subprocess-run-without-check
     "PLW2901", # 6 redefined-loop-name
-    "E731",    # 5 lambda-assignment
     "PLW0603", # 5 global-statement
-    "PTH123",  # 5 builtin-open
     "S310",    # 5 suspicious-url-open-usage
     "ANN002",  # 4 missing-type-args
     "D400",    # 4 missing-trailing-period
     "FURB167", # 4 regex-flag-alias
     "PLR0912", # 4 too-many-branches
     "ANN003",  # 3 missing-type-kwargs
+    "ANN204",  # 3 missing-return-type-special-method
     "ARG001",  # 3 unused-function-argument
     "ARG005",  # 3 unused-lambda-argument
+    "D107",    # 3 undocumented-public-init
     "D403",    # 3 first-word-uncapitalized
     "D415",    # 3 missing-terminal-punctuation
     "FBT003",  # 3 boolean-positional-value-in-call
@@ -84,9 +85,7 @@ ignore = [
     "PTH111",  # 3 os-path-expanduser
     "PTH122",  # 3 os-path-splitext
     "S101",    # 3 assert
-    "ANN204",  # 2 missing-return-type-special-method
     "B007",    # 2 unused-loop-control-variable
-    "D107",    # 2 undocumented-public-init
     "F821",    # 2 undefined-name
     "F841",    # 2 unused-variable
     "PERF401", # 2 manual-list-comprehension
@@ -97,6 +96,7 @@ ignore = [
     "S108",    # 2 hardcoded-temp-file
     "S110",    # 2 try-except-pass
     "C416",    # 1 unnecessary-comprehension
+    "D210",    # 1 surrounding-whitespace
     "E401",    # 1 multiple-imports-on-one-line
     "EXE001",  # 1 shebang-not-executable
     "ISC004",  # 1 implicit-string-concatenation-in-collection-literal
@@ -116,7 +116,6 @@ ignore = [
     "SIM115",  # 1 open-file-with-context-handler
     "TRY004",  # 1 type-check-without-type-error
     "TRY301",  # 1 raise-within-try
-    "UP031",   # 1 printf-string-formatting
 ]
 
 [tool.ty.environment]
@@ -128,11 +127,11 @@ python-version = "3.12"
 [tool.ty.rules]
 invalid-argument-type = "ignore"  # 296
 import-not-found = "ignore"  # 201
-unsupported-operator = "ignore"  # 80
+unsupported-operator = "ignore"  # 81
 not-subscriptable = "ignore"  # 58
 not-iterable = "ignore"  # 54
 invalid-assignment = "ignore"  # 32
-missing-union-attribute = "ignore"  # 14
+missing-union-attribute = "ignore"  # 17
 invalid-explicit-return = "ignore"  # 6
 index-out-of-bounds = "ignore"  # 4
 possibly-missing-submodule = "ignore"  # 1

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The repo's checks, side by side: ruff and ty for the Python, oxlint for the JavaScript. Exit 1 when any one fails.
+# The repo's checks, side by side: ruff and ty for the Python, oxlint and oxfmt for the JavaScript. Exit 1 if any fails.
 #   bash .claude/check.sh           every tracked file (what CI runs)
 #   bash .claude/check.sh FILE...   only these files, as paths from the repo root
 # Needs the tools installed first: `uv sync --frozen && bun install --frozen-lockfile` (their versions are pinned in
@@ -8,8 +8,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-ruff=.venv/bin/ruff ty=.venv/bin/ty oxlint=node_modules/.bin/oxlint
-for tool in "$ruff" "$ty" "$oxlint"; do
+ruff=.venv/bin/ruff ty=.venv/bin/ty oxlint=node_modules/.bin/oxlint oxfmt=node_modules/.bin/oxfmt
+for tool in "$ruff" "$ty" "$oxlint" "$oxfmt"; do
   [ -x "$tool" ] || { echo "$tool is missing: run 'uv sync --frozen && bun install --frozen-lockfile'" >&2; exit 1; }
 done
 
@@ -42,6 +42,7 @@ line() { printf '%q ' "$@"; }
 steps=()
 if [ ${#python[@]} -gt 0 ]; then
   steps+=("ruff check::$(line "$ruff" check --no-cache --output-format concise "${python[@]}")")
+  steps+=("ruff format::$(line "$ruff" format --check --no-cache "${python[@]}")")
 fi
 templates=photo-retouch/templates
 if [ ${#pipeline[@]} -gt 0 ]; then
@@ -55,6 +56,7 @@ if [ ${#scripts[@]} -gt 0 ]; then
 fi
 if [ ${#js[@]} -gt 0 ]; then
   steps+=("oxlint::$(line "$oxlint" --deny-warnings "${js[@]}")")
+  steps+=("oxfmt::$(line "$oxfmt" --check "${js[@]}")")
 fi
 
 if [ ${#steps[@]} -eq 0 ]; then
