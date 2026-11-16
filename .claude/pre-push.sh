@@ -5,6 +5,8 @@
 # <remote sha>`. For each branch it reads, the files that differ between the remote sha and the local sha are checked
 # as they are in the pushed commit (read with `git show` into a temp folder), never as they are in the working tree, so
 # an uncommitted or untracked file cannot pass or block a push.
+#   - what the push writes is told by the remote ref (`refs/heads/*` is a branch), never by the local ref: git writes
+#     that as it was typed (`HEAD`, a sha, `HEAD^{/fix bug}`), so a line is cut from the right;
 #   - a new branch (remote sha all zeros) is compared with its merge-base with origin/main;
 #   - a deleted branch (local sha all zeros), a tag and a commit without .claude/check.sh have nothing to check.
 # It does not set core.hooksPath and does not touch .git/hooks: the shared pre-push hook of the home repo calls it.
@@ -39,12 +41,18 @@ base_of() {
 }
 
 status=0
-while read -r local_ref local_sha _remote_ref remote_sha; do
-  case $local_ref in refs/heads/*) ;; *) continue ;; esac # a tag, or the like
+while IFS= read -r line || [ -n "$line" ]; do
+  # Shas and refs hold no spaces, the local ref can: cut from the right.
+  remote_sha=${line##* }
+  rest=${line% *}
+  remote_ref=${rest##* }
+  rest=${rest% *}
+  local_sha=${rest##* }
+  case $remote_ref in refs/heads/*) ;; *) continue ;; esac # a tag, or the like
   [ "$local_sha" != "$zeros" ] || continue # a deleted branch
   git cat-file -e "$local_sha^{commit}" 2>/dev/null || continue
   git cat-file -e "$local_sha:.claude/check.sh" 2>/dev/null || {
-    echo "pre-push: $local_ref has no .claude/check.sh, nothing to check"
+    echo "pre-push: $remote_ref has no .claude/check.sh, nothing to check"
     continue
   }
 
@@ -82,7 +90,7 @@ while read -r local_ref local_sha _remote_ref remote_sha; do
     esac
   done
   [ ${#files[@]} -gt 0 ] || {
-    echo "pre-push: $local_ref changes no Python or JavaScript file, nothing to check"
+    echo "pre-push: $remote_ref changes no Python or JavaScript file, nothing to check"
     continue
   }
 
