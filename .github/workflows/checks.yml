@@ -57,6 +57,6 @@ jobs:
       - name: Run the checks
         # Past a budget, .claude/run_steps.py kills what still runs and fails the run, naming the step.
         env:
-          CHECK_STEP_BUDGET_SECONDS: "5"
+          CHECK_STEP_BUDGET_SECONDS: "0.05"
           CHECK_BUDGET_SECONDS: "10"
         run: bash .claude/check.sh
