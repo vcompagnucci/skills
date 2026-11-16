@@ -73,7 +73,9 @@ def evening_log(field: np.ndarray, name: str) -> np.ndarray:
     h, w = field.shape
     if not PHOTOS[name]["faces"]:  # sin caras no hay altura a la que igualar: la pared queda como esta
         return np.zeros_like(field, dtype=np.float32)
-    at_faces = [field[min(int(f["oval"][1] / DOWN), h - 1), min(int(f["oval"][0] / DOWN), w - 1)] for f in PHOTOS[name]["faces"]]
+    at_faces = [
+        field[min(int(f["oval"][1] / DOWN), h - 1), min(int(f["oval"][0] / DOWN), w - 1)] for f in PHOTOS[name]["faces"]
+    ]
     return np.clip(EVEN * (float(np.mean(at_faces)) - field), -EVEN_LIMIT, EVEN_LIMIT).astype(np.float32)
 
 
@@ -134,7 +136,14 @@ def neutral_stains(img: np.ndarray, name: str, strip: int = 768) -> np.ndarray:
         g = np.maximum(p[..., 1], 1e-6)
         rr = np.log(np.maximum(p[..., 0], 1e-6) / g)
         bb = np.log(np.maximum(p[..., 2], 1e-6) / g)
-        out = np.stack([g * np.exp(rr + (ref_r[y0 : y0 + strip] - rr) * wgt), g, g * np.exp(bb + (ref_b[y0 : y0 + strip] - bb) * wgt)], -1)
+        out = np.stack(
+            [
+                g * np.exp(rr + (ref_r[y0 : y0 + strip] - rr) * wgt),
+                g,
+                g * np.exp(bb + (ref_b[y0 : y0 + strip] - bb) * wgt),
+            ],
+            -1,
+        )
         out *= (y[k] / np.maximum(luminance(out), 1e-7))[..., None]
         img[y0 : y0 + strip] = out
         amount[y0 : y0 + strip] = wgt
@@ -158,7 +167,9 @@ def find_marks(img: np.ndarray, name: str, max_n: int = 60) -> list[dict]:
             continue
         x0, y0, w, h = (int(v) for v in stats[i, :4])
         depth = float(-d[y0 : y0 + h, x0 : x0 + w][labels[y0 : y0 + h, x0 : x0 + w] == i].min())
-        out.append({"x": int(cents[i][0]), "y": int(cents[i][1]), "r": int(max(w, h) / 2 + 2), "depth": depth, "area": area})
+        out.append(
+            {"x": int(cents[i][0]), "y": int(cents[i][1]), "r": int(max(w, h) / 2 + 2), "depth": depth, "area": area}
+        )
     out.sort(key=lambda c: -c["depth"] * np.sqrt(c["area"]))
     return out[:max_n]
 
@@ -185,7 +196,12 @@ def sheet(name: str, img: np.ndarray, marks: list[dict]) -> None:
         t = cv2.resize(to_uint8(t, dither=False), (tile, tile), interpolation=cv2.INTER_NEAREST)
         gx, gy = 8 + (i % cols) * (tile + 8), 8 + (i // cols) * (tile + 24)
         grid.paste(Image.fromarray(t), (gx, gy))
-        d.text((gx, gy + tile + 4), f"{i + 1}  ({c['x']}, {c['y']}) r{c['r']}  -{c['depth'] * 100:.0f}%", fill=(220, 220, 220), font=font)
+        d.text(
+            (gx, gy + tile + 4),
+            f"{i + 1}  ({c['x']}, {c['y']}) r{c['r']}  -{c['depth'] * 100:.0f}%",
+            fill=(220, 220, 220),
+            font=font,
+        )
     grid.save(OUT / f"{name}-manchas.png")
     small = 0.15
     over = cv2.resize(img, None, fx=small, fy=small, interpolation=cv2.INTER_AREA)

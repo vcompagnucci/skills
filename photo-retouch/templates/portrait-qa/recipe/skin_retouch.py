@@ -63,7 +63,9 @@ def protected(name: str, shape: tuple[int, int], origin: tuple[int, int]) -> np.
 def skin_weight(crop: np.ndarray, name: str, origin: tuple[int, int]) -> np.ndarray:
     """Piel por color (rojo calido, no oscura), sin las zonas protegidas, con borde suave."""
     g = 0.30 / max(float(np.percentile(luminance(crop), 70)), 1e-6)
-    lab = cv2.cvtColor((linear_to_srgb(np.clip(crop * g, 0, 1)) * 255).astype(np.uint8), cv2.COLOR_RGB2LAB).astype(np.float32)
+    lab = cv2.cvtColor((linear_to_srgb(np.clip(crop * g, 0, 1)) * 255).astype(np.uint8), cv2.COLOR_RGB2LAB).astype(
+        np.float32
+    )
     L, a = lab[..., 0], lab[..., 1] - 128
     warm = np.clip((a - 3) / 4, 0, 1) * np.clip((L - 60) / 30, 0, 1)
     # El reflejo de la frente o la nariz no tiene rojo y quedaba como un agujero en la piel:

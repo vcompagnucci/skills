@@ -66,7 +66,9 @@ def fit_mask(alpha: np.ndarray, cam_srgb: np.ndarray) -> tuple[np.ndarray, np.nd
     return person & ok, wall & ok
 
 
-def fit_tone(l_ours: np.ndarray, l_cam: np.ndarray, person: np.ndarray, wall: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def fit_tone(
+    l_ours: np.ndarray, l_cam: np.ndarray, person: np.ndarray, wall: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
     """La curva L* -> L* que lleva mi brillo al de la camara, por cuantiles.
 
     La persona da la curva de 0 a la piel iluminada; la pared, el tramo de arriba (los pelos
@@ -137,7 +139,9 @@ def band_stats(lab: np.ndarray, mask: np.ndarray) -> tuple[np.ndarray, np.ndarra
     return count, chroma, hue
 
 
-def fit_chroma(lab_ours: np.ndarray, lab_cam: np.ndarray, person: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def fit_chroma(
+    lab_ours: np.ndarray, lab_cam: np.ndarray, person: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Ganancia de croma y giro de matiz por franja de L*, para que la persona tenga la croma y
     el matiz de la camara en cada brillo. Franjas con pocos pixeles o casi sin color toman el
     valor de la vecina; despues se suaviza con la vecina para que no haya escalones."""

@@ -56,9 +56,11 @@ class Regions:
     blacks: list = field(default_factory=list)  # (x0, y0, x1, y1)
 
     def scaled(self, k: float) -> "Regions":
-        return Regions([tuple(v * k for v in f) for f in self.faces],
-                       [tuple(v * k for v in b) for b in self.walls],
-                       [tuple(v * k for v in b) for b in self.blacks])
+        return Regions(
+            [tuple(v * k for v in f) for f in self.faces],
+            [tuple(v * k for v in b) for b in self.walls],
+            [tuple(v * k for v in b) for b in self.blacks],
+        )
 
     def face_height(self) -> float:
         return float(np.mean([f[3] for f in self.faces]))
@@ -91,7 +93,9 @@ def ref_regions(ref: str) -> Regions:
 def ellipses(shape: tuple[int, int], faces: list, shrink: float) -> np.ndarray:
     m = np.zeros(shape, np.uint8)
     for cx, cy, rx, ry in faces:
-        cv2.ellipse(m, (round(cx), round(cy)), (max(1, round(rx * shrink)), max(1, round(ry * shrink))), 0, 0, 360, 1, -1)
+        cv2.ellipse(
+            m, (round(cx), round(cy)), (max(1, round(rx * shrink)), max(1, round(ry * shrink))), 0, 0, 360, 1, -1
+        )
     return m > 0
 
 
@@ -126,7 +130,15 @@ def skin_mask(Lab: np.ndarray, reg: Regions) -> np.ndarray:
     L, a, b = Lab[..., 0], Lab[..., 1], Lab[..., 2]
     C = np.hypot(a, b)
     h = np.degrees(np.arctan2(b, a)) % 360
-    return ellipses(L.shape, reg.faces, FACE_SHRINK) & upper_face(L.shape, reg.faces) & (C > 5) & (h > 20) & (h < 90) & (L > 25) & (L < 97)
+    return (
+        ellipses(L.shape, reg.faces, FACE_SHRINK)
+        & upper_face(L.shape, reg.faces)
+        & (C > 5)
+        & (h > 20)
+        & (h < 90)
+        & (L > 25)
+        & (L < 97)
+    )
 
 
 def measure(lin: np.ndarray, reg: Regions) -> dict:
@@ -135,11 +147,18 @@ def measure(lin: np.ndarray, reg: Regions) -> dict:
     L, a, b = Lab[..., 0], Lab[..., 1], Lab[..., 2]
     out = {"tone": [float(v) for v in np.percentile(L, [1, 5, 50, 95, 99])]}
 
-    walls = [(float(np.median(L[s])), float(np.median(a[s])), float(np.median(b[s]))) for s in boxes(L.shape, reg.walls)]
+    walls = [
+        (float(np.median(L[s])), float(np.median(a[s])), float(np.median(b[s]))) for s in boxes(L.shape, reg.walls)
+    ]
     if walls:
         w = np.array(walls)
-        out["wall"] = {"L": float(w[:, 0].mean()), "a": float(w[:, 1].mean()), "b": float(w[:, 2].mean()),
-                       "spread": float(w[:, 0].max() - w[:, 0].min()), "each": [round(v, 1) for v in w[:, 0]]}
+        out["wall"] = {
+            "L": float(w[:, 0].mean()),
+            "a": float(w[:, 1].mean()),
+            "b": float(w[:, 2].mean()),
+            "spread": float(w[:, 0].max() - w[:, 0].min()),
+            "each": [round(v, 1) for v in w[:, 0]],
+        }
         core = np.zeros(L.shape, bool)
         for sy, sx in boxes(L.shape, reg.walls, erode=4):
             core[sy, sx] = True
@@ -150,16 +169,26 @@ def measure(lin: np.ndarray, reg: Regions) -> dict:
     if skin.sum() > 200:
         Ls = L[skin]
         ma, mb = float(np.median(a[skin])), float(np.median(b[skin]))
-        out["skin"] = {"p10": float(np.percentile(Ls, 10)), "p50": float(np.percentile(Ls, 50)),
-                       "p90": float(np.percentile(Ls, 90)), "p98": float(np.percentile(Ls, 98)),
-                       "a": ma, "b": mb, "C": float(np.hypot(ma, mb)), "h": hue(ma, mb), "n": int(skin.sum())}
+        out["skin"] = {
+            "p10": float(np.percentile(Ls, 10)),
+            "p50": float(np.percentile(Ls, 50)),
+            "p90": float(np.percentile(Ls, 90)),
+            "p98": float(np.percentile(Ls, 98)),
+            "a": ma,
+            "b": mb,
+            "C": float(np.hypot(ma, mb)),
+            "h": hue(ma, mb),
+            "n": int(skin.sum()),
+        }
         bands = []
         for lo, hi in SKIN_BANDS:
             m = skin & (L >= lo) & (L < hi)
             n = int(m.sum())
             if n >= MIN_BAND_PX:
                 ba, bb = float(np.median(a[m])), float(np.median(b[m]))
-                bands.append({"band": f"{lo}-{hi}", "n": n, "a": ba, "b": bb, "C": float(np.hypot(ba, bb)), "h": hue(ba, bb)})
+                bands.append(
+                    {"band": f"{lo}-{hi}", "n": n, "a": ba, "b": bb, "C": float(np.hypot(ba, bb)), "h": hue(ba, bb)}
+                )
             else:
                 bands.append({"band": f"{lo}-{hi}", "n": n})
         out["bands"] = bands
@@ -167,9 +196,12 @@ def measure(lin: np.ndarray, reg: Regions) -> dict:
     blk = boxes(L.shape, reg.blacks)
     if blk:
         vals = np.concatenate([L[s].ravel() for s in blk])
-        out["black"] = {"p5": float(np.percentile(vals, 5)), "p50": float(np.percentile(vals, 50)),
-                        "a": float(np.median(np.concatenate([a[s].ravel() for s in blk]))),
-                        "b": float(np.median(np.concatenate([b[s].ravel() for s in blk])))}
+        out["black"] = {
+            "p5": float(np.percentile(vals, 5)),
+            "p50": float(np.percentile(vals, 50)),
+            "a": float(np.median(np.concatenate([a[s].ravel() for s in blk]))),
+            "b": float(np.median(np.concatenate([b[s].ravel() for s in blk]))),
+        }
     return out
 
 
@@ -193,7 +225,9 @@ def read_reference_codes(ref: str) -> np.ndarray:
     return codes[..., :3] if codes.ndim == 3 else codes
 
 
-def at_scale(name: str, target_face_h: float, params: dict | None = None, srgb: np.ndarray | None = None) -> tuple[np.ndarray, Regions]:
+def at_scale(
+    name: str, target_face_h: float, params: dict | None = None, srgb: np.ndarray | None = None
+) -> tuple[np.ndarray, Regions]:
     """La maestra (la entrega, ojeras al 70 %) achicada en luz lineal hasta que sus caras tengan el alto
     pedido (nunca agrandada), con los ajustes si los hay, y sus regiones a esa escala. `srgb`: la maestra ya
     leida con read_master, para no leerla dos veces."""
@@ -218,8 +252,16 @@ def overlay(lin: np.ndarray, reg: Regions, height: int) -> Image.Image:
     im = Image.fromarray(to_uint8(linear_to_srgb(small), dither=False))
     d = ImageDraw.Draw(im, "RGBA")
     for cx, cy, rx, ry in reg.faces:
-        d.ellipse([(cx - rx * FACE_SHRINK) * k, (cy - ry * FACE_SHRINK) * k, (cx + rx * FACE_SHRINK) * k, (cy + ry * FACE_SHRINK) * k],
-                  outline=(255, 210, 0, 220), width=2)
+        d.ellipse(
+            [
+                (cx - rx * FACE_SHRINK) * k,
+                (cy - ry * FACE_SHRINK) * k,
+                (cx + rx * FACE_SHRINK) * k,
+                (cy + ry * FACE_SHRINK) * k,
+            ],
+            outline=(255, 210, 0, 220),
+            width=2,
+        )
     for x0, y0, x1, y1 in reg.walls:
         d.rectangle([x0 * k, y0 * k, x1 * k, y1 * k], outline=(0, 220, 255, 220), width=2)
     for x0, y0, x1, y1 in reg.blacks:

@@ -53,9 +53,19 @@ SIDE = 1024  # lado largo
 GRID = 4  # el ajuste mira 1 de cada 4 pixeles por lado; el residuo, todos
 ROUGH = 3.0  # media de |Delta L*| desde la que el equivalente es solo aproximado
 # de cada ajuste, su control en el panel, plano como lo guarda DialKit ("Light.Exposure")
-UI = {"exposure": "Light.Exposure", "brightness": "Light.Brightness", "contrast": "Light.Contrast",
-      "highlights": "Light.Highlights", "shadows": "Light.Shadows", "whites": "Light.Whites", "blacks": "Light.Blacks",
-      "temperature": "Color.Temperature", "tint": "Color.Tint", "vibrance": "Color.Vibrance", "saturation": "Color.Saturation"}
+UI = {
+    "exposure": "Light.Exposure",
+    "brightness": "Light.Brightness",
+    "contrast": "Light.Contrast",
+    "highlights": "Light.Highlights",
+    "shadows": "Light.Shadows",
+    "whites": "Light.Whites",
+    "blacks": "Light.Blacks",
+    "temperature": "Color.Temperature",
+    "tint": "Color.Tint",
+    "vibrance": "Color.Vibrance",
+    "saturation": "Color.Saturation",
+}
 
 
 def load_starts() -> dict[str, dict[str, float]]:
@@ -144,8 +154,12 @@ def difference(src: np.ndarray, target_lab: np.ndarray, p: dict) -> np.ndarray:
 def residual(src: np.ndarray, target_lab: np.ndarray, p: dict) -> dict:
     d = difference(src, target_lab, p)
     dl, de = np.abs(d[..., 0]), np.linalg.norm(d, axis=-1)
-    return {"mean_dL": float(dl.mean()), "p95_dL": float(np.percentile(dl, 95)),
-            "mean_dE": float(de.mean()), "p95_dE": float(np.percentile(de, 95))}
+    return {
+        "mean_dL": float(dl.mean()),
+        "p95_dL": float(np.percentile(dl, 95)),
+        "mean_dE": float(de.mean()),
+        "p95_dE": float(np.percentile(de, 95)),
+    }
 
 
 def score(src: np.ndarray, target_lab: np.ndarray, p: dict) -> float:
@@ -170,7 +184,9 @@ def fit(raw: np.ndarray, master: np.ndarray) -> tuple[dict, dict, list]:
     seeds[1][0] = np.clip(np.log2(y(master) / max(y(raw), 1e-6)), lo[0] + 0.01, hi[0] - 0.01)  # la luz media, igualada
     best = None
     for x0 in seeds:
-        r = least_squares(f, x0, bounds=(lo, hi), loss="soft_l1", f_scale=1.0, diff_step=1e-3, x_scale=0.3, max_nfev=400)
+        r = least_squares(
+            f, x0, bounds=(lo, hi), loss="soft_l1", f_scale=1.0, diff_step=1e-3, x_scale=0.3, max_nfev=400
+        )
         if best is None or r.cost < best.cost:
             best = r
     p = rounded(params_of(best.x))
@@ -196,7 +212,10 @@ def fit(raw: np.ndarray, master: np.ndarray) -> tuple[dict, dict, list]:
 
 
 def describe(p: dict) -> str:
-    return "  ".join(f"{k[:4].capitalize()} {p[k]:+.2f}" if k == "exposure" else f"{k[:4].capitalize()} {p[k]:+.0f}" for k in adjust.KEYS)
+    return "  ".join(
+        f"{k[:4].capitalize()} {p[k]:+.2f}" if k == "exposure" else f"{k[:4].capitalize()} {p[k]:+.0f}"
+        for k in adjust.KEYS
+    )
 
 
 def tile(lin: np.ndarray, h: int) -> np.ndarray:
@@ -216,7 +235,9 @@ def sheet(rows: list, path: Path, h: int = 480) -> None:
     for title, line, tiles in rows:
         draw.text((gap, y), title, fill=(235, 235, 235), font=big)
         draw.text((gap, y + 34), line, fill=(170, 170, 170), font=small)
-        draw.text((gap, y + 60), "RAW original   |   RAW + equivalent sliders   |   Master", fill=(120, 120, 120), font=small)
+        draw.text(
+            (gap, y + 60), "RAW original   |   RAW + equivalent sliders   |   Master", fill=(120, 120, 120), font=small
+        )
         x = gap
         for t in tiles:
             canvas.paste(Image.fromarray(t), (x, y + head))
@@ -248,13 +269,22 @@ def main(args: list[str]) -> None:
             elif done["values"] != values:
                 moved[photo] = (done["values"], values)
             data["photos"][photo] = {"values": values, "residual": res, "at_limit": edges, "sig": sig}
-            print(f"{photo}: {time.time() - t:.0f} s  |dL*| {res['mean_dL']:.2f}  dE76 {res['mean_dE']:.2f}  {describe(values)}", flush=True)
+            print(
+                f"{photo}: {time.time() - t:.0f} s  |dL*| {res['mean_dL']:.2f}  dE76 {res['mean_dE']:.2f}  {describe(values)}",
+                flush=True,
+            )
         done = data["photos"][photo]
         res = done["residual"]
         line = f"mean |dL*| {res['mean_dL']:.2f}  p95 {res['p95_dL']:.2f}   mean dE76 {res['mean_dE']:.2f}  p95 {res['p95_dE']:.2f}"
         if res["mean_dL"] > ROUGH or done["at_limit"]:
             line += "   ROUGH EQUIVALENT"
-        rows.append((f"{photo}   {describe(done['values'])}", line, [tile(raw, 480), tile(adjust.adjust(raw, done["values"]), 480), tile(master, 480)]))
+        rows.append(
+            (
+                f"{photo}   {describe(done['values'])}",
+                line,
+                [tile(raw, 480), tile(adjust.adjust(raw, done["values"]), 480), tile(master, 480)],
+            )
+        )
         del raw, master
     # primero las versiones (con respaldo), despues el archivo: si algo falla en el medio, la proxima pasada las vuelve
     # a encontrar sin punto de partida y las mueve una sola vez
@@ -275,13 +305,19 @@ def main(args: list[str]) -> None:
         cells = "  ".join(f"{v[k]:>11.2f}" if k == "exposure" else f"{v[k]:>11.0f}" for k in adjust.KEYS)
         flag = "  APROXIMADO" if r["mean_dL"] > ROUGH or d["at_limit"] else ""
         limit = f"  (en el limite: {', '.join(d['at_limit'])})" if d["at_limit"] else ""
-        lines.append(f"{photo}  {cells}   {r['mean_dL']:>10.2f}  {r['p95_dL']:.2f}   {r['mean_dE']:>10.2f}  {r['p95_dE']:.2f}{flag}{limit}")
+        lines.append(
+            f"{photo}  {cells}   {r['mean_dL']:>10.2f}  {r['p95_dL']:.2f}   {r['mean_dE']:>10.2f}  {r['p95_dE']:.2f}{flag}{limit}"
+        )
     (out / "equivalentes.txt").write_text("\n".join(lines) + "\n")
     print("\n".join(lines))
     if touched:
-        print(f"versiones con el punto de partida sumado (respaldo en respaldos/): {', '.join(touched)}. Con el editor abierto, recargar la pagina")
+        print(
+            f"versiones con el punto de partida sumado (respaldo en respaldos/): {', '.join(touched)}. Con el editor abierto, recargar la pagina"
+        )
     for photo, (a, b) in moved.items():
-        print(f"{photo}: el punto de partida cambio ({describe(a)} -> {describe(b)}); sus versiones no se tocan, revisarlas")
+        print(
+            f"{photo}: el punto de partida cambio ({describe(a)} -> {describe(b)}); sus versiones no se tocan, revisarlas"
+        )
 
 
 if __name__ == "__main__":

@@ -56,7 +56,9 @@ def v2_module():
     if not path.exists():
         return None
     sys.dont_write_bytecode = True  # sin __pycache__ al lado del codigo archivado
-    spec = importlib.util.spec_from_loader("undereye_v2", importlib.machinery.SourceFileLoader("undereye_v2", str(path)))
+    spec = importlib.util.spec_from_loader(
+        "undereye_v2", importlib.machinery.SourceFileLoader("undereye_v2", str(path))
+    )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
@@ -112,14 +114,18 @@ def numbers(crop: np.ndarray, out_v2: np.ndarray, outs: list, m: dict, face_leve
     hp = lift - blur(lift, 1.5)
     return {
         "falta": p90(deficit),
-        "queda": {"v2": p90(np.clip(deficit - lift_v2, 0, None))} | {pct(t): p90(np.clip(deficit - t * lift, 0, None)) for t in LEVELS}
+        "queda": {"v2": p90(np.clip(deficit - lift_v2, 0, None))}
+        | {pct(t): p90(np.clip(deficit - t * lift, 0, None)) for t in LEVELS}
         | {TOP: p90(np.clip(deficit - m["lift_top"], 0, None))},
-        "tope": {"v2": float(np.where(zone > 0, lift_v2, 0).max())} | {pct(t): t * float(lift.max()) for t in LEVELS}
+        "tope": {"v2": float(np.where(zone > 0, lift_v2, 0).max())}
+        | {pct(t): t * float(lift.max()) for t in LEVELS}
         | {TOP: float(m["lift_top"].max())},
         "parpado": float(lift[lid_strip].max()) if lid_strip.any() else 0.0,
         "textura": float(np.sqrt(np.mean(hp[zone > 0.05] ** 2))) if (zone > 0.05).any() else 0.0,
         "borde": float((np.hypot(gx, gy) * grow).max()),
-        "color": {k: chroma_gap(c, core, ring) for k, c in zip(["antes", "v2", *map(pct, LEVELS), TOP], [crop, out_v2, *outs])},
+        "color": {
+            k: chroma_gap(c, core, ring) for k, c in zip(["antes", "v2", *map(pct, LEVELS), TOP], [crop, out_v2, *outs])
+        },
         "lado": "luz" if float(np.median(luminance(crop)[ring])) >= face_level else "sombra",
     }
 
@@ -144,7 +150,10 @@ def panel(img: np.ndarray, box, width: int) -> np.ndarray:
     x0, y0, x1, y1 = box
     part = img[max(y0, 0) : y1, max(x0, 0) : x1]
     zoom = width / part.shape[1]
-    return to_uint8(cv2.resize(part, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC if zoom > 1 else cv2.INTER_AREA), dither=False)
+    return to_uint8(
+        cv2.resize(part, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC if zoom > 1 else cv2.INTER_AREA),
+        dither=False,
+    )
 
 
 def label(im: np.ndarray, text: str) -> Image.Image:
@@ -166,7 +175,9 @@ def sheet(name: str, face: dict, v2) -> dict:
     lift_total = sum(m["lift"] for m in maps)
     lift_v2 = np.log2(np.maximum(luminance(out_v2), 1e-7) / np.maximum(luminance(crop), 1e-7))
     rows, report = [], []
-    face_level = float(np.median(luminance(crop)[(ellipse_mask(crop.shape[:2], [face["oval"]], origin) > 0) & (w > 0.5)]))
+    face_level = float(
+        np.median(luminance(crop)[(ellipse_mask(crop.shape[:2], [face["oval"]], origin) > 0) & (w > 0.5)])
+    )
     # la cara entera a 50 %: lo que se ve sin zoom
     half = [to_uint8(cv2.resize(v, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA), dither=False) for v in views]
     rows.append([label(h, t) for h, t in zip(half, ["antes (cara a 50 %)", *names])])
@@ -181,10 +192,19 @@ def sheet(name: str, face: dict, v2) -> dict:
         for mask, col in ((m["region"], (255, 40, 160)), (m["ring"], (60, 160, 255))):
             cnts, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
             cv2.drawContours(lift_im, cnts, -1, col, 1)
-        tint = np.dstack([0.5 + 4 * sum(mm["tint"][0] for mm in maps), np.full(crop.shape[:2], 0.5), 0.5 + 4 * sum(mm["tint"][1] for mm in maps)])
+        tint = np.dstack(
+            [
+                0.5 + 4 * sum(mm["tint"][0] for mm in maps),
+                np.full(crop.shape[:2], 0.5),
+                0.5 + 4 * sum(mm["tint"][1] for mm in maps),
+            ]
+        )
         v2_im = to_uint8(np.dstack([np.clip(0.5 + lift_v2, 0, 1)] * 3).astype(np.float32), dither=False)
         cols = [panel(v, box, EYE_W) for v in views]
-        cols += [panel(v2_im.astype(np.float32) / 255, box, EYE_W // 2), panel(lift_im.astype(np.float32) / 255, box, EYE_W // 2)]
+        cols += [
+            panel(v2_im.astype(np.float32) / 255, box, EYE_W // 2),
+            panel(lift_im.astype(np.float32) / 255, box, EYE_W // 2),
+        ]
         cols.append(panel(np.clip(tint, 0, 1).astype(np.float32), box, EYE_W // 2))
         texts = [f"ojo {i + 1}: antes", *names, "aclarado v2", "aclarado v3 100 %", "color v3 100 % (x4)"]
         rows.append([label(c, t) for c, t in zip(cols, texts)])
@@ -205,11 +225,14 @@ def sheet(name: str, face: dict, v2) -> dict:
     OUT.mkdir(parents=True, exist_ok=True)
     out.save(OUT / f"{name}-{face['id']}.png")
     # de cerca y sin mapas: antes | final | 100 % | 200 %, un ojo por fila, para mirar solo la piel
-    close = [np.hstack([panel(views[k], eye_box(face, i, origin, maps[i]["params"]["depth"]), EYE_W) for k in (0, 2, 3, 4)]) for i in range(2)]
+    close = [
+        np.hstack([panel(views[k], eye_box(face, i, origin, maps[i]["params"]["depth"]), EYE_W) for k in (0, 2, 3, 4)])
+        for i in range(2)
+    ]
     width = max(c.shape[1] for c in close)
-    Image.fromarray(np.vstack([np.pad(c, ((0, 6), (0, width - c.shape[1]), (0, 0)), constant_values=20) for c in close])).save(
-        OUT / f"{name}-{face['id']}-cerca.png"
-    )
+    Image.fromarray(
+        np.vstack([np.pad(c, ((0, 6), (0, width - c.shape[1]), (0, 0)), constant_values=20) for c in close])
+    ).save(OUT / f"{name}-{face['id']}-cerca.png")
     return {"foto": name, "cara": face["id"], "ojos": report}
 
 

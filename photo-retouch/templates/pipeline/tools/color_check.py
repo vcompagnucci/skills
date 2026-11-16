@@ -72,7 +72,9 @@ def stats(lin: np.ndarray, m: np.ndarray) -> str:
     return f"L {L:4.1f}  a {a:4.1f}  b {b:4.1f}  C {np.hypot(a, b):4.1f}  h {np.degrees(np.arctan2(b, a)):4.1f}  scope {ang:5.1f}"
 
 
-def main(name: str, variants: list[tuple[float, float]]) -> dict[tuple[float, float], dict[str, tuple[float, float, float]]]:
+def main(
+    name: str, variants: list[tuple[float, float]]
+) -> dict[tuple[float, float], dict[str, tuple[float, float, float]]]:
     """Imprime y guarda las hojas; devuelve, por variante, la mediana (L*, a*, b*) de piel iluminada de cada cara."""
     img = load_linear(name, "retocada")
     img *= evening_gain(img, name)[..., None]
@@ -94,11 +96,16 @@ def main(name: str, variants: list[tuple[float, float]]) -> dict[tuple[float, fl
             print(f"  {face['id']:<11} {ch:.2f}/{hu:<3.0f} {stats(out, m)}")
             lit[(ch, hu)][face["id"]] = medians(out, m)
             # el recorte: la mejilla y la nariz, al 100 %
-            ty, tx = min(max(cy - y0 - CROP // 4, 0), out.shape[0] - CROP), min(max(cx - x0 - CROP // 2, 0), out.shape[1] - CROP)
+            ty, tx = (
+                min(max(cy - y0 - CROP // 4, 0), out.shape[0] - CROP),
+                min(max(cx - x0 - CROP // 2, 0), out.shape[1] - CROP),
+            )
             tile = to_uint8(linear_to_srgb(out[ty : ty + CROP, tx : tx + CROP]), dither=False)
             gx, gy = 8 + j * (CROP + 8), 8 + i * (CROP + 28)
             sheet.paste(Image.fromarray(tile), (gx, gy))
-            d.text((gx, gy + CROP + 6), f"{face['id']}  croma x{ch:.2f}, piel +{hu:.0f}", fill=(220, 220, 220), font=font)
+            d.text(
+                (gx, gy + CROP + 6), f"{face['id']}  croma x{ch:.2f}, piel +{hu:.0f}", fill=(220, 220, 220), font=font
+            )
     for box in PHOTOS[name]["wall"]:
         wall = img[frac_box(box, img.shape[:2])][::4, ::4]
         for ch, hu in variants:
@@ -110,8 +117,15 @@ def main(name: str, variants: list[tuple[float, float]]) -> dict[tuple[float, fl
     whole = Image.new("RGB", (len(variants) * (SMALL + 8) + 8, small.shape[0] + 36), (16, 16, 16))
     dw = ImageDraw.Draw(whole)
     for j, (ch, hu) in enumerate(variants):
-        whole.paste(Image.fromarray(to_uint8(linear_to_srgb(graded(small, ch, hu)), dither=False)), (8 + j * (SMALL + 8), 8))
-        dw.text((8 + j * (SMALL + 8), small.shape[0] + 14), f"croma x{ch:.2f}, piel +{hu:.0f}", fill=(220, 220, 220), font=font)
+        whole.paste(
+            Image.fromarray(to_uint8(linear_to_srgb(graded(small, ch, hu)), dither=False)), (8 + j * (SMALL + 8), 8)
+        )
+        dw.text(
+            (8 + j * (SMALL + 8), small.shape[0] + 14),
+            f"croma x{ch:.2f}, piel +{hu:.0f}",
+            fill=(220, 220, 220),
+            font=font,
+        )
     whole.save(OUT / f"{name}-variantes.png")
     return lit
 
@@ -135,7 +149,11 @@ def between_photos(lit: dict[str, dict], variants: list[tuple[float, float]]) ->
                     de = float(np.linalg.norm(np.subtract(f1[f], f2[f])))
                     worst = de if np.isnan(de) else max(worst, de)  # una cara sin piel (nan) no se esconde en el maximo
                     print(f"  {v[0]:.2f}/{v[1]:<3.0f} {n1} {f} - {n2} {f}  {de:5.2f}")
-        print(f"  {v[0]:.2f}/{v[1]:<3.0f} maximo {worst:5.2f}" if compared else f"  {v[0]:.2f}/{v[1]:<3.0f} maximo: sin pares con el mismo id")
+        print(
+            f"  {v[0]:.2f}/{v[1]:<3.0f} maximo {worst:5.2f}"
+            if compared
+            else f"  {v[0]:.2f}/{v[1]:<3.0f} maximo: sin pares con el mismo id"
+        )
 
 
 if __name__ == "__main__":

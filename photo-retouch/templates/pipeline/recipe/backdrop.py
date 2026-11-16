@@ -57,8 +57,15 @@ from common import EDITED, LUMA, linear_to_srgb, to_uint16
 from matte import NATIVE
 
 KEYS = ("exposure", "evenness", "smoothing", "falloff", "temperature", "tint", "saturation")
-RANGE = {"exposure": (-2.0, 2.0), "evenness": (0.0, 100.0), "smoothing": (0.0, 100.0), "falloff": (0.0, 100.0),
-         "temperature": (-100.0, 100.0), "tint": (-100.0, 100.0), "saturation": (-100.0, 100.0)}
+RANGE = {
+    "exposure": (-2.0, 2.0),
+    "evenness": (0.0, 100.0),
+    "smoothing": (0.0, 100.0),
+    "falloff": (0.0, 100.0),
+    "temperature": (-100.0, 100.0),
+    "tint": (-100.0, 100.0),
+    "saturation": (-100.0, 100.0),
+}
 FALL_FROM, FALL_POW, FALL_MAX = 0.35, 1.82, 64.0
 TOP = 98  # percentil de la luz de la pared que Evenness deja quieto
 L_MIN = 1.0  # L* minimo de la pared: la caida no la lleva a negro puro
@@ -69,7 +76,9 @@ WALL_MARGIN = 0.01  # margen alrededor de la gente que no cuenta para medirla
 EDGE = 0.02  # alpha desde el que un pixel tiene gente
 RING = 2  # px nativos alrededor de la gente donde la pared de atras es la de al lado, no el pixel
 STRIP = 128  # filas por tanda: la foto entera en float32 son 300 MB por imagen
-THREADS = 4  # tandas a la vez (numpy suelta el GIL): los 4 nucleos de rendimiento; cada tanda da lo mismo sola o en grupo
+THREADS = (
+    4  # tandas a la vez (numpy suelta el GIL): los 4 nucleos de rendimiento; cada tanda da lo mismo sola o en grupo
+)
 LAYERS = EDITED / "fondo"
 
 
@@ -114,7 +123,10 @@ def wall_light(rgb: np.ndarray, alpha: np.ndarray) -> np.ndarray:
     sigma = WALL_SIGMA * short
     den = cv2.GaussianBlur(ws, (0, 0), sigma)
     near = cv2.GaussianBlur(small, (0, 0), sigma) / np.maximum(den, 1e-4)[..., None]
-    wide = cv2.GaussianBlur(small, (0, 0), 4 * sigma) / np.maximum(cv2.GaussianBlur(ws, (0, 0), 4 * sigma), 1e-4)[..., None]
+    wide = (
+        cv2.GaussianBlur(small, (0, 0), 4 * sigma)
+        / np.maximum(cv2.GaussianBlur(ws, (0, 0), 4 * sigma), 1e-4)[..., None]
+    )
     cover = np.clip(den / 0.15, 0, 1)[..., None]
     return (cover * near + (1 - cover) * wide).astype(np.float32)
 
@@ -169,7 +181,9 @@ def edge_alpha16(alpha: np.ndarray) -> np.ndarray:
     cualquier pixel con gente (alpha > EDGE), 257 o mas, que a 8 bits sigue siendo 1 o mas."""
     unit = min(alpha.shape) / NATIVE
     r = max(1, int(round(RING * unit)))
-    some = cv2.dilate((alpha > EDGE).astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * r + 1,) * 2)) > 0
+    some = (
+        cv2.dilate((alpha > EDGE).astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * r + 1,) * 2)) > 0
+    )
     a16 = (np.clip(alpha, 0, 1) * 65535 + 0.5).astype(np.uint16)
     return np.where(some, np.maximum(a16, 257), 0).astype(np.uint16)
 
@@ -281,7 +295,9 @@ def paper(d: np.ndarray) -> np.ndarray:
     return 1 - t * t * (3 - 2 * t)
 
 
-def compose(c: np.ndarray, a16: np.ndarray, behind: np.ndarray, light: np.ndarray, top: float, u: np.ndarray, p: dict) -> np.ndarray:
+def compose(
+    c: np.ndarray, a16: np.ndarray, behind: np.ndarray, light: np.ndarray, top: float, u: np.ndarray, p: dict
+) -> np.ndarray:
     """La foto ajustada c con el fondo encima. behind y light ya pasaron por los mismos ajustes que c."""
     g = target(light, top, u, p)
     if p["smoothing"]:  # las franjas del papel: la luz ancha sobre la de 12 px, solo lo que es papel
@@ -298,8 +314,18 @@ def toned_top(layers: Layers, params: dict) -> float:
     return float(100 * to_x(tone(grey, params) @ LUMA)[0])
 
 
-def render(img16: np.ndarray, x0: int, y0: int, size: tuple[int, int], layers: Layers, params: dict, bg: dict,
-           a16: np.ndarray | None = None, behind16: np.ndarray | None = None, mirror: bool = False) -> np.ndarray:
+def render(
+    img16: np.ndarray,
+    x0: int,
+    y0: int,
+    size: tuple[int, int],
+    layers: Layers,
+    params: dict,
+    bg: dict,
+    a16: np.ndarray | None = None,
+    behind16: np.ndarray | None = None,
+    mirror: bool = False,
+) -> np.ndarray:
     """El recorte img16 (uint16 sRGB, ojeras incluidas) en (x0, y0) de una foto de size = (alto, ancho), con los
     ajustes del panel y el fondo. Devuelve uint16 sRGB.
 

@@ -19,8 +19,35 @@ from photos import IMPORTS, STUDIO
 
 # las pruebas traen sus archivos de work/ (EDITOR_ORIGINALS): nunca escriben en originales/
 ORIGINALS = Path(os.environ.get("EDITOR_ORIGINALS") or ROOT / "originales")
-RAW = {".raf", ".dng", ".cr2", ".cr3", ".crw", ".nef", ".nrw", ".arw", ".srf", ".sr2", ".orf", ".rw2", ".raw", ".pef",
-       ".srw", ".x3f", ".3fr", ".fff", ".iiq", ".erf", ".mef", ".mos", ".mrw", ".kdc", ".dcr", ".rwl", ".gpr"}
+RAW = {
+    ".raf",
+    ".dng",
+    ".cr2",
+    ".cr3",
+    ".crw",
+    ".nef",
+    ".nrw",
+    ".arw",
+    ".srf",
+    ".sr2",
+    ".orf",
+    ".rw2",
+    ".raw",
+    ".pef",
+    ".srw",
+    ".x3f",
+    ".3fr",
+    ".fff",
+    ".iiq",
+    ".erf",
+    ".mef",
+    ".mos",
+    ".mrw",
+    ".kdc",
+    ".dcr",
+    ".rwl",
+    ".gpr",
+}
 RASTER = {".tif", ".tiff", ".png", ".heic", ".heif", ".hif", ".avif", ".webp", ".gif", ".bmp", ".psd"}
 LOSSY = {".jpg", ".jpeg", ".jpe", ".jfif"}
 MAX_BYTES = 600 * 1024 * 1024  # un RAW de medio formato entra; un archivo de 2 GB no es una foto

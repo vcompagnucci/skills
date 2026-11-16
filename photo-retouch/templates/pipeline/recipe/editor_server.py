@@ -153,7 +153,9 @@ def master(photo: str, image: str, path: Path, bits: int, sig: tuple) -> np.ndar
         masters.move_to_end((photo, image))
         return cached[1]
     try:
-        img = tifffile.imread(path) if bits == 16 else np.asarray(Image.open(path).convert("RGB")).astype(np.uint16) * 257
+        img = (
+            tifffile.imread(path) if bits == 16 else np.asarray(Image.open(path).convert("RGB")).astype(np.uint16) * 257
+        )
     except Exception as err:  # un archivo a medio escribir puede romper de mil formas
         raise NotReady from err
     if img is None or img.ndim != 3 or img.shape[2] != 3 or source(photo, image)[2] != sig:
@@ -194,7 +196,10 @@ def eye_manifest() -> tuple[dict, tuple]:
     path = EYES / "ojeras.json"
     try:
         s = path.stat()
-        return {"max": 100} | json.loads(path.read_text()), (s.st_mtime_ns, s.st_size)  # sin max: puntas de antes del 200 %
+        return {"max": 100} | json.loads(path.read_text()), (
+            s.st_mtime_ns,
+            s.st_size,
+        )  # sin max: puntas de antes del 200 %
     except FileNotFoundError:
         return {"intensity": 100, "max": 100, "photos": {}}, (0, 0)
     except ValueError as err:  # grade.py lo esta escribiendo
@@ -249,7 +254,9 @@ def blend_eyes(crop: np.ndarray, photo: str, x: int, y: int, levels: int | dict,
             out = crop.copy()  # el recorte es una vista de la maestra en cache
         inside = (slice(y0 - e["y"], y1 - e["y"]), slice(x0 - e["x"], x1 - e["x"]))
         end = eye_patch(photo, e["face"], tag)[inside].astype(np.float32)
-        base = (out[y0 - y : y1 - y, x0 - x : x1 - x] if start is None else eye_patch(photo, e["face"], start)[inside]).astype(np.float32)
+        base = (
+            out[y0 - y : y1 - y, x0 - x : x1 - x] if start is None else eye_patch(photo, e["face"], start)[inside]
+        ).astype(np.float32)
         out[y0 - y : y1 - y, x0 - x : x1 - x] = (base + f * (end - base) + 0.5).astype(np.uint16)
     return crop if out is None else out
 
@@ -281,8 +288,16 @@ def png_with_srgb(data: bytes) -> bytes:
 # de sensor no puede llevar una edicion; esto si. Los datos son los mismos del TIFF pasados a luz lineal: no suma
 # calidad, suma que Lightroom lo abra como RAW. Las matrices son las de sRGB (D65), asi que el balance neutro es 1, 1, 1.
 # Medido: LibRaw lo lee a 2 de 65535 como mucho; el motor RAW de macOS, 0,5 % mas oscuro
-XYZ_TO_SRGB = [[3.2404542, -1.5371385, -0.4985314], [-0.9692660, 1.8760108, 0.0415560], [0.0556434, -0.2040259, 1.0572252]]
-SRGB_TO_XYZ_D50 = [[0.4360747, 0.3850649, 0.1430804], [0.2225045, 0.7168786, 0.0606169], [0.0139322, 0.0971045, 0.7141733]]
+XYZ_TO_SRGB = [
+    [3.2404542, -1.5371385, -0.4985314],
+    [-0.9692660, 1.8760108, 0.0415560],
+    [0.0556434, -0.2040259, 1.0572252],
+]
+SRGB_TO_XYZ_D50 = [
+    [0.4360747, 0.3850649, 0.1430804],
+    [0.2225045, 0.7168786, 0.0606169],
+    [0.0139322, 0.0971045, 0.7141733],
+]
 
 
 def srational(matrix: list[list[float]]) -> list[int]:
@@ -310,8 +325,15 @@ def encode_dng(img: np.ndarray) -> bytes:
     """img: uint16 sRGB. Sin perfil ICC (el color lo dicen las matrices) y sin el tag Orientation."""
     buf = io.BytesIO()
     linear = (TO_LINEAR[img] * 65535 + 0.5).astype(np.uint16)
-    tifffile.imwrite(buf, linear, photometric=tifffile.PHOTOMETRIC.LINEAR_RAW, planarconfig="contig",
-                     subfiletype=0, metadata=None, extratags=DNG_TAGS)
+    tifffile.imwrite(
+        buf,
+        linear,
+        photometric=tifffile.PHOTOMETRIC.LINEAR_RAW,
+        planarconfig="contig",
+        subfiletype=0,
+        metadata=None,
+        extratags=DNG_TAGS,
+    )
     return buf.getvalue()
 
 
@@ -328,14 +350,27 @@ def encode(img: np.ndarray, fmt: str, bits: int) -> bytes:
         return png_with_srgb(cv2.imencode(".png", bgr, [cv2.IMWRITE_PNG_COMPRESSION, 1])[1].tobytes())
     if fmt == "tiff":
         buf = io.BytesIO()
-        extra = {"extrasamples": ["unassalpha"]} if img.shape[2] == 4 else {}  # sin premultiplicar: el color queda entero
-        tifffile.imwrite(buf, img, photometric="rgb", compression="zlib", compressionargs={"level": 3},
-                         predictor=True, iccprofile=ICC, resolution=(300, 300), resolutionunit="INCH", **extra)
+        extra = (
+            {"extrasamples": ["unassalpha"]} if img.shape[2] == 4 else {}
+        )  # sin premultiplicar: el color queda entero
+        tifffile.imwrite(
+            buf,
+            img,
+            photometric="rgb",
+            compression="zlib",
+            compressionargs={"level": 3},
+            predictor=True,
+            iccprofile=ICC,
+            resolution=(300, 300),
+            resolutionunit="INCH",
+            **extra,
+        )
         return buf.getvalue()
     buf = io.BytesIO()
     if fmt == "jpeg":
-        Image.fromarray(img).save(buf, "JPEG", quality=JPEG_QUALITY, subsampling=0, optimize=True, progressive=True,
-                                  icc_profile=ICC)
+        Image.fromarray(img).save(
+            buf, "JPEG", quality=JPEG_QUALITY, subsampling=0, optimize=True, progressive=True, icc_profile=ICC
+        )
         return buf.getvalue()
     # sin perdida con method 0: los mismos pixeles, 3 veces mas rapido y ~25 % mas pesado que method 4
     Image.fromarray(img).save(buf, "WEBP", lossless=True, quality=60, method=0, exact=True, icc_profile=ICC)
@@ -347,7 +382,9 @@ def slug(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")[:40].strip("-")
 
 
-def parse(req: dict) -> tuple[str, str, tuple[int, int, int, int], int | str, str, int | dict | None, dict, dict, str | None, bool, bool]:
+def parse(
+    req: dict,
+) -> tuple[str, str, tuple[int, int, int, int], int | str, str, int | dict | None, dict, dict, str | None, bool, bool]:
     photo, image = req.get("photo"), req.get("image")
     if photo not in PHOTOS or image not in IMAGES:
         raise ValueError("foto invalida")
@@ -372,7 +409,9 @@ def parse(req: dict) -> tuple[str, str, tuple[int, int, int, int], int | str, st
     params = adjust.parse(req.get("adjust"))  # lo que falta vale 0; fuera de rango, ValueError
     bg = backdrop.parse(req.get("background"))
     version = req.get("version")
-    if version is not None and not (isinstance(version, str) and 1 <= len(version) <= 40 and not CONTROL.search(version)):
+    if version is not None and not (
+        isinstance(version, str) and 1 <= len(version) <= 40 and not CONTROL.search(version)
+    ):
         raise ValueError("version invalida")
     if image == "raw":  # el RAW original sale como es: ni ajustes, ni fondo, ni version
         params, bg, version = adjust.parse(None), backdrop.parse(None), None
@@ -386,7 +425,19 @@ def parse(req: dict) -> tuple[str, str, tuple[int, int, int, int], int | str, st
         raise ValueError("el circulo va con una caja cuadrada")
     circle = shape == "circle" and fmt in ALPHA  # JPG y DNG no tienen transparencia: salen cuadrados
     # "!!!" no deja nombre: va como sin version
-    return photo, image, tuple(box), size, fmt, level, params, bg, (slug(version) or None) if version else None, flip, circle
+    return (
+        photo,
+        image,
+        tuple(box),
+        size,
+        fmt,
+        level,
+        params,
+        bg,
+        (slug(version) or None) if version else None,
+        flip,
+        circle,
+    )
 
 
 def take_ticket() -> int:
@@ -414,9 +465,27 @@ def prepare(req: dict, ticket: int) -> dict:
         if any(v > manifest["max"] for v in level.values()):
             raise ValueError("intensidad de ojeras invalida")
         level = {f: level[f] for f in faces}  # en el orden de ojeras.json: la clave del pedido no depende del navegador
-    key = json.dumps([photo, image, x, y, w, h, size, fmt, level, sig, eyes_sig, [params[k] for k in adjust.KEYS],
-                      [bg[k] for k in backdrop.KEYS], bg_sig, version] + ([True] if flip else [])
-                     + (["circle"] if circle else []))  # sin flip ni circulo, la clave de siempre
+    key = json.dumps(
+        [
+            photo,
+            image,
+            x,
+            y,
+            w,
+            h,
+            size,
+            fmt,
+            level,
+            sig,
+            eyes_sig,
+            [params[k] for k in adjust.KEYS],
+            [bg[k] for k in backdrop.KEYS],
+            bg_sig,
+            version,
+        ]
+        + ([True] if flip else [])
+        + (["circle"] if circle else [])
+    )  # sin flip ni circulo, la clave de siempre
     with work:
         if key in by_request and by_request[key]["id"] in files:
             return by_request[key]
@@ -434,8 +503,10 @@ def prepare(req: dict, ticket: int) -> dict:
         # la foto entera ajustada se guarda: con el mismo ajuste, otro formato, tamano o recorte sale de ahi. Cada pixel
         # se calcula igual entero que recortado (export_identical.py lo comprueba)
         # con Flip y fondo, la caida va al otro lado: es otra foto entera
-        look = json.dumps([photo, sig, eyes_sig, level, [params[k] for k in adjust.KEYS], [bg[k] for k in backdrop.KEYS], bg_sig]
-                          + ([True] if flip and with_bg else []))
+        look = json.dumps(
+            [photo, sig, eyes_sig, level, [params[k] for k in adjust.KEYS], [bg[k] for k in backdrop.KEYS], bg_sig]
+            + ([True] if flip and with_bg else [])
+        )
         whole_img = rendered.get(look) if image == "edit" else None
         if whole_img is not None:
             rendered.move_to_end(look)
@@ -467,8 +538,13 @@ def prepare(req: dict, ticket: int) -> dict:
         else:
             moved = {f: v for f, v in level.items() if v != manifest["intensity"]}
             same = set(level.values())
-            eyes = "" if not moved else f"-under-eyes-{level[faces[0]]}" if len(same) == 1 else \
-                "-under-eyes-" + "-".join(f"{f}-{v}" for f, v in moved.items())
+            eyes = (
+                ""
+                if not moved
+                else f"-under-eyes-{level[faces[0]]}"
+                if len(same) == 1
+                else "-under-eyes-" + "-".join(f"{f}-{v}" for f, v in moved.items())
+            )
             tag = ("-adjusted" if adjusted else "") + eyes
         name = f"{photo}{tag}{'-flip' if flip else ''}{'' if whole else '-crop'}-{out_w}x{out_h}{'-circle' if circle else ''}.{ext}"
         fid = uuid.uuid4().hex
@@ -477,9 +553,20 @@ def prepare(req: dict, ticket: int) -> dict:
             gone, _ = files.popitem(last=False)
             for k in [k for k, v in by_request.items() if v["id"] == gone]:
                 del by_request[k]
-        result = {"id": fid, "name": name, "bytes": len(data), "w": out_w, "h": out_h, "bits": min(bits, file_bits),
-                  "under_eyes": level, "adjusted": adjusted, "backdrop": with_bg, "version": version, "flip": flip,
-                  "shape": "circle" if circle else "square"}
+        result = {
+            "id": fid,
+            "name": name,
+            "bytes": len(data),
+            "w": out_w,
+            "h": out_h,
+            "bits": min(bits, file_bits),
+            "under_eyes": level,
+            "adjusted": adjusted,
+            "backdrop": with_bg,
+            "version": version,
+            "flip": flip,
+            "shape": "circle" if circle else "square",
+        }
         by_request[key] = result
         return result
 
@@ -584,7 +671,11 @@ def refresh_photos() -> None:
 
 def mac_busy() -> bool:
     try:
-        level = int(subprocess.run(["sysctl", "-n", "kern.memorystatus_vm_pressure_level"], capture_output=True, text=True).stdout)
+        level = int(
+            subprocess.run(
+                ["sysctl", "-n", "kern.memorystatus_vm_pressure_level"], capture_output=True, text=True
+            ).stdout
+        )
     except ValueError:
         level = 1
     return level >= 4 or os.getloadavg()[0] > LOAD_MAX
@@ -601,8 +692,14 @@ def run_job(key: str) -> None:
     log_path = ROOT / "work" / "imports" / f"{key}.log"
     log_path.parent.mkdir(parents=True, exist_ok=True)
     with open(log_path, "w") as log:
-        child = subprocess.Popen(["nice", "-n", "19", sys.executable, str(Path(__file__).with_name("import_photo.py")), key],
-                                 stdout=subprocess.PIPE, stderr=log, text=True, env=env, cwd=Path(__file__).parent)
+        child = subprocess.Popen(
+            ["nice", "-n", "19", sys.executable, str(Path(__file__).with_name("import_photo.py")), key],
+            stdout=subprocess.PIPE,
+            stderr=log,
+            text=True,
+            env=env,
+            cwd=Path(__file__).parent,
+        )
         for line in child.stdout:
             if line.startswith("STEP "):
                 st["step"] = line[5:].strip()
@@ -645,8 +742,11 @@ def receive(handler, filename: str, length: int) -> dict:
     kind = imports.kind(filename)
     if kind is None:
         ext = Path(filename).suffix.lower()
-        raise ValueError("JPG is off in this project: no JPG at any step" if ext in imports.LOSSY
-                         else f"{ext or 'That file'} isn't an image this editor reads")
+        raise ValueError(
+            "JPG is off in this project: no JPG at any step"
+            if ext in imports.LOSSY
+            else f"{ext or 'That file'} isn't an image this editor reads"
+        )
     if not 0 < length <= imports.MAX_BYTES:
         raise ValueError("That file is too large")
     with imports.editing() as data:
@@ -654,8 +754,14 @@ def receive(handler, filename: str, length: int) -> dict:
         labels = {v.get("label") or imports.label(k) for k, v in {**PHOTOS, **data["photos"]}.items()}
         tab = imports.label(key, labels)
         dest = imports.ORIGINALS / f"{key}{Path(filename).suffix.lower()}"
-        data["photos"][key] = {"file": dest.name, "kind": kind, "label": tab, "name": Path(filename).name[:120],
-                               "added": time.strftime("%Y-%m-%d %H:%M"), "ready": False}
+        data["photos"][key] = {
+            "file": dest.name,
+            "kind": kind,
+            "label": tab,
+            "name": Path(filename).name[:120],
+            "added": time.strftime("%Y-%m-%d %H:%M"),
+            "ready": False,
+        }
     dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_name(f".{dest.name}.part")
     try:
@@ -693,7 +799,12 @@ def import_status() -> dict:
 def resume_imports() -> None:
     """Al arrancar: las que quedaron a medias (el servidor se cerro en el medio) vuelven a la cola."""
     for k, v in load_imports().items():
-        if k not in STUDIO and not v.get("ready") and not v.get("error") and (imports.ORIGINALS / v.get("file", "")).is_file():
+        if (
+            k not in STUDIO
+            and not v.get("ready")
+            and not v.get("error")
+            and (imports.ORIGINALS / v.get("file", "")).is_file()
+        ):
             enqueue(k)
 
 
@@ -813,7 +924,9 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(HTTPStatus.OK, read_versions(), no_store=True)
             except Exception as err:  # corrupto o ilegible: se dice, no se inventa uno vacio
                 self.log_error("versiones: %r", err)
-                return self.send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"error": "versiones.json no se puede leer"}, no_store=True)
+                return self.send_json(
+                    HTTPStatus.INTERNAL_SERVER_ERROR, {"error": "versiones.json no se puede leer"}, no_store=True
+                )
         m = re.fullmatch(r"/api/file/([0-9a-f]{32})", self.path)
         entry = files.get(m.group(1)) if m else None
         if entry is None:

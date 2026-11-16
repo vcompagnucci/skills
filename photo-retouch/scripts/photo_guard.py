@@ -16,6 +16,7 @@ only and does not open subfolders; notes and numbers go to proceso-notas/).
 
 No dependencies. If anything fails it does not block (exit 0).
 """
+
 import json
 import os
 import re
@@ -23,17 +24,55 @@ import sys
 
 PHOTOS = os.path.expanduser(os.environ.get("PHOTO_ROOT") or "~/PHOTOS").rstrip("/")
 HOME = os.path.expanduser("~")
-STATE = os.environ.get("PHOTO_GUARD_STATE") or os.path.expanduser("~/.claude/hooks/state/photo_guard.json")  # files already warned about
+STATE = os.environ.get("PHOTO_GUARD_STATE") or os.path.expanduser(
+    "~/.claude/hooks/state/photo_guard.json"
+)  # files already warned about
 IMAGES = {".png", ".tif", ".tiff", ".jpg", ".jpeg", ".webp", ".gif", ".heic", ".dng", ".exr"}
-_REL = PHOTOS[len(HOME):] if PHOTOS.startswith(HOME + "/") else None  # the root as written from ~
-PROJECT_RE = re.compile((r"(?:(?:~|\$HOME|\$\{HOME\})" + re.escape(_REL) + "|" if _REL else "(?:")
-                        + re.escape(PHOTOS) + r")/([^/\s'\"]+)")
+_REL = PHOTOS[len(HOME) :] if PHOTOS.startswith(HOME + "/") else None  # the root as written from ~
+PROJECT_RE = re.compile(
+    (r"(?:(?:~|\$HOME|\$\{HOME\})" + re.escape(_REL) + "|" if _REL else "(?:") + re.escape(PHOTOS) + r")/([^/\s'\"]+)"
+)
 TMP_RE = re.compile(r"(?<![\w.])(?:/private)?/tmp(?:/[^\s'\"]*)?")
 TMP_OK = ("/tmp/claude-", "/private/tmp/claude-")  # the harness's own task outputs
 JPEG_RE = re.compile(r"jpe?g|\bjfif\b", re.I)
-READ_ONLY = {"find", "ls", "grep", "rg", "pgrep", "stat", "file", "mdls", "test", "[", "wc", "rm", "trash",
-             "open", "du", "head", "tail", "cat", "which", "echo", "sed", "awk", "cd", "pwd", "printf",
-             "basename", "dirname", "realpath", "shasum", "md5", "sort", "uniq", "diff", "cmp", "jq", "less"}
+READ_ONLY = {
+    "find",
+    "ls",
+    "grep",
+    "rg",
+    "pgrep",
+    "stat",
+    "file",
+    "mdls",
+    "test",
+    "[",
+    "wc",
+    "rm",
+    "trash",
+    "open",
+    "du",
+    "head",
+    "tail",
+    "cat",
+    "which",
+    "echo",
+    "sed",
+    "awk",
+    "cd",
+    "pwd",
+    "printf",
+    "basename",
+    "dirname",
+    "realpath",
+    "shasum",
+    "md5",
+    "sort",
+    "uniq",
+    "diff",
+    "cmp",
+    "jq",
+    "less",
+}
 PREFIX = {"do", "then", "else", "!", "{", "(", "time"}  # not the command: look at the next word
 SPLIT_RE = re.compile(r"&&|\|\||(?<![>&])&(?![>&])|[;|\n]")  # a lone & runs the next command too; 2>&1 and &> stay
 
@@ -42,7 +81,7 @@ def projects_in(text: str, cwd: str) -> set:
     found = {m.group(1) for m in PROJECT_RE.finditer(text or "")}
     for path in (cwd or "",):
         if path.startswith(PHOTOS + "/"):
-            found.add(path[len(PHOTOS) + 1:].split("/")[0])
+            found.add(path[len(PHOTOS) + 1 :].split("/")[0])
     return {p for p in found if os.path.isdir(os.path.join(PHOTOS, p))}
 
 
@@ -54,8 +93,9 @@ def tmp_paths(text: str) -> list:
     return [m.group(0) for m in TMP_RE.finditer(text or "") if not m.group(0).startswith(TMP_OK)]
 
 
-TEXT_HEREDOC_RE = re.compile(r"^([^\n]*\b(?:cat|tee)\b[^\n]*<<-?\s*['\"]?(\w+)['\"]?[^\n]*\n)(.*?\n)?\2[ \t]*$",
-                             re.M | re.S)
+TEXT_HEREDOC_RE = re.compile(
+    r"^([^\n]*\b(?:cat|tee)\b[^\n]*<<-?\s*['\"]?(\w+)['\"]?[^\n]*\n)(.*?\n)?\2[ \t]*$", re.M | re.S
+)
 
 
 def drop_text_heredocs(cmd: str) -> str:
@@ -95,10 +135,13 @@ def runs_ref_import(segment: str) -> bool:
     if re.search(r"\$\(|`|<\(|>\(", segment) or "&" in re.sub(r"\d*>&\d+", "", segment):
         return False
     words = [w.lstrip("({") for w in segment.split()]
-    while words and (re.match(r"^\w+=", words[0]) or words[0] in PREFIX | {"", "nice", "-n", "env", "exec"}
-                     or words[0].isdigit()):
+    while words and (
+        re.match(r"^\w+=", words[0]) or words[0] in PREFIX | {"", "nice", "-n", "env", "exec"} or words[0].isdigit()
+    ):
         words.pop(0)
-    return len(words) > 1 and os.path.basename(words[0]).startswith("python") and words[1].endswith("tools/ref_import.py")
+    return (
+        len(words) > 1 and os.path.basename(words[0]).startswith("python") and words[1].endswith("tools/ref_import.py")
+    )
 
 
 def writes_jpeg(segment: str) -> bool:
@@ -113,11 +156,17 @@ def writes_jpeg(segment: str) -> bool:
 
 
 def deny(reason: str) -> None:
-    print(json.dumps({"hookSpecificOutput": {
-        "hookEventName": "PreToolUse",
-        "permissionDecision": "deny",
-        "permissionDecisionReason": reason,
-    }}))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": reason,
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 
@@ -130,20 +179,30 @@ def pre(tool: str, inp: dict, cwd: str) -> None:
             return
         tmp = [t for seg in SPLIT_RE.split(cmd) if writes_tmp(seg) for t in tmp_paths(seg)]
         if tmp:
-            deny(f"photo_guard: this command touches a photo project and uses {tmp[0]}. macOS clears /tmp: "
-                 "process images go to <project>/proceso/, notes and numbers to proceso-notas/, "
-                 "regenerable scratch to work/.")
+            deny(
+                f"photo_guard: this command touches a photo project and uses {tmp[0]}. macOS clears /tmp: "
+                "process images go to <project>/proceso/, notes and numbers to proceso-notas/, "
+                "regenerable scratch to work/."
+            )
         blocked = [p for p in projects if sin_jpg(p)]
         if blocked and any(writes_jpeg(seg) for seg in SPLIT_RE.split(cmd)):
-            deny(f"photo_guard: {blocked[0]} has .sin-jpg (the brief said no JPG) and this command "
-                 "mentions JPEG. No step, previews included, produces JPEG: use PNG or TIFF. If you "
-                 "are only reading or searching, start the segment with find, ls, grep, cat or test.")
+            deny(
+                f"photo_guard: {blocked[0]} has .sin-jpg (the brief said no JPG) and this command "
+                "mentions JPEG. No step, previews included, produces JPEG: use PNG or TIFF. If you "
+                "are only reading or searching, start the segment with find, ls, grep, cat or test."
+            )
         return
     path = inp.get("file_path", "")
     content = inp.get("content", "") or inp.get("new_string", "")
-    if path.startswith(("/tmp/", "/private/tmp/")) and not path.startswith(TMP_OK) and (PHOTOS in content or (_REL and _REL in content)):
-        deny(f"photo_guard: {path} is in /tmp and its content touches a photo project. macOS clears /tmp: "
-             "scripts go to <project>/recipe/ or tools/, images to proceso/.")
+    if (
+        path.startswith(("/tmp/", "/private/tmp/"))
+        and not path.startswith(TMP_OK)
+        and (PHOTOS in content or (_REL and _REL in content))
+    ):
+        deny(
+            f"photo_guard: {path} is in /tmp and its content touches a photo project. macOS clears /tmp: "
+            "scripts go to <project>/recipe/ or tools/, images to proceso/."
+        )
     for p in projects_in(path, ""):
         if sin_jpg(p) and os.path.splitext(path)[1].lower() in (".jpg", ".jpeg"):
             deny(f"photo_guard: {p} has .sin-jpg: no JPEG file in the project. Use PNG or TIFF.")
@@ -156,7 +215,10 @@ def violations(project: str) -> list:
     for dirpath, dirs, files in os.walk(proceso):
         dirs[:] = [d for d in dirs if not d.startswith(".")]
         if dirpath == proceso:
-            out += [("folder inside proceso/ (keep it flat: the group is a filename prefix)", os.path.join(dirpath, d)) for d in dirs]
+            out += [
+                ("folder inside proceso/ (keep it flat: the group is a filename prefix)", os.path.join(dirpath, d))
+                for d in dirs
+            ]
         for f in files:
             if not f.startswith(".") and os.path.splitext(f)[1].lower() not in IMAGES:
                 out.append(("not an image in proceso/", os.path.join(dirpath, f)))
@@ -188,13 +250,17 @@ def post(tool: str, inp: dict, cwd: str) -> None:
     lines = [f"- {why}: {path}" for why, path in new[:20]]
     if len(new) > 20:
         lines.append(f"- and {len(new) - 20} more")
-    print(json.dumps({
-        "decision": "block",
-        "reason": "photo_guard (one warning per file):\n" + "\n".join(lines) + "\n"
-                  "Process images go to proceso/; notes and numbers to proceso-notas/ (same group "
-                  "name); a script that is run again, to tools/. In a .sin-jpg project, redo it as PNG or TIFF. "
-                  "If the file is not yours, tell the user instead of moving it.",
-    }))
+    print(
+        json.dumps(
+            {
+                "decision": "block",
+                "reason": "photo_guard (one warning per file):\n" + "\n".join(lines) + "\n"
+                "Process images go to proceso/; notes and numbers to proceso-notas/ (same group "
+                "name); a script that is run again, to tools/. In a .sin-jpg project, redo it as PNG or TIFF. "
+                "If the file is not yours, tell the user instead of moving it.",
+            }
+        )
+    )
 
 
 def main() -> None:

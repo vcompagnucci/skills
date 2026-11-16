@@ -53,7 +53,12 @@ def find(master8: np.ndarray, white8: np.ndarray, light: dict) -> tuple[np.ndarr
     h, w = same.shape
     light = cv2.resize(wall_light(rgb, same.astype(np.float32)), (w, h), interpolation=cv2.INTER_LINEAR)
     d = lab(rgb) - lab(light)
-    wallish = (d[..., 0] > -WALLISH[0]) & (d[..., 0] < WALLISH[1]) & (np.abs(d[..., 1]) < WALLISH[2]) & (np.abs(d[..., 2]) < WALLISH[3])
+    wallish = (
+        (d[..., 0] > -WALLISH[0])
+        & (d[..., 0] < WALLISH[1])
+        & (np.abs(d[..., 1]) < WALLISH[2])
+        & (np.abs(d[..., 2]) < WALLISH[3])
+    )
     miss = cv2.morphologyEx((wallish & same).astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
     n, labels, stats, _ = cv2.connectedComponentsWithStats(miss)
     keep = [i for i in range(1, n) if stats[i, 4] >= MIN_AREA * h * w]
@@ -61,15 +66,25 @@ def find(master8: np.ndarray, white8: np.ndarray, light: dict) -> tuple[np.ndarr
 
 
 def main(name: str, preview: bool) -> dict:
-    src = (PREVIEW / f"{name}-maestra.png", PREVIEW / f"{name}-white.png") if preview else (EDITED / f"{name}.png", EDITED / f"{name}-white.png")
+    src = (
+        (PREVIEW / f"{name}-maestra.png", PREVIEW / f"{name}-white.png")
+        if preview
+        else (EDITED / f"{name}.png", EDITED / f"{name}-white.png")
+    )
     master8, white8 = load(src[0]), load(src[1])
     light = {k: v for k, v in STYLES["white"]["light"].items()}  # el resto de preset() es del fondo
     labels, zones = find(master8, white8, light)
     h, w = labels.shape
-    report = {"photo": name, "size": [h, w], "zones": [{"box": [x, y, x + bw, y + bh], "area": a} for _, x, y, bw, bh, a in zones]}
+    report = {
+        "photo": name,
+        "size": [h, w],
+        "zones": [{"box": [x, y, x + bw, y + bh], "area": a} for _, x, y, bw, bh, a in zones],
+    }
     print(f"{name}: {len(zones)} zonas, {sum(z[5] for z in zones)} px")
     for _, x, y, bw, bh, a in zones[:12]:
-        print(f"   x {x}-{x + bw} y {y}-{y + bh} area {a}  ({x / w:.2f},{y / h:.2f})-({(x + bw) / w:.2f},{(y + bh) / h:.2f})")
+        print(
+            f"   x {x}-{x + bw} y {y}-{y + bh} area {a}  ({x / w:.2f},{y / h:.2f})-({(x + bw) / w:.2f},{(y + bh) / h:.2f})"
+        )
     tag = "-piloto" if preview else ""
     notes = NOTES / "estilos"
     notes.mkdir(parents=True, exist_ok=True)

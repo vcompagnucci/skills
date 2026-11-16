@@ -72,7 +72,11 @@ def main(name: str) -> None:
     sheet.paste(over, (8, rows * (TILE + 24) + 8))
     out = PROCESS / "21-pared" / f"{name}-color.png"
     sheet.save(out)
-    print(out.name, sheet.size, f"{len(picks)} manchas; zona corregida {float((amount > 0.5).mean()) * 100:.0f} % de la foto")
+    print(
+        out.name,
+        sheet.size,
+        f"{len(picks)} manchas; zona corregida {float((amount > 0.5).mean()) * 100:.0f} % de la foto",
+    )
 
 
 if __name__ == "__main__":

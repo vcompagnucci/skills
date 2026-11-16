@@ -35,7 +35,11 @@ GATE = ROOT / "work" / "gate"
 
 
 def write_png(path: Path, srgb: np.ndarray) -> None:
-    cv2.imwrite(str(path), cv2.cvtColor((srgb * 255 + 0.5).astype(np.uint8), cv2.COLOR_RGB2BGR), [cv2.IMWRITE_PNG_COMPRESSION, 1])
+    cv2.imwrite(
+        str(path),
+        cv2.cvtColor((srgb * 255 + 0.5).astype(np.uint8), cv2.COLOR_RGB2BGR),
+        [cv2.IMWRITE_PNG_COMPRESSION, 1],
+    )
 
 
 def render_case(name: str, key: str, out: Path) -> None:
@@ -54,7 +58,9 @@ def render_case(name: str, key: str, out: Path) -> None:
     del base
     write_png(out / f"{name}-{key}-pared-si-final.png", master)
     del master
-    np.savez_compressed(out / f"{name}-alpha.npz", alpha=scene.alpha.astype(np.float16), skin=scene.skin.astype(np.float16))
+    np.savez_compressed(
+        out / f"{name}-alpha.npz", alpha=scene.alpha.astype(np.float16), skin=scene.skin.astype(np.float16)
+    )
     del scene
     build_scene.cache_clear()  # una foto entera por vez en memoria
     print(f"{name} {key} -> {out}", flush=True)
@@ -70,7 +76,9 @@ def main(argv: list[str]) -> None:
     for case in args.cases:
         name, sep, key = case.rpartition(":")
         if not sep or name not in PHOTOS or key not in keys:
-            ap.error(f"{case!r}: tiene que ser <foto>:<estilo>, con la foto en photos.py y el estilo uno de {', '.join(keys)}")
+            ap.error(
+                f"{case!r}: tiene que ser <foto>:<estilo>, con la foto en photos.py y el estilo uno de {', '.join(keys)}"
+            )
         cases.append((name, key))
     args.out.mkdir(parents=True, exist_ok=True)
     for name, key in cases:

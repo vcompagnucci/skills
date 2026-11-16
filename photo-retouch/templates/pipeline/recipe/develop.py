@@ -23,9 +23,7 @@ from common import PHOTO_NAMES, ROOT, luminance, save_linear
 from photos import PHOTOS
 
 # sRGB (D65) -> XYZ, la misma tabla que usa LibRaw
-XYZ_RGB = np.array(
-    [[0.412453, 0.357580, 0.180423], [0.212671, 0.715160, 0.072169], [0.019334, 0.119193, 0.950227]]
-)
+XYZ_RGB = np.array([[0.412453, 0.357580, 0.180423], [0.212671, 0.715160, 0.072169], [0.019334, 0.119193, 0.950227]])
 
 
 def rgb_cam(raw: rawpy.RawPy) -> np.ndarray:
@@ -61,8 +59,13 @@ def frac_box(box: tuple[float, float, float, float], shape: tuple[int, int]) -> 
 def wall_white_balance(raw: rawpy.RawPy, name: str) -> list[float]:
     """Multiplicadores que dejan la pared neutra, medidos en camara RGB sin balancear (media resolucion)."""
     cam = raw.postprocess(
-        half_size=True, user_wb=[1, 1, 1, 1], output_color=rawpy.ColorSpace.raw,
-        no_auto_bright=True, gamma=(1, 1), output_bps=16, highlight_mode=rawpy.HighlightMode.Clip,
+        half_size=True,
+        user_wb=[1, 1, 1, 1],
+        output_color=rawpy.ColorSpace.raw,
+        no_auto_bright=True,
+        gamma=(1, 1),
+        output_bps=16,
+        highlight_mode=rawpy.HighlightMode.Clip,
     ).astype(np.float32)
     samples = []
     for box in PHOTOS[name]["wall"]:

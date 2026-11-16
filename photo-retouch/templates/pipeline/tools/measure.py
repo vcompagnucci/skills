@@ -16,7 +16,7 @@ from photos import PHOTOS  # noqa: E402
 
 
 def load(name: str, suffix: str) -> np.ndarray:
-    """"final" = la salida de 16 bits de editadas/, vuelta a lineal."""
+    """ "final" = la salida de 16 bits de editadas/, vuelta a lineal."""
     if suffix == "final":
         import tifffile
 
@@ -30,7 +30,9 @@ def main(suffix: str, names: list[str]) -> None:
     for name in names:
         img = load(name, suffix)
         walls = [np.median(luminance(img[frac_box(b, img.shape[:2])])) for b in PHOTOS[name]["wall"]]
-        print(f"{name} pared Y {' '.join(f'{w:.3f}' for w in walls)}  (L* {' '.join(f'{lightness(w):.1f}' for w in walls)})")
+        print(
+            f"{name} pared Y {' '.join(f'{w:.3f}' for w in walls)}  (L* {' '.join(f'{lightness(w):.1f}' for w in walls)})"
+        )
         for face in PHOTOS[name]["faces"]:
             sy, sx = window(face, img.shape[:2])
             crop = img[sy, sx]

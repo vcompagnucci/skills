@@ -46,9 +46,22 @@ PHOTOS = {
         # pared en sombra entre el pelo y una remera negra, adentro de la elipse de la cabeza: el recuadro decide
         "backdrop_sure": [(2380, 2600, 2560, 3040)],
         # una zapatilla blanca en sombra con el gris de la pared: persona segura, el poligono 2 px adentro del borde
-        "backdrop_keep": [[(1480, 5500), (1700, 5500), (1780, 5600), (1790, 5800), (1840, 6050), (1880, 6070),
-                           (1880, 6246), (1480, 6246)]],
-        "blacks": [(700, 2300, 1100, 2900), (2900, 2900, 3300, 3500)],  # ropa negra con luz pareja (x0, y0, x1, y1): el negro de la medida de estilos
+        "backdrop_keep": [
+            [
+                (1480, 5500),
+                (1700, 5500),
+                (1780, 5600),
+                (1790, 5800),
+                (1840, 6050),
+                (1880, 6070),
+                (1880, 6246),
+                (1480, 6246),
+            ]
+        ],
+        "blacks": [
+            (700, 2300, 1100, 2900),
+            (2900, 2900, 3300, 3500),
+        ],  # ropa negra con luz pareja (x0, y0, x1, y1): el negro de la medida de estilos
         # granos y marcas rojas (x, y, radio): uno en el menton y dos puntos rojos de una mejilla
         "spots": [(1650, 2870, 6), (2690, 1780, 5), (2720, 1830, 5)],
         "kept": [(2740, 1820, 3)],  # una peca: queda
@@ -82,7 +95,13 @@ PHOTOS = {
                 "id": "persona-2",
                 "lids": [[(2730, 1780), (2765, 1786), (2810, 1778)], [(2935, 1768), (2970, 1774), (3010, 1770)]],
                 # la ojera esta del lado del lagrimal, pegada a las pestanas; el ojo de atras va en sombra
-                "under_eye": {"depth": 0.75, "span": 0.66, "shift": 0.15, "reach_lashes": True, "eyes": [{}, {"light": 0.3, "color": 0.4}]},
+                "under_eye": {
+                    "depth": 0.75,
+                    "span": 0.66,
+                    "shift": 0.15,
+                    "reach_lashes": True,
+                    "eyes": [{}, {"light": 0.3, "color": 0.4}],
+                },
                 "teeth": True,  # sonrie con los dientes a la vista
                 "oval": (2880, 1880, 240, 320),
                 "features": [
@@ -111,7 +130,9 @@ def _imports_path():
     import os
     from pathlib import Path
 
-    return Path(os.environ.get("EDITOR_IMPORTS") or Path(__file__).resolve().parent.parent / "editadas" / "importadas.json")
+    return Path(
+        os.environ.get("EDITOR_IMPORTS") or Path(__file__).resolve().parent.parent / "editadas" / "importadas.json"
+    )
 
 
 def load_imports() -> dict:

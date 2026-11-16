@@ -74,14 +74,17 @@ def lab_to_linear(lab_img: np.ndarray) -> np.ndarray:
     fy = (L + 16) / 116
     fx, fz = fy + a / 500, fy - b / 200
     eps, kappa = 216 / 24389, 24389 / 27
-    xyz = np.stack(
-        [
-            np.where(fx**3 > eps, fx**3, (116 * fx - 16) / kappa),
-            np.where(L > kappa * eps, fy**3, L / kappa),
-            np.where(fz**3 > eps, fz**3, (116 * fz - 16) / kappa),
-        ],
-        -1,
-    ) * _WHITE
+    xyz = (
+        np.stack(
+            [
+                np.where(fx**3 > eps, fx**3, (116 * fx - 16) / kappa),
+                np.where(L > kappa * eps, fy**3, L / kappa),
+                np.where(fz**3 > eps, fz**3, (116 * fz - 16) / kappa),
+            ],
+            -1,
+        )
+        * _WHITE
+    )
     return (xyz @ np.linalg.inv(_RGB2XYZ).T.astype(np.float32)).astype(np.float32)
 
 

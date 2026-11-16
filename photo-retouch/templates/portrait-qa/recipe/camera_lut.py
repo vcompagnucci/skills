@@ -39,7 +39,11 @@ def corners(x: np.ndarray, n: int) -> tuple[np.ndarray, np.ndarray]:
         for dg in (0, 1):
             for db in (0, 1):
                 idx[:, k] = ((i0[:, 0] + dr) * n + (i0[:, 1] + dg)) * n + (i0[:, 2] + db)
-                wt[:, k] = (f[:, 0] if dr else 1 - f[:, 0]) * (f[:, 1] if dg else 1 - f[:, 1]) * (f[:, 2] if db else 1 - f[:, 2])
+                wt[:, k] = (
+                    (f[:, 0] if dr else 1 - f[:, 0])
+                    * (f[:, 1] if dg else 1 - f[:, 1])
+                    * (f[:, 2] if db else 1 - f[:, 2])
+                )
                 k += 1
     return idx, wt
 

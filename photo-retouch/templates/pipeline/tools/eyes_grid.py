@@ -55,7 +55,13 @@ def main(name: str) -> None:
             ang = np.radians(e[4] if len(e) > 4 else 0)
             t = np.linspace(0, 2 * np.pi, 90)
             u, v = ex * np.cos(t), ey * np.sin(t)
-            pts = [((cx + u_ * np.cos(ang) - v_ * np.sin(ang) - x0) * zoom, (cy + u_ * np.sin(ang) + v_ * np.cos(ang) - y0) * zoom) for u_, v_ in zip(u, v)]
+            pts = [
+                (
+                    (cx + u_ * np.cos(ang) - v_ * np.sin(ang) - x0) * zoom,
+                    (cy + u_ * np.sin(ang) + v_ * np.cos(ang) - y0) * zoom,
+                )
+                for u_, v_ in zip(u, v)
+            ]
             d.line(pts + [pts[0]], fill=(255, 214, 10, 200), width=1)
         out = PROCESS / "31-ojeras" / f"{name}-{face['id']}-grilla.png"
         out.parent.mkdir(parents=True, exist_ok=True)

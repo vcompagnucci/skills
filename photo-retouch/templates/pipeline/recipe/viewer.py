@@ -36,7 +36,9 @@ TO_LINEAR_8 = TO_LINEAR[np.arange(256) * 257]  # el RAW es de 8 bits: los mismos
 def eye_manifest() -> dict:
     """Donde va cada parche de ojeras, a que intensidad salio la final y hasta donde llega el control."""
     path = EYES / "ojeras.json"
-    return {"max": 100} | json.loads(path.read_text()) if path.exists() else {"intensity": 100, "max": 100, "photos": {}}
+    return (
+        {"max": 100} | json.loads(path.read_text()) if path.exists() else {"intensity": 100, "max": 100, "photos": {}}
+    )
 
 
 def screen(src, out) -> None:
@@ -79,9 +81,16 @@ def editor_layers(n: str) -> None:
     """Lo que el editor lee del fondo de una foto, a 8 bits: la capa a la escala de pantalla (promediada como en el
     piloto, backdrop.layers_at) y entera, y la luz de la pared. Lo que esta al dia no se rehace."""
     capa, luz = backdrop.layer_paths(n)
-    outs = {"pantalla": SCREENS / f"{n}-capa.png", "entera": backdrop.LAYERS / f"{n}-capa-editor.png",
-            "luz": backdrop.LAYERS / f"{n}-luz-editor.png"}
-    stale = [k for k, out in outs.items() if not out.exists() or out.stat().st_mtime < (luz if k == "luz" else capa).stat().st_mtime]
+    outs = {
+        "pantalla": SCREENS / f"{n}-capa.png",
+        "entera": backdrop.LAYERS / f"{n}-capa-editor.png",
+        "luz": backdrop.LAYERS / f"{n}-luz-editor.png",
+    }
+    stale = [
+        k
+        for k, out in outs.items()
+        if not out.exists() or out.stat().st_mtime < (luz if k == "luz" else capa).stat().st_mtime
+    ]
     if not stale:
         print(f"{n}: fondo del editor al dia")
         return
@@ -89,7 +98,9 @@ def editor_layers(n: str) -> None:
     h, w = layers.alpha16.shape
     long = max(h, w)
     if "pantalla" in stale:
-        write_png8(layer8(*backdrop.layers_at(layers, (round(w * SCREEN / long), round(h * SCREEN / long)))), outs["pantalla"])
+        write_png8(
+            layer8(*backdrop.layers_at(layers, (round(w * SCREEN / long), round(h * SCREEN / long)))), outs["pantalla"]
+        )
     if "entera" in stale:
         write_png8(layer8(layers.alpha16, layers.behind16), outs["entera"])
     if "luz" in stale:
@@ -101,7 +112,10 @@ def screens() -> None:
     """Las imagenes de editadas/pantalla/, de a una foto; las que estan al dia no se rehacen."""
     cv2.setNumThreads(2)
     for n in visible():
-        for src, out in ((EDITED / f"{n}.tif", SCREENS / f"{n}.png"), (EDITED / f"{n}-antes.png", SCREENS / f"{n}-antes.png")):
+        for src, out in (
+            (EDITED / f"{n}.tif", SCREENS / f"{n}.png"),
+            (EDITED / f"{n}-antes.png", SCREENS / f"{n}-antes.png"),
+        ):
             if out.exists() and out.stat().st_mtime >= src.stat().st_mtime:
                 print(f"{out.name}: al dia")
                 continue
@@ -121,12 +135,16 @@ def bases(eyes: dict) -> None:
     for n in visible():
         src = EDITED / f"{n}.png"
         newest = max(src.stat().st_mtime, manifest)
-        todo = [e for e in eyes["photos"].get(n, []) if not (base(n, e).exists() and base(n, e).stat().st_mtime >= newest)]
+        todo = [
+            e for e in eyes["photos"].get(n, []) if not (base(n, e).exists() and base(n, e).stat().st_mtime >= newest)
+        ]
         if not todo:
             continue
         with Image.open(src) as im:
             for e in todo:
-                im.crop((e["x"], e["y"], e["x"] + e["w"], e["y"] + e["h"])).save(base(n, e), icc_profile=im.info.get("icc_profile"))
+                im.crop((e["x"], e["y"], e["x"] + e["w"], e["y"] + e["h"])).save(
+                    base(n, e), icc_profile=im.info.get("icc_profile")
+                )
                 print(f"{base(n, e).name}: escrita", flush=True)
 
 
@@ -145,10 +163,24 @@ def photo(n: str, eyes: dict) -> dict:
         if not thumb.exists() or thumb.stat().st_mtime < src.stat().st_mtime:
             ImageOps.fit(im, (THUMB, THUMB), Image.LANCZOS).save(thumb, icc_profile=im.info.get("icc_profile"))
     capa, luz = backdrop.layer_paths(n)
-    made = [SCREENS / f"{n}-capa.png", backdrop.LAYERS / f"{n}-capa-editor.png", backdrop.LAYERS / f"{n}-luz-editor.png"]
-    top = backdrop.top_lightness(TO_LINEAR[backdrop.read_png16(luz)]) if all(f.exists() for f in [capa, luz, *made]) else None
-    return {"key": n, "label": PHOTOS[n].get("label") or imports.label(n), "w": w, "h": h, "eyes": eyes["photos"].get(n, []),
-            "top": None if top is None else round(float(top), 4)}
+    made = [
+        SCREENS / f"{n}-capa.png",
+        backdrop.LAYERS / f"{n}-capa-editor.png",
+        backdrop.LAYERS / f"{n}-luz-editor.png",
+    ]
+    top = (
+        backdrop.top_lightness(TO_LINEAR[backdrop.read_png16(luz)])
+        if all(f.exists() for f in [capa, luz, *made])
+        else None
+    )
+    return {
+        "key": n,
+        "label": PHOTOS[n].get("label") or imports.label(n),
+        "w": w,
+        "h": h,
+        "eyes": eyes["photos"].get(n, []),
+        "top": None if top is None else round(float(top), 4),
+    }
 
 
 def visible() -> list[str]:
@@ -162,15 +194,26 @@ def page_html(names: list[str]) -> str:
     eyes = eye_manifest()
     data = {
         # cambia con cada pasada: sin esto el navegador puede seguir mostrando las editadas viejas
-        "version": int(max(f.stat().st_mtime for f in [*EDITED.glob("*.png"), *EYES.glob("*.png"), *SCREENS.glob("*.png"),
-                                                        *backdrop.LAYERS.glob("*.png")])),
+        "version": int(
+            max(
+                f.stat().st_mtime
+                for f in [
+                    *EDITED.glob("*.png"),
+                    *EYES.glob("*.png"),
+                    *SCREENS.glob("*.png"),
+                    *backdrop.LAYERS.glob("*.png"),
+                ]
+            )
+        ),
         "screen": SCREEN,
         "eyes": {"default": eyes["intensity"], "max": eyes["max"]},
         "photos": [photo(n, eyes) for n in names],
         # el punto de partida del panel de cada foto (recipe/equivalents.py); sin el archivo, el panel arranca en 0
         "starts": {n: v for n, v in equivalents.load_starts().items() if n in names},
     }
-    return (ROOT / "recipe" / "viewer_template.html").read_text().replace("/*DATA*/", json.dumps(data, ensure_ascii=False))
+    return (
+        (ROOT / "recipe" / "viewer_template.html").read_text().replace("/*DATA*/", json.dumps(data, ensure_ascii=False))
+    )
 
 
 def main() -> None:

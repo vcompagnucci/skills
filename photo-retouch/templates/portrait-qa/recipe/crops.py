@@ -95,7 +95,11 @@ def run(name: str, extra: tuple[float, float, int] | None = None) -> None:
             c = crop(img, x, y, side)
             cv2.imwrite(str(zooms / f"{zone}-{key}.jpg"), c, [cv2.IMWRITE_JPEG_QUALITY, 95])
             tiles.append(label(cv2.resize(c, (400, 400), interpolation=cv2.INTER_AREA), key))
-        cv2.imwrite(str(process_file("qa-v7", f"{name}-{zone}-tira.jpg")), np.concatenate(tiles, axis=1), [cv2.IMWRITE_JPEG_QUALITY, 92])
+        cv2.imwrite(
+            str(process_file("qa-v7", f"{name}-{zone}-tira.jpg")),
+            np.concatenate(tiles, axis=1),
+            [cv2.IMWRITE_JPEG_QUALITY, 92],
+        )
     print(name, ", ".join(f"{z} ({x},{y})" for z, (x, y) in zs.items()))
 
 

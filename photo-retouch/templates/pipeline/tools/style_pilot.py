@@ -56,8 +56,10 @@ def regions(name: str, lin: np.ndarray):
 def line(tag: str, m: dict) -> str:
     w, s, b, t = m["wall"], m["skin"], m["black"], m["tone"]
     each = "/".join(f"{v:.0f}" for v in w["each"])
-    return (f"{tag:9s} pared {each:>9s} a{w['a']:+4.1f} b{w['b']:+4.1f} | piel {s['p10']:3.0f} {s['p50']:3.0f} {s['p90']:3.0f} {s['p98']:3.0f}"
-            f" a{s['a']:5.1f} b{s['b']:5.1f} C{s['C']:5.1f} h{s['h']:3.0f} | negro {b["p5"]:4.1f} {b["p50"]:4.1f} a{b["a"]:+4.1f} b{b["b"]:+4.1f} | p1 {t[0]:3.1f} p99 {t[4]:3.0f}")
+    return (
+        f"{tag:9s} pared {each:>9s} a{w['a']:+4.1f} b{w['b']:+4.1f} | piel {s['p10']:3.0f} {s['p50']:3.0f} {s['p90']:3.0f} {s['p98']:3.0f}"
+        f" a{s['a']:5.1f} b{s['b']:5.1f} C{s['C']:5.1f} h{s['h']:3.0f} | negro {b['p5']:4.1f} {b['p50']:4.1f} a{b['a']:+4.1f} b{b['b']:+4.1f} | p1 {t[0]:3.1f} p99 {t[4]:3.0f}"
+    )
 
 
 def thumb(lin: np.ndarray, height: int) -> Image.Image:

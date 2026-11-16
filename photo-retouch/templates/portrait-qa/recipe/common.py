@@ -66,8 +66,19 @@ def to_uint16(srgb: np.ndarray) -> np.ndarray:
 def save_tiff16(srgb: np.ndarray, path: Path) -> None:
     """La maestra sin perdida: 16 bits por canal, sRGB con su perfil. De aca salen las exportaciones."""
     data = to_uint16(srgb)
-    write_atomically(path, lambda tmp: tifffile.imwrite(tmp, data, photometric="rgb", compression="zlib", predictor=True,
-                                                         iccprofile=srgb_icc(), resolution=(72, 72), resolutionunit="INCH"))
+    write_atomically(
+        path,
+        lambda tmp: tifffile.imwrite(
+            tmp,
+            data,
+            photometric="rgb",
+            compression="zlib",
+            predictor=True,
+            iccprofile=srgb_icc(),
+            resolution=(72, 72),
+            resolutionunit="INCH",
+        ),
+    )
 
 
 def contact_sheet(tiles: list[tuple[str, np.ndarray]], path: Path, height: int = 900) -> None:

@@ -24,13 +24,17 @@ alpha = upsample_alpha(img, small, face_ellipse(geo))
 np.save(ROOT / "work" / f"{name}-alpha-check.npy", alpha.astype(np.float16))
 scale = float(np.percentile(img @ [0.2126, 0.7152, 0.0722], 99.5))
 B = wall_behind(img, alpha).astype(np.float32)
-srgb = lambda x: np.clip(np.where(x <= 0.0031308, 12.92 * x, 1.055 * np.power(np.clip(x, 0, None), 1 / 2.4) - 0.055), 0, 1)  # noqa: E731
+srgb = lambda x: np.clip(
+    np.where(x <= 0.0031308, 12.92 * x, 1.055 * np.power(np.clip(x, 0, None), 1 / 2.4) - 0.055), 0, 1
+)  # noqa: E731
 rows = []
 for x, y in pts:
     sl = (slice(y - 90, y + 90), slice(x - 90, x + 90))
     I, a = img[sl] / scale, alpha[sl]
     lit = I + ((1 - a) * 1.4)[..., None] * B[sl] / scale
     tiles = [srgb(I), srgb(lit), np.repeat(a[..., None], 3, 2)]
-    row = np.concatenate([cv2.resize((t * 255).astype(np.uint8), (360, 360), interpolation=cv2.INTER_NEAREST) for t in tiles], 1)
+    row = np.concatenate(
+        [cv2.resize((t * 255).astype(np.uint8), (360, 360), interpolation=cv2.INTER_NEAREST) for t in tiles], 1
+    )
     rows.append(cv2.cvtColor(row, cv2.COLOR_RGB2BGR))
 cv2.imwrite(str(ROOT / "proceso" / f"alpha-check-{name}.png"), np.concatenate(rows, 0))  # proceso/ no tiene carpetas

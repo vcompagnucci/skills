@@ -22,7 +22,15 @@ sys.path.insert(0, str(ROOT / "recipe"))
 import editor_server as es  # noqa: E402
 from photos import STUDIO  # noqa: E402
 
-ADJUST = {"exposure": 0.29, "contrast": 5, "highlights": -20, "shadows": 20, "whites": -8, "blacks": -10, "vibrance": 10}
+ADJUST = {
+    "exposure": 0.29,
+    "contrast": 5,
+    "highlights": -20,
+    "shadows": 20,
+    "whites": -8,
+    "blacks": -10,
+    "vibrance": 10,
+}
 BG = {"exposure": 0.62, "evenness": 100, "smoothing": 100, "saturation": -100}
 # las fotos: las tres primeras de la sesion (recipe/photos.py); con menos, se repiten. Los recortes van en fracciones
 # del ancho y el alto de la maestra (x0, y0, ancho, alto), asi sirven en cualquier foto
@@ -52,16 +60,30 @@ def main() -> None:
         path, bits, sig = es.source(photo, "edit")
         W, H = es.master(photo, "edit", path, bits, sig).shape[1::-1]
         b = [round(f * d) for f, d in zip(box, (W, H, W, H))] if box else [0, 0, W, H]
-        req = {"photo": photo, "image": "edit", "box": b, "size": size, "format": fmt, "under_eyes": 70, "adjust": ADJUST,
-               "background": BG if bg else {}, "version": "identical"}
+        req = {
+            "photo": photo,
+            "image": "edit",
+            "box": b,
+            "size": size,
+            "format": fmt,
+            "under_eyes": 70,
+            "adjust": ADJUST,
+            "background": BG if bg else {},
+            "version": "identical",
+        }
         t = time.perf_counter()
         meta = es.prepare(req, es.take_ticket())
         dt = time.perf_counter() - t
         data = es.files[meta["id"]][0]
         px = pixels(fmt, data)
         key = f"{photo} {b} {size} {fmt} bg={bg}"
-        rows[key] = {"sha": hashlib.sha256(px.tobytes()).hexdigest(), "shape": list(px.shape), "dtype": str(px.dtype),
-                     "MB": round(len(data) / 1e6, 1), "s": round(dt, 2)}
+        rows[key] = {
+            "sha": hashlib.sha256(px.tobytes()).hexdigest(),
+            "shape": list(px.shape),
+            "dtype": str(px.dtype),
+            "MB": round(len(data) / 1e6, 1),
+            "s": round(dt, 2),
+        }
         print(f"{dt:6.2f} s  {len(data) / 1e6:6.1f} MB  {key}", flush=True)
     Path(out).write_text(json.dumps(rows, indent=1))
     if len(sys.argv) > 2:

@@ -14,6 +14,7 @@ el % de pixeles distintos adentro de la mascara (persona) y afuera (pared), por 
 de pared, la persona tiene que dar max 0. Si el archivo tiene otro tamano que la mascara pero la misma proporcion
 (+-1 %), la mascara se lleva a su tamano (lineal, y despues el umbral); con otra proporcion, no se separa.
 """
+
 import argparse
 from pathlib import Path
 
@@ -32,6 +33,7 @@ def load(p: Path) -> np.ndarray:
         return np.load(p)
     if p.suffix.lower() == ".png":  # 16 bits con alpha: PIL no los abre bien
         import cv2
+
         return cv2.imread(str(p), cv2.IMREAD_UNCHANGED)
     return np.asarray(Image.open(p))
 
@@ -58,6 +60,7 @@ def person_for(alpha: np.ndarray, shape: tuple[int, int]) -> tuple[np.ndarray | 
     if abs(alpha.shape[1] / alpha.shape[0] - shape[1] / shape[0]) > 0.01 * shape[1] / shape[0]:
         return None, f"mascara de otra forma {alpha.shape[1]}x{alpha.shape[0]}: sin separar"
     import cv2
+
     shrink = shape[0] < alpha.shape[0]
     a = cv2.resize(alpha, (shape[1], shape[0]), interpolation=cv2.INTER_AREA if shrink else cv2.INTER_LINEAR)
     return a > 0.5, f"mascara llevada de {alpha.shape[1]}x{alpha.shape[0]} a {shape[1]}x{shape[0]}"
@@ -74,7 +77,9 @@ def change(d: np.ndarray, px: np.ndarray, where: np.ndarray, scale: int) -> str:
 def main() -> None:
     ap = argparse.ArgumentParser(description="Compara un respaldo contra el proyecto, en pixeles decodificados.")
     ap.add_argument("respaldo", type=Path)
-    ap.add_argument("--mask", type=Path, metavar="FILE", help="alpha: .npz (clave alpha) o PNG/TIFF gris; persona donde > 0.5")
+    ap.add_argument(
+        "--mask", type=Path, metavar="FILE", help="alpha: .npz (clave alpha) o PNG/TIFF gris; persona donde > 0.5"
+    )
     args = ap.parse_args()
     old_root = args.respaldo.resolve()
     if not old_root.is_dir():
@@ -104,10 +109,22 @@ def main() -> None:
         split = None
         if alpha is not None:
             person, note = person_for(alpha, px.shape)
-            split = note if person is None else (f"persona: {change(d, px, person, scale)}   |   pared: {change(d, px, ~person, scale)}"
-                                                 + (f"   ({note})" if note else ""))
-        diff.append((str(rel), f"max {d.max()}/{scale}  media {d.mean():.4f}  px distintos {px.mean() * 100:.3f} %"
-                               f"  en x {xs.min()}-{xs.max()} y {ys.min()}-{ys.max()}", split))
+            split = (
+                note
+                if person is None
+                else (
+                    f"persona: {change(d, px, person, scale)}   |   pared: {change(d, px, ~person, scale)}"
+                    + (f"   ({note})" if note else "")
+                )
+            )
+        diff.append(
+            (
+                str(rel),
+                f"max {d.max()}/{scale}  media {d.mean():.4f}  px distintos {px.mean() * 100:.3f} %"
+                f"  en x {xs.min()}-{xs.max()} y {ys.min()}-{ys.max()}",
+                split,
+            )
+        )
     new_files = []
     for top in sorted(d for d in old_root.iterdir() if d.is_dir() and not d.name.startswith(".")):
         for cur in sorted((ROOT / top.name).rglob("*")):
@@ -115,8 +132,10 @@ def main() -> None:
                 rel = cur.relative_to(ROOT)
                 if not (old_root / rel).exists():
                     new_files.append(str(rel))
-    print(f"identicos {len(same)}  distintos {len(diff)}  faltan {len(missing)}"
-          + (f"  nuevos {len(new_files)}" if new_files else ""))
+    print(
+        f"identicos {len(same)}  distintos {len(diff)}  faltan {len(missing)}"
+        + (f"  nuevos {len(new_files)}" if new_files else "")
+    )
     for r, s, split in diff:
         print("DISTINTO", r, s)
         if split:

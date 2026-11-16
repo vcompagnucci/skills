@@ -47,7 +47,13 @@ def main(name: str, only: str | None = None, width: int = WIDTH) -> None:
         zoom = width / (x1 - x0)
         if only:
             panels = panels[:2]
-        ims = [to_uint8(cv2.resize(p, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_AREA if zoom < 1 else cv2.INTER_CUBIC), dither=False) for p in panels]
+        ims = [
+            to_uint8(
+                cv2.resize(p, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_AREA if zoom < 1 else cv2.INTER_CUBIC),
+                dither=False,
+            )
+            for p in panels
+        ]
         gap = np.full((ims[0].shape[0], 6, 3), 20, np.uint8)
         row = Image.fromarray(np.concatenate([x for im in ims for x in (im, gap)][:-1], 1))
         dr = ImageDraw.Draw(row)

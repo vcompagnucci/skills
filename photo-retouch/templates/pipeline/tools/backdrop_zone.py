@@ -40,9 +40,20 @@ def main(name, box, zoom, tag):
         people = adjust_uint16(crop, light)
         final = tifffile.imread(EDITED / f"{name}-{key}.tif")[y0:y1, x0:x1]
         de = np.linalg.norm(lab(TO_LINEAR[final]) - lab(TO_LINEAR[people]), axis=-1)
-        print(f"{key}: dE>2 en {(de > 2).sum()} px; con alpha 1 y cambio: {((a16 == 65535) & (final != people).any(-1)).sum()} px;"
-              f" alpha<1 dentro de la zona: {(a16 < 65535).sum()} px")
-        rows.append((STYLES[key]["name"], [to8(people), to8(final), np.repeat((np.clip(de / DE_WHITE, 0, 1) * 255).astype(np.uint8)[..., None], 3, -1)]))
+        print(
+            f"{key}: dE>2 en {(de > 2).sum()} px; con alpha 1 y cambio: {((a16 == 65535) & (final != people).any(-1)).sum()} px;"
+            f" alpha<1 dentro de la zona: {(a16 < 65535).sum()} px"
+        )
+        rows.append(
+            (
+                STYLES[key]["name"],
+                [
+                    to8(people),
+                    to8(final),
+                    np.repeat((np.clip(de / DE_WHITE, 0, 1) * 255).astype(np.uint8)[..., None], 3, -1),
+                ],
+            )
+        )
     rows.append(("Alpha (blanco = persona)", [np.repeat(to8(a16)[..., None], 3, -1)]))
     labels = ["Sin fondo", "Final", f"Que cambio (blanco = dE {DE_WHITE:g})"]
     tw, th = (x1 - x0) * zoom, (y1 - y0) * zoom

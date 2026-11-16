@@ -53,14 +53,32 @@ def check_cap() -> None:
     out = exacta.cap_slope(T, exacta.SLOPE, window)
     i0, i1 = int(np.searchsorted(X, window[0])), int(np.searchsorted(X, window[1]))
     d = np.diff(out)[i0:i1]
-    check("cap_slope: dentro de la ventana, pendiente de a lo sumo 2,5", bool(np.all(d <= exacta.SLOPE * np.diff(X)[i0:i1] + 1e-9)), f"max {float((d / np.diff(X)[i0:i1]).max()):.2f}")
-    check("cap_slope: creciente, de 0 a 100, y el punto alto de la ventana donde estaba",
-          bool(np.all(np.diff(out) >= -1e-12)) and out[0] == 0 and out[-1] == 100 and out[i1] == T[i1], f"{out[0]} {out[-1]} {out[i1]} {T[i1]}")
-    check("cap_slope: con tope cambia T; sin tope la deja igual", not np.allclose(out, T) and exacta.cap_slope(T, None, window) is T)
+    check(
+        "cap_slope: dentro de la ventana, pendiente de a lo sumo 2,5",
+        bool(np.all(d <= exacta.SLOPE * np.diff(X)[i0:i1] + 1e-9)),
+        f"max {float((d / np.diff(X)[i0:i1]).max()):.2f}",
+    )
+    check(
+        "cap_slope: creciente, de 0 a 100, y el punto alto de la ventana donde estaba",
+        bool(np.all(np.diff(out) >= -1e-12)) and out[0] == 0 and out[-1] == 100 and out[i1] == T[i1],
+        f"{out[0]} {out[-1]} {out[i1]} {T[i1]}",
+    )
+    check(
+        "cap_slope: con tope cambia T; sin tope la deja igual",
+        not np.allclose(out, T) and exacta.cap_slope(T, None, window) is T,
+    )
     x, y = exacta.quantile_map([20, 30, 30.01, 50], [40, 45, 46, 70])
-    check("quantile_map: de 0 a 100, creciente, y cada percentil a su par (sin los repetidos)",
-          x[0] == 0 and x[-1] == 100 and y[0] == 0 and y[-1] == 100 and bool(np.all(np.diff(y) >= 0)) and list(x[1:-1]) == [20, 30, 50] and list(y[1:-1]) == [40, 45, 70],
-          f"{x} {y}")
+    check(
+        "quantile_map: de 0 a 100, creciente, y cada percentil a su par (sin los repetidos)",
+        x[0] == 0
+        and x[-1] == 100
+        and y[0] == 0
+        and y[-1] == 100
+        and bool(np.all(np.diff(y) >= 0))
+        and list(x[1:-1]) == [20, 30, 50]
+        and list(y[1:-1]) == [40, 45, 70],
+        f"{x} {y}",
+    )
 
 
 def check_light() -> None:
@@ -76,8 +94,11 @@ def check_light() -> None:
     tex0 = float(np.abs(Lab[..., 0] - cv2.GaussianBlur(Lab[..., 0], (0, 0), 3)).mean())
     check("light_map: la luz de la piel va de 40 a 60", abs(float(L.mean()) - 60) < 0.3, f"{L.mean():.2f}")
     check("light_map: el damero (la textura) queda", abs(tex / tex0 - 1) < 0.05, f"{tex:.3f} contra {tex0:.3f}")
-    check("light_map: a* y b* no se mueven", float(np.abs(out[..., 1] - 15).max()) < 0.05 and float(np.abs(out[..., 2] - 20).max()) < 0.05,
-          f"a* {out[..., 1].mean():.2f} b* {out[..., 2].mean():.2f}")
+    check(
+        "light_map: a* y b* no se mueven",
+        float(np.abs(out[..., 1] - 15).max()) < 0.05 and float(np.abs(out[..., 2] - 20).max()) < 0.05,
+        f"a* {out[..., 1].mean():.2f} b* {out[..., 2].mean():.2f}",
+    )
     zero = np.zeros((h, w), np.float32)
     same = exacta.light_map(lin, ones > 0, zero, ones, T, sigma=8.0)
     check("light_map: fuera del pincel no cambia nada", float(np.abs(same - lin).max()) < 1e-5)
@@ -94,9 +115,16 @@ def check_brush() -> None:
     skin, brush, r = exacta.skin_and_brush(lin, [(150, 140, 80, 100)], alpha)
     T = np.interp(exacta.LIGHT_X, [0, 50, 100], [0, 65, 100])
     out = lab(exacta.light_map(lin, skin, brush, alpha, T, exacta.LIGHT_SIGMA * r))
-    check("pincel: la piel de la cara y el cuello sube", float(out[140, 150, 0]) > 60 and float(out[230, 150, 0]) > 60,
-          f"{out[140, 150, 0]:.1f} {out[230, 150, 0]:.1f}")
-    check("pincel: la ropa negra junto al cuello no se aclara", float(np.abs(out[252:, :, 0] - 8).max()) < 0.5, f"{float(np.abs(out[252:, :, 0] - 8).max()):.2f}")
+    check(
+        "pincel: la piel de la cara y el cuello sube",
+        float(out[140, 150, 0]) > 60 and float(out[230, 150, 0]) > 60,
+        f"{out[140, 150, 0]:.1f} {out[230, 150, 0]:.1f}",
+    )
+    check(
+        "pincel: la ropa negra junto al cuello no se aclara",
+        float(np.abs(out[252:, :, 0] - 8).max()) < 0.5,
+        f"{float(np.abs(out[252:, :, 0] - 8).max()):.2f}",
+    )
 
 
 def check_shoulder() -> None:
@@ -105,9 +133,16 @@ def check_shoulder() -> None:
     lifted = np.zeros_like(L)
     lifted[:, 64:] = 6.0
     cut = exacta.shoulder_cut(L, lifted, knee=80.0, ceiling=88.0, detail_sigma=0.0, alpha=np.ones_like(L))
-    check("shoulder_cut: nunca baja mas de lo que subio el relleno", bool(np.all(cut <= lifted + 1e-6)), f"{float((cut - lifted).max()):.3f}")
-    check("shoulder_cut: donde no subio nada no toca; donde subio, baja los brillos", float(cut[:, :64].max()) == 0 and float(cut[:, 64:].mean()) > 1,
-          f"{float(cut[:, 64:].mean()):.2f}")
+    check(
+        "shoulder_cut: nunca baja mas de lo que subio el relleno",
+        bool(np.all(cut <= lifted + 1e-6)),
+        f"{float((cut - lifted).max()):.3f}",
+    )
+    check(
+        "shoulder_cut: donde no subio nada no toca; donde subio, baja los brillos",
+        float(cut[:, :64].max()) == 0 and float(cut[:, 64:].mean()) > 1,
+        f"{float(cut[:, 64:].mean()):.2f}",
+    )
 
 
 def pick() -> tuple[str, str] | None:
@@ -132,11 +167,17 @@ def check_photo() -> None:
     rec = exacta.run(photo, style, exacta.SLOPE, n=1024, log=lambda *a, **k: None)
     hist = rec["preview"]["history"]
     d0, d1 = hist[0]["dq"], min(h["dq"] for h in hist[1:])
-    check(f"{photo}-{style}: la piel se acerca a la referencia ({d0:.2f} -> {d1:.2f} L*)", d1 < d0 / 2 and d1 < 1.5, f"{d0:.2f} -> {d1:.2f}")
+    check(
+        f"{photo}-{style}: la piel se acerca a la referencia ({d0:.2f} -> {d1:.2f} L*)",
+        d1 < d0 / 2 and d1 < 1.5,
+        f"{d0:.2f} -> {d1:.2f}",
+    )
     # a* y b* en la misma mascara (la de la maestra), en la previa
     m16 = tifffile.imread(EDITED / f"{photo}-{style}.tif")
     H, W = m16.shape[:2]
-    pre = cv2.cvtColor(cv2.imread(str(exacta.PROCESS / f"exacta-{photo}-{style}.png"), cv2.IMREAD_UNCHANGED), cv2.COLOR_BGR2RGB)
+    pre = cv2.cvtColor(
+        cv2.imread(str(exacta.PROCESS / f"exacta-{photo}-{style}.png"), cv2.IMREAD_UNCHANGED), cv2.COLOR_BGR2RGB
+    )
     base = cv2.resize(TO_LINEAR[m16], (pre.shape[1], pre.shape[0]), interpolation=cv2.INTER_AREA)
     del m16
     got = lab(TO_LINEAR[pre.astype(np.uint16) * 257])
@@ -145,12 +186,18 @@ def check_photo() -> None:
     m = ref_measure.skin_mask(want, reg)
     da = abs(float(np.median(got[..., 1][m]) - np.median(want[..., 1][m])))
     db = abs(float(np.median(got[..., 2][m]) - np.median(want[..., 2][m])))
-    check(f"{photo}-{style}: a* y b* de la piel se mueven menos de 0,5", da < 0.5 and db < 0.5, f"a* {da:.2f} b* {db:.2f}")
+    check(
+        f"{photo}-{style}: a* y b* de la piel se mueven menos de 0,5", da < 0.5 and db < 0.5, f"a* {da:.2f} b* {db:.2f}"
+    )
     check(f"{photo}-{style}: la exacta no es la maestra", float(np.abs(got[..., 0] - want[..., 0])[m].mean()) > 0.5)
     tif = EDITED / f"{photo}-{style}-exacta.tif"
     if tif.exists():
         t = tifffile.imread(tif)
-        check(f"{tif.name}: 16 bits, la medida de la maestra del estilo", t.dtype == np.uint16 and t.shape[:2] == (H, W), f"{t.dtype} {t.shape}")
+        check(
+            f"{tif.name}: 16 bits, la medida de la maestra del estilo",
+            t.dtype == np.uint16 and t.shape[:2] == (H, W),
+            f"{t.dtype} {t.shape}",
+        )
 
 
 def check_writer() -> None:
@@ -158,16 +205,24 @@ def check_writer() -> None:
     WORK.mkdir(parents=True)
     path = WORK / "prueba-exacta.tif"
     img = np.linspace(0, 1, 64 * 48 * 3, dtype=np.float32).reshape(48, 64, 3)
-    exacta.atomic(path, lambda p: tifffile.imwrite(p, to_uint16(img), compression="zlib", photometric="rgb", iccprofile=_srgb_icc()))
+    exacta.atomic(
+        path,
+        lambda p: tifffile.imwrite(p, to_uint16(img), compression="zlib", photometric="rgb", iccprofile=_srgb_icc()),
+    )
     mask = os.umask(0)
     os.umask(mask)
     with tifffile.TiffFile(path) as f:
         page = f.pages[0]
         icc = page.tags.get("InterColorProfile")
         data = page.asarray()
-    check("el archivo: sin temporales, permisos de maestra, 16 bits y su perfil",
-          [p.name for p in WORK.iterdir()] == [path.name] and (path.stat().st_mode & 0o777) == (0o666 & ~mask) and data.dtype == np.uint16 and icc is not None,
-          f"{[p.name for p in WORK.iterdir()]} {oct(path.stat().st_mode & 0o777)}")
+    check(
+        "el archivo: sin temporales, permisos de maestra, 16 bits y su perfil",
+        [p.name for p in WORK.iterdir()] == [path.name]
+        and (path.stat().st_mode & 0o777) == (0o666 & ~mask)
+        and data.dtype == np.uint16
+        and icc is not None,
+        f"{[p.name for p in WORK.iterdir()]} {oct(path.stat().st_mode & 0o777)}",
+    )
     shutil.rmtree(WORK, ignore_errors=True)
 
 

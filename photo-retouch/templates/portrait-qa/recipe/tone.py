@@ -63,7 +63,9 @@ def fit_curve(inp: dict, want: dict, weights: dict, pivot: str) -> tuple[np.ndar
         xk.append(x)
         yk.append(max(y, yk[-1] + 0.05))
     xk.append(100.0)
-    yk.append(min(100.0, max(yk[-1] + 0.05, yk[-1] + (100 - xk[-2]) * 1.0)))  # arriba del ultimo punto sigue a 45 grados
+    yk.append(
+        min(100.0, max(yk[-1] + 0.05, yk[-1] + (100 - xk[-2]) * 1.0))
+    )  # arriba del ultimo punto sigue a 45 grados
     return limit_slope(np.array(xk, np.float32), np.array(yk, np.float32), inp[pivot])
 
 
@@ -87,5 +89,3 @@ def limit_slope(xk: np.ndarray, yk: np.ndarray, anchor: float) -> np.ndarray:
         dx = xk[i] - xk[i - 1]
         y[i - 1] = np.clip(y[i - 1], y[i] - MAX_SLOPE * dx, y[i] - MIN_SLOPE * dx)
     return xk, np.clip(y, 0, 100)
-
-
