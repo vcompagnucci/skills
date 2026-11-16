@@ -60,15 +60,18 @@ while read -r local_ref local_sha _remote_ref remote_sha; do
   # The pushed commit's tools, config and code (so that ty sees the modules a changed file imports), read from the commit.
   dir=$tmp/${local_sha:0:12}
   mkdir -p "$dir"
-  while IFS= read -r -d '' f; do
+  # The file mode comes from the commit too: ruff fails a script that has a shebang and is not executable.
+  while IFS= read -r -d '' entry; do
+    f=${entry#*$'\t'}
     case $f in
       */vendor/*) ;; # third-party code, never checked
       pyproject.toml | uv.lock | package.json | bun.lock | .oxlintrc.json | .oxfmtrc.json | .claude/check.sh | .claude/run_steps.py | *.py | *.js | *.mjs)
         mkdir -p "$dir/$(dirname "$f")"
         git show "$local_sha:$f" >"$dir/$f"
+        [ "${entry%% *}" != 100755 ] || chmod +x "$dir/$f"
         ;;
     esac
-  done < <(git ls-tree -r -z --name-only "$local_sha")
+  done < <(git ls-tree -r -z "$local_sha")
 
   # Of the changed files, the ones check.sh looks at.
   files=()
