@@ -1,0 +1,9 @@
+{
+  "name": "skills-tooling",
+  "private": true,
+  "description": "Linter and formatter for the JavaScript in this repo. Not published, and not part of any skill.",
+  "devDependencies": {
+    "oxfmt": "0.78.0",
+    "oxlint": "1.93.0"
+  }
+}

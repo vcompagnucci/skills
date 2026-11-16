@@ -1,0 +1,106 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // Every rule on, one category at a time, except `nursery` (rules still under development, they change between releases)
+  // and the plugins for languages this repo does not have (typescript, react, jsx-a11y, jest, vitest, vue, nextjs).
+  "plugins": ["unicorn", "oxc", "import", "node", "promise", "jsdoc"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "pedantic": "error",
+    "perf": "error",
+    "style": "error",
+    "restriction": "error"
+  },
+  // Third-party code, copied in as it was published.
+  "ignorePatterns": ["**/vendor/**"],
+  "rules": {
+    // Rules the code fails today, with the number of violations on 2026-11-16 (oxlint 1.93.0). Fix a rule's
+    // violations, delete its line, and CI keeps it passing from then on.
+    "eslint/no-magic-numbers": "off", // 954
+    "node/no-top-level-await": "off", // 632
+    "eslint/one-var": "off", // 524
+    "eslint/id-length": "off", // 446
+    "eslint/capitalized-comments": "off", // 217
+    "eslint/sort-keys": "off", // 111
+    "eslint/no-await-in-loop": "off", // 107
+    "eslint/curly": "off", // 103
+    "oxc/no-async-await": "off", // 78
+    "eslint/no-ternary": "off", // 66
+    "eslint/sort-vars": "off", // 54
+    "node/no-sync": "off", // 45
+    "unicorn/no-await-expression-member": "off", // 45
+    "eslint/no-shadow": "off", // 43
+    "oxc/no-optional-chaining": "off", // 42
+    "eslint/no-plusplus": "off", // 39
+    "unicorn/numeric-separators-style": "off", // 38
+    "promise/param-names": "off", // 34
+    "eslint/new-cap": "off", // 31
+    "oxc/no-rest-spread-properties": "off", // 27
+    "promise/avoid-new": "off", // 27
+    "import/no-nodejs-modules": "off", // 26
+    "unicorn/no-null": "off", // 25
+    "eslint/require-unicode-regexp": "off", // 24
+    "eslint/max-statements": "off", // 22
+    "eslint/no-console": "off", // 21
+    "node/no-process-env": "off", // 20
+    "eslint/no-promise-executor-return": "off", // 18
+    "eslint/no-inline-comments": "off", // 17
+    "unicorn/require-array-join-separator": "off", // 17
+    "unicorn/consistent-function-scoping": "off", // 16
+    "eslint/no-implicit-coercion": "off", // 15
+    "eslint/func-style": "off", // 14
+    "eslint/sort-imports": "off", // 13
+    "eslint/no-empty-function": "off", // 10
+    "eslint/prefer-named-capture-group": "off", // 10
+    "unicorn/no-array-callback-reference": "off", // 10
+    "unicorn/prefer-query-selector": "off", // 9
+    "eslint/prefer-template": "off", // 8
+    "eslint/max-lines-per-function": "off", // 7
+    "eslint/max-params": "off", // 6
+    "eslint/no-continue": "off", // 5
+    "import/group-exports": "off", // 5
+    "import/no-named-export": "off", // 5
+    "unicorn/catch-error-name": "off", // 5
+    "unicorn/explicit-length-check": "off", // 5
+    "unicorn/filename-case": "off", // 5
+    "unicorn/no-process-exit": "off", // 5
+    "unicorn/prefer-spread": "off", // 5
+    "promise/prefer-await-to-then": "off", // 4
+    "promise/prefer-catch": "off", // 4
+    "unicorn/number-literal-case": "off", // 4
+    "eslint/max-depth": "off", // 3
+    "eslint/no-bitwise": "off", // 3
+    "eslint/no-underscore-dangle": "off", // 3
+    "eslint/prefer-destructuring": "off", // 3
+    "promise/catch-or-return": "off", // 3
+    "unicorn/max-nested-calls": "off", // 3
+    "unicorn/prefer-global-this": "off", // 3
+    "eslint/complexity": "off", // 2
+    "eslint/max-lines": "off", // 2
+    "eslint/no-nested-ternary": "off", // 2
+    "eslint/radix": "off", // 2
+    "import/exports-last": "off", // 2
+    "unicorn/consistent-existence-index-check": "off", // 2
+    "unicorn/import-style": "off", // 2
+    "unicorn/no-nested-ternary": "off", // 2
+    "unicorn/prefer-number-properties": "off", // 2
+    "unicorn/prefer-string-replace-all": "off", // 2
+    "eslint/default-param-last": "off", // 1
+    "eslint/eqeqeq": "off", // 1
+    "eslint/no-async-promise-executor": "off", // 1
+    "eslint/no-empty": "off", // 1
+    "eslint/no-eq-null": "off", // 1
+    "eslint/no-negated-condition": "off", // 1
+    "eslint/no-unused-expressions": "off", // 1
+    "eslint/no-use-before-define": "off", // 1
+    "eslint/prefer-const": "off", // 1
+    "import/newline-after-import": "off", // 1
+    "unicorn/no-array-for-each": "off", // 1
+    "unicorn/no-array-reduce": "off", // 1
+    "unicorn/no-negated-condition": "off", // 1
+    "unicorn/prefer-add-event-listener": "off", // 1
+    "unicorn/prefer-dom-node-dataset": "off", // 1
+    "unicorn/prefer-import-meta-properties": "off", // 1
+    "unicorn/prefer-string-starts-ends-with": "off" // 1
+  }
+}

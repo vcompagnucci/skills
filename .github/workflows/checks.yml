@@ -1,0 +1,62 @@
+name: checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  # A pull request shares one group per branch, so a newer push cancels the older run. A push to main gets a group of its
+  # own (the run id), so no other run can cancel or replace it: every push to main runs, and each one saves the caches
+  # that pull requests restore.
+  group: checks-${{ github.event_name == 'pull_request' && github.head_ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    name: lint and types
+    # The repo is public, so the 4-core runner is free. One job, with the checks side by side inside it: lint and types of
+    # the Python and the JavaScript take about a second, so a second job would only add its own setup.
+    runs-on: ubuntu-latest
+    # The budgets are enforced by the steps below (setup 30 s, each check 5 s, all of them 10 s). This only stops a hung
+    # job, and it is not for widening.
+    timeout-minutes: 2
+    steps:
+      - name: Start the clock
+        run: echo "JOB_STARTED=$(date +%s)" >> "$GITHUB_ENV"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # A blobless clone (all the history, file contents only when a checkout needs them), not a shallow one.
+          fetch-depth: 0
+          filter: blob:none
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.12.17"
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: "1.4.4"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+      - name: Install the tools
+        run: |
+          uv sync --frozen
+          bun install --frozen-lockfile
+      - name: Setup took at most 30 s
+        run: |
+          took=$(( $(date +%s) - JOB_STARTED ))
+          echo "setup (checkout, caches and tools) took ${took}s, the budget is 30s"
+          [ "$took" -le 30 ] || { echo "::error title=Setup over budget::checkout, caches and tools took ${took}s, the budget is 30s"; exit 1; }
+      - name: Run the checks
+        # Past a budget, .claude/run_steps.py kills what still runs and fails the run, naming the step.
+        env:
+          CHECK_STEP_BUDGET_SECONDS: "5"
+          CHECK_BUDGET_SECONDS: "10"
+        run: bash .claude/check.sh
