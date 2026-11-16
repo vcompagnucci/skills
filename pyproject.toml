@@ -54,7 +54,7 @@ ignore = [
     "ANN202",  # 10 missing-return-type-private-function
     "PLR0915", # 10 too-many-statements
     "D101",    # 9 undocumented-public-class
-    "D401",    # 9 non-imperative-mood
+    "D401",    # 8 non-imperative-mood
     "BLE001",  # 8 blind-except
     "PTH118",  # 8 os-path-join
     "RUF059",  # 8 unused-unpacked-variable
