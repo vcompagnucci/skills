@@ -1,0 +1,141 @@
+# Tooling config. CI (.github/workflows/checks.yml) and .claude/check.sh run these tools; versions are pinned in the
+# dependency group below and in uv.lock. Not a Python package: nothing here is built or installed for users.
+[dependency-groups]
+dev = ["ruff==0.17.5", "ty==0.0.104"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+# Ruff formats Markdown code blocks by default; this repo's Markdown is not its to touch.
+include = ["*.py"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    # Conflict with the formatter or with another rule: off by design, not by violations.
+    "COM812",  # missing-trailing-comma: ruff format decides the trailing commas
+    "ISC001",  # single-line-implicit-string-concatenation: ruff format may join the lines
+    "D203",    # incorrect-blank-line-before-class: D211 says the opposite
+    "D213",    # multi-line-summary-second-line: D212 says the opposite
+    # Rules the code fails today, with the number of violations on 2026-11-16 (ruff 0.17.5). Fix a rule's violations,
+    # delete its line, and CI keeps it passing from then on.
+    "PLR2004", # 382 magic-value-comparison
+    "E501",    # 352 line-too-long
+    "D103",    # 253 undocumented-public-function
+    "N806",    # 155 non-lowercase-variable-in-function
+    "T201",    # 122 print
+    "RUF100",  # 120 unused-noqa
+    "ANN001",  # 106 missing-type-function-argument
+    "D205",    # 82 missing-blank-line-after-summary
+    "CPY001",  # 76 missing-copyright-notice
+    "INP001",  # 74 implicit-namespace-package
+    "D209",    # 64 new-line-after-last-paragraph
+    "TRY003",  # 50 raise-vanilla-args
+    "EM101",   # 38 raw-string-in-exception
+    "N803",    # 33 invalid-argument-name
+    "I001",    # 31 unsorted-imports
+    "ANN201",  # 29 missing-return-type-public-function
+    "PLC0415", # 26 import-outside-top-level
+    "FBT001",  # 23 boolean-type-hint-positional-argument
+    "SIM300",  # 23 yoda-conditions
+    "B905",    # 22 zip-without-explicit-strict
+    "PLR0913", # 19 too-many-arguments
+    "PLR0917", # 19 too-many-positional-arguments
+    "C408",    # 18 unnecessary-collection-call
+    "RUF046",  # 16 unnecessary-cast-to-int
+    "E701",    # 15 multiple-statements-on-one-line-colon
+    "D102",    # 14 undocumented-public-method
+    "B023",    # 13 function-uses-loop-variable
+    "E741",    # 12 ambiguous-variable-name
+    "EM102",   # 12 f-string-in-exception
+    "FBT002",  # 11 boolean-default-value-positional-argument
+    "ANN202",  # 10 missing-return-type-private-function
+    "PLR0915", # 10 too-many-statements
+    "S603",    # 10 subprocess-without-shell-equals-true
+    "S607",    # 10 start-process-with-partial-path
+    "BLE001",  # 8 blind-except
+    "D101",    # 8 undocumented-public-class
+    "D401",    # 8 non-imperative-mood
+    "E702",    # 8 multiple-statements-on-one-line-semicolon
+    "RUF059",  # 8 unused-unpacked-variable
+    "C420",    # 7 unnecessary-dict-comprehension-for-iterable
+    "PTH105",  # 7 os-replace
+    "PTH118",  # 7 os-path-join
+    "RUF005",  # 7 collection-literal-concatenation
+    "C901",    # 6 complex-structure
+    "F401",    # 6 unused-import
+    "PLW1510", # 6 subprocess-run-without-check
+    "PLW2901", # 6 redefined-loop-name
+    "E731",    # 5 lambda-assignment
+    "PLW0603", # 5 global-statement
+    "PTH123",  # 5 builtin-open
+    "S310",    # 5 suspicious-url-open-usage
+    "ANN002",  # 4 missing-type-args
+    "D400",    # 4 missing-trailing-period
+    "FURB167", # 4 regex-flag-alias
+    "PLR0912", # 4 too-many-branches
+    "ANN003",  # 3 missing-type-kwargs
+    "ARG001",  # 3 unused-function-argument
+    "ARG005",  # 3 unused-lambda-argument
+    "D403",    # 3 first-word-uncapitalized
+    "D415",    # 3 missing-terminal-punctuation
+    "FBT003",  # 3 boolean-positional-value-in-call
+    "N818",    # 3 error-suffix-on-exception-name
+    "PTH111",  # 3 os-path-expanduser
+    "PTH122",  # 3 os-path-splitext
+    "S101",    # 3 assert
+    "ANN204",  # 2 missing-return-type-special-method
+    "B007",    # 2 unused-loop-control-variable
+    "D107",    # 2 undocumented-public-init
+    "F821",    # 2 undefined-name
+    "F841",    # 2 unused-variable
+    "PERF401", # 2 manual-list-comprehension
+    "PLC3002", # 2 unnecessary-direct-lambda-call
+    "PLR0911", # 2 too-many-return-statements
+    "PTH119",  # 2 os-path-basename
+    "RET503",  # 2 implicit-return
+    "S108",    # 2 hardcoded-temp-file
+    "S110",    # 2 try-except-pass
+    "C416",    # 1 unnecessary-comprehension
+    "E401",    # 1 multiple-imports-on-one-line
+    "EXE001",  # 1 shebang-not-executable
+    "ISC004",  # 1 implicit-string-concatenation-in-collection-literal
+    "N815",    # 1 mixed-case-variable-in-class-scope
+    "PLR1704", # 1 redefined-argument-from-local
+    "PLR1714", # 1 repeated-equality-comparison
+    "PT018",   # 1 pytest-composite-assertion
+    "PTH101",  # 1 os-chmod
+    "PTH103",  # 1 os-makedirs
+    "PTH110",  # 1 os-path-exists
+    "PTH112",  # 1 os-path-isdir
+    "PTH120",  # 1 os-path-dirname
+    "PTH201",  # 1 path-constructor-current-directory
+    "RET504",  # 1 unnecessary-assign
+    "RUF002",  # 1 ambiguous-unicode-character-docstring
+    "RUF010",  # 1 explicit-f-string-type-conversion
+    "SIM115",  # 1 open-file-with-context-handler
+    "TRY004",  # 1 type-check-without-type-error
+    "TRY301",  # 1 raise-within-try
+    "UP031",   # 1 printf-string-formatting
+]
+
+[tool.ty.environment]
+python-version = "3.12"
+
+# ty runs without the third-party packages (numpy, opencv, ... are not installed in CI), so their imports do not resolve.
+# The template folders import their own modules by sys.path.insert, which ty cannot see; .claude/check.sh gives each
+# template its own search path. Rules the code fails today, with the number of violations on 2026-11-16 (ty 0.0.104).
+[tool.ty.rules]
+invalid-argument-type = "ignore"  # 296
+import-not-found = "ignore"  # 201
+unsupported-operator = "ignore"  # 80
+not-subscriptable = "ignore"  # 58
+not-iterable = "ignore"  # 54
+invalid-assignment = "ignore"  # 32
+missing-union-attribute = "ignore"  # 14
+invalid-explicit-return = "ignore"  # 6
+index-out-of-bounds = "ignore"  # 4
+possibly-missing-submodule = "ignore"  # 1
+no-matching-overload = "ignore"  # 1
+missing-attribute = "ignore"  # 1
+lost-keyword-for-regular-parameter = "ignore"  # 1
