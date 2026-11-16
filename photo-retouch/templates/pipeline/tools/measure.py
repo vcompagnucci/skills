@@ -16,7 +16,7 @@ from photos import PHOTOS  # noqa: E402
 
 
 def load(name: str, suffix: str) -> np.ndarray:
-    """ "final" = la salida de 16 bits de editadas/, vuelta a lineal."""
+    """Para suffix "final", la salida de 16 bits de editadas/, vuelta a lineal."""
     if suffix == "final":
         import tifffile
 

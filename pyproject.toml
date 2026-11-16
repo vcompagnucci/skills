@@ -96,7 +96,6 @@ ignore = [
     "S108",    # 2 hardcoded-temp-file
     "S110",    # 2 try-except-pass
     "C416",    # 1 unnecessary-comprehension
-    "D210",    # 1 surrounding-whitespace
     "E401",    # 1 multiple-imports-on-one-line
     "EXE001",  # 1 shebang-not-executable
     "ISC004",  # 1 implicit-string-concatenation-in-collection-literal
