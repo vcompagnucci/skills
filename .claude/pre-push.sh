@@ -73,7 +73,7 @@ while IFS= read -r line || [ -n "$line" ]; do
     f=${entry#*$'\t'}
     case $f in
       */vendor/*) ;; # third-party code, never checked
-      pyproject.toml | uv.lock | package.json | bun.lock | .oxlintrc.json | .oxfmtrc.json | .claude/check.sh | .claude/run_steps.py | *.py | *.js | *.mjs)
+      pyproject.toml | uv.lock | bun.lock | .bun-version | .claude/check.sh | .claude/run_steps.py | *.json | *.yml | *.yaml | *.css | *.py | *.js | *.mjs)
         mkdir -p "$dir/$(dirname "$f")"
         git show "$local_sha:$f" >"$dir/$f"
         [ "${entry%% *}" != 100755 ] || chmod +x "$dir/$f"
@@ -86,11 +86,11 @@ while IFS= read -r line || [ -n "$line" ]; do
   for f in ${changed[@]+"${changed[@]}"}; do
     case $f in
       */vendor/*) ;;
-      *.py | *.js | *.mjs) [ -f "$dir/$f" ] && files+=("$f") ;;
+      *.py | *.js | *.mjs | *.json | *.yml | *.yaml | *.css) [ -f "$dir/$f" ] && files+=("$f") ;;
     esac
   done
   [ ${#files[@]} -gt 0 ] || {
-    echo "pre-push: $remote_ref changes no Python or JavaScript file, nothing to check"
+    echo "pre-push: $remote_ref changes no Python, JavaScript, JSON, YAML or CSS file, nothing to check"
     continue
   }
 
