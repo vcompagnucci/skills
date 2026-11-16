@@ -178,13 +178,21 @@ def membrane(values: np.ndarray, known: np.ndarray, unknown: np.ndarray) -> np.n
     diag[lonely] = 1
     rhs[lonely] = values[ys[lonely], xs[lonely]]
     r, c = np.concatenate(rows), np.concatenate(cols)
-    a = csr_matrix((np.concatenate([diag, -np.ones(len(r))]), (np.concatenate([np.arange(len(ys)), r]), np.concatenate([np.arange(len(ys)), c]))), shape=(len(ys), len(ys)))
+    a = csr_matrix(
+        (
+            np.concatenate([diag, -np.ones(len(r))]),
+            (np.concatenate([np.arange(len(ys)), r]), np.concatenate([np.arange(len(ys)), c])),
+        ),
+        shape=(len(ys), len(ys)),
+    )
     out = values.copy()
     out[ys, xs] = spsolve(a, rhs)
     return out
 
 
-def envelope(low: np.ndarray, known: np.ndarray, region: np.ndarray, pinnable: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def envelope(
+    low: np.ndarray, known: np.ndarray, region: np.ndarray, pinnable: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
     """La piel esperada: la membrana desde el anillo, pero la piel de adentro que queda por encima
     (el pomulo, en la parte de abajo de la zona) tambien la sostiene. Asi la ojera se compara con la
     piel que tiene justo debajo y no con la mejilla de mas abajo, que ya cae en sombra."""
@@ -238,11 +246,30 @@ def geometry(shape, face: dict, i: int, origin, p: dict) -> dict:
     top = np.clip((below - LID_GAP * width) / (LID_RAMP * width), 0, 1)
     zone = edge * top * top * (3 - 2 * top)  # entra en S: sin un escalon donde empieza
     lash = outer & (below > -0.1 * width) & (below < LASH * width)
-    return {"zone": zone.astype(np.float32), "region": region, "ring": ring, "lash": lash, "below": below, "width": width,
-            "edge": edge, "ellipse": ellipse, "left": left, "right": right}
+    return {
+        "zone": zone.astype(np.float32),
+        "region": region,
+        "ring": ring,
+        "lash": lash,
+        "below": below,
+        "width": width,
+        "edge": edge,
+        "ellipse": ellipse,
+        "left": left,
+        "right": right,
+    }
 
 
-def top_light(log_y: np.ndarray, expected: np.ndarray, g: dict, p: dict, skin: np.ndarray, eyes: np.ndarray, hole: np.ndarray, s: float):
+def top_light(
+    log_y: np.ndarray,
+    expected: np.ndarray,
+    g: dict,
+    p: dict,
+    skin: np.ndarray,
+    eyes: np.ndarray,
+    hole: np.ndarray,
+    s: float,
+):
     """El 200 % de un ojo: el aclarado (sin las arrugas) y las zonas donde entran la luz y el color."""
     w = g["width"]
     b = g["below"] / w
@@ -271,7 +298,9 @@ def top_light(log_y: np.ndarray, expected: np.ndarray, g: dict, p: dict, skin: n
     return lift, light_zone, color_zone
 
 
-def creases(log_y: np.ndarray, lift: np.ndarray, lines: np.ndarray, is_skin: np.ndarray, g: dict, light_zone: np.ndarray) -> np.ndarray:
+def creases(
+    log_y: np.ndarray, lift: np.ndarray, lines: np.ndarray, is_skin: np.ndarray, g: dict, light_zone: np.ndarray
+) -> np.ndarray:
     """Al 200 %, con la luz de vuelta, el surco de cada arruga se acerca a la piel de alrededor. Como
     en una separacion de frecuencias: el sombreado de la arruga (oscuro, con sus hombros claros) se
     suaviza, y el poro y el grano quedan. Solo donde hay una linea (`lines`), y recien pasadas las
@@ -317,8 +346,21 @@ def eye_maps(crop: np.ndarray, face: dict, origin, skin=None, eyes=None) -> list
             missing = membrane(low_c, known | pins, g["region"] & ~pins) - low_c  # el color que falta, entero
             tints.append((p["color"] * missing * zone).astype(np.float32))
             tints_top.append((missing * color_zone).astype(np.float32))
-        out.append(g | {"params": p, "zone": zone, "deficit": deficit, "lift": lift.astype(np.float32), "tint": tints,
-                        "lift_top": lift_top.astype(np.float32), "tint_top": tints_top, "pins": pins, "low": low, "expected": expected})
+        out.append(
+            g
+            | {
+                "params": p,
+                "zone": zone,
+                "deficit": deficit,
+                "lift": lift.astype(np.float32),
+                "tint": tints,
+                "lift_top": lift_top.astype(np.float32),
+                "tint_top": tints_top,
+                "pins": pins,
+                "low": low,
+                "expected": expected,
+            }
+        )
     return out
 
 

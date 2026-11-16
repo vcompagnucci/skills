@@ -287,10 +287,25 @@ def reference_profile(path: Path, ref: str) -> dict:
     bg = box_mask(L.shape, REF_BG_TOP[ref]) | box_mask(L.shape, REF_BG[ref])
     bg_mask = reference_background(ref, L, face) if ref in REF_BG_YMAX else None
     plane = plane_fit(L, bg_mask) if bg_mask is not None else None
-    return dict(face_bands=band_energy(L, flat_face(L, upper_face(L.shape, cx, cy, rx, ry), rx / FACE_RX), rx / FACE_RX), face_rx=float(rx), lit=lit_skin(L, face, rx), top=lit_skin(L, face, rx, 98), grain_bands=band_energy(L, bg_mask)[:3] if bg_mask is not None else None,
-                skin_a=float(lab[..., 1][inner].mean()), skin_b=float(lab[..., 2][inner].mean()),
-                skin_bands=skin_bands(lab, inner), bg_plane=plane,
-                bg_a=float(lab[..., 1][bg].mean()), bg_b=float(lab[..., 2][bg].mean()),
-                shade10=shape[0], shade50=shape[1], shade90=shape[2], bg_top=top, bg_bottom=bottom,
-                clarity=band_contrast(L, face, s),
-                face50=float(levels[0]), face75=float(levels[1]), face90=float(levels[2]))
+    return dict(
+        face_bands=band_energy(L, flat_face(L, upper_face(L.shape, cx, cy, rx, ry), rx / FACE_RX), rx / FACE_RX),
+        face_rx=float(rx),
+        lit=lit_skin(L, face, rx),
+        top=lit_skin(L, face, rx, 98),
+        grain_bands=band_energy(L, bg_mask)[:3] if bg_mask is not None else None,
+        skin_a=float(lab[..., 1][inner].mean()),
+        skin_b=float(lab[..., 2][inner].mean()),
+        skin_bands=skin_bands(lab, inner),
+        bg_plane=plane,
+        bg_a=float(lab[..., 1][bg].mean()),
+        bg_b=float(lab[..., 2][bg].mean()),
+        shade10=shape[0],
+        shade50=shape[1],
+        shade90=shape[2],
+        bg_top=top,
+        bg_bottom=bottom,
+        clarity=band_contrast(L, face, s),
+        face50=float(levels[0]),
+        face75=float(levels[1]),
+        face90=float(levels[2]),
+    )

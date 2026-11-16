@@ -38,7 +38,9 @@ def main() -> None:
         k = labels[py, px]
         w, h = int(stats[k, 2]), int(stats[k, 3])
         cx, cy = int(round(cents[k][0])) + x0, int(round(cents[k][1])) + y0
-        print(f"{arg:>12}: {d[py, px] * 100:4.0f}% en ({px + x0}, {py + y0}); mancha {w}x{h} -> ({cx}, {cy}, {max(w, h) // 2 + 2})")
+        print(
+            f"{arg:>12}: {d[py, px] * 100:4.0f}% en ({px + x0}, {py + y0}); mancha {w}x{h} -> ({cx}, {cy}, {max(w, h) // 2 + 2})"
+        )
 
 
 if __name__ == "__main__":

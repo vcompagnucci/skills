@@ -60,7 +60,15 @@ def profile_stats(p: np.ndarray, t: np.ndarray) -> tuple:
     ramp = (a > 0.05) & (a < 0.95)
     mina = Lp[ramp, 1].min() - min(LB[1], LF[1]) if ramp.any() else np.nan
     minb = Lp[ramp, 2].min() - min(LB[2], LF[2]) if ramp.any() else np.nan
-    return (cross(0.5), abs(cross(0.9) - cross(0.1)), max(lo - Lp[:, 0].min(), 0), max(Lp[:, 0].max() - hi, 0), mina, minb, *LF)
+    return (
+        cross(0.5),
+        abs(cross(0.9) - cross(0.1)),
+        max(lo - Lp[:, 0].min(), 0),
+        max(Lp[:, 0].max() - hi, 0),
+        mina,
+        minb,
+        *LF,
+    )
 
 
 def lift_alpha(base: np.ndarray, edit: np.ndarray, t: np.ndarray) -> tuple:
@@ -149,7 +157,10 @@ def main(name: str, key: str, stage: str = "crudo") -> bool:
         med = lambda v: float(np.nanmedian(v[k]))  # noqa: E731
         p90 = lambda v: float(np.nanpercentile(v[k], 90))  # noqa: E731
         checks = {
-            "posicion 50 %": (abs(med(d50)) <= 0.3 and p90(np.abs(d50)) <= 0.6, f"{med(d50):+.2f} px (p90 |d| {p90(np.abs(d50)):.2f})"),
+            "posicion 50 %": (
+                abs(med(d50)) <= 0.3 and p90(np.abs(d50)) <= 0.6,
+                f"{med(d50):+.2f} px (p90 |d| {p90(np.abs(d50)):.2f})",
+            ),
             "ancho 10-90 %": (-0.3 <= med(dw) <= 0.5, f"{med(dw):+.2f} px"),
             "pozo/loma nuevo": (med(dext) <= LIMITS[c], f"{med(dext):.2f} L* (p90 {p90(dext):.2f})"),
             "a*, b* en la rampa": (min(med(mina), med(minb)) >= -1, f"{med(mina):+.2f}, {med(minb):+.2f}"),
@@ -161,7 +172,9 @@ def main(name: str, key: str, stage: str = "crudo") -> bool:
         idx = np.flatnonzero(k)
         by_ext = idx[np.argsort(-np.nan_to_num(dext[idx]))[:3]]
         by_pos = idx[np.argsort(-np.nan_to_num(np.abs(d50[idx])))[:2]]
-        worst[c] = [[int(v) for v in pts[i]] + [round(float(dext[i]), 1), round(float(d50[i]), 1)] for i in [*by_ext, *by_pos]]
+        worst[c] = [
+            [int(v) for v in pts[i]] + [round(float(dext[i]), 1), round(float(d50[i]), 1)] for i in [*by_ext, *by_pos]
+        ]
     (GATE / f"{name}-{key}-peores.json").write_text(json.dumps(worst))
     return ok_all
 

@@ -108,8 +108,11 @@ def ref_path(ref: str) -> Path:
 def import_reference(src: Path, ref: str) -> Path:
     """La imagen bajada, a PNG en sRGB (sips convierte desde su perfil, P3 incluido). No la agranda."""
     out = ref_path(ref)
-    subprocess.run(["sips", "-s", "format", "png", "--matchTo", SRGB_ICC, str(src), "--out", str(out)],
-                   check=True, capture_output=True)
+    subprocess.run(
+        ["sips", "-s", "format", "png", "--matchTo", SRGB_ICC, str(src), "--out", str(out)],
+        check=True,
+        capture_output=True,
+    )
     return out
 
 

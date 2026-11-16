@@ -40,7 +40,12 @@ def landmarks(name: str, alpha: np.ndarray) -> list[tuple[str, int, int]]:
     col = np.flatnonzero(person[:, int(cx)])
     top = int(col[0]) if col.size else int(cy - 1.5 * r)
     pts = []
-    for label, y in (("ojos", cy - 0.1 * r), ("boca", cy + 0.45 * r), ("pelo-costado", cy - 0.6 * r), ("ropa", cy + 2.4 * r)):
+    for label, y in (
+        ("ojos", cy - 0.1 * r),
+        ("boca", cy + 0.45 * r),
+        ("pelo-costado", cy - 0.6 * r),
+        ("ropa", cy + 2.4 * r),
+    ):
         left, right = edges(y)
         pts += [(f"{label}-izq", left, int(y)), (f"{label}-der", right, int(y))]
     pts.append(("pelo-arriba", int(cx), top))
@@ -58,16 +63,29 @@ def main(name: str, key: str, out: str) -> None:
     k = max(cam.shape[:2]) / 6240  # la vista previa cubre los 6240 px del lado largo del sensor
     m = side / n
     pts = landmarks(name, alpha)
-    worst = json.loads((GATE / f"{name}-{key}-peores.json").read_text()) if (GATE / f"{name}-{key}-peores.json").exists() else {}
+    worst = (
+        json.loads((GATE / f"{name}-{key}-peores.json").read_text())
+        if (GATE / f"{name}-{key}-peores.json").exists()
+        else {}
+    )
     for c, items in worst.items():
-        pts += [(f"{c} {e:+.1f}L* {d:+.1f}px", int(np.clip(x, H, n - H - 1)), int(np.clip(y, H, n - H - 1))) for x, y, e, d in items]
+        pts += [
+            (f"{c} {e:+.1f}L* {d:+.1f}px", int(np.clip(x, H, n - H - 1)), int(np.clip(y, H, n - H - 1)))
+            for x, y, e, d in items
+        ]
     rows = []
     for label, x, y in pts:
         cx, cy, ch = (x0 + x * m) * k, (y0 + y * m) * k, H * m * k
         sc = T / (2 * ch)
-        c = cv2.warpAffine(cam, np.float32([[sc, 0, -(cx - ch) * sc], [0, sc, -(cy - ch) * sc]]), (T, T), flags=cv2.INTER_CUBIC)
-        tiles = [c] + [cv2.resize(im[y - H : y + H, x - H : x + H], (T, T), interpolation=cv2.INTER_CUBIC) for im in (no, si)]
-        row = np.concatenate([tiles[0], np.full((T, 3, 3), 255, np.uint8), tiles[1], np.full((T, 3, 3), 255, np.uint8), tiles[2]], 1)
+        c = cv2.warpAffine(
+            cam, np.float32([[sc, 0, -(cx - ch) * sc], [0, sc, -(cy - ch) * sc]]), (T, T), flags=cv2.INTER_CUBIC
+        )
+        tiles = [c] + [
+            cv2.resize(im[y - H : y + H, x - H : x + H], (T, T), interpolation=cv2.INTER_CUBIC) for im in (no, si)
+        ]
+        row = np.concatenate(
+            [tiles[0], np.full((T, 3, 3), 255, np.uint8), tiles[1], np.full((T, 3, 3), 255, np.uint8), tiles[2]], 1
+        )
         cv2.rectangle(row, (0, 0), (len(label) * 8 + 8, 18), (255, 255, 255), -1)
         cv2.putText(row, label, (4, 13), cv2.FONT_HERSHEY_SIMPLEX, 0.42, (0, 0, 0), 1, cv2.LINE_AA)
         rows.append(row)

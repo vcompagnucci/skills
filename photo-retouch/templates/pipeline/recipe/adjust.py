@@ -22,8 +22,19 @@ import numpy as np
 
 from common import LUMA, linear_to_srgb
 
-KEYS = ("exposure", "brightness", "contrast", "highlights", "shadows", "whites", "blacks",
-        "temperature", "tint", "vibrance", "saturation")
+KEYS = (
+    "exposure",
+    "brightness",
+    "contrast",
+    "highlights",
+    "shadows",
+    "whites",
+    "blacks",
+    "temperature",
+    "tint",
+    "vibrance",
+    "saturation",
+)
 TONE = ("brightness", "contrast", "highlights", "shadows", "whites", "blacks")
 EXPOSURE = 2.0  # pasos para cada lado; el resto va de -100 a 100
 
@@ -41,18 +52,34 @@ TO_LINEAR = (lambda v: np.where(v <= 0.04045, v / 12.92, ((v + 0.055) / 1.055) *
     np.arange(65536, dtype=np.float64) / 65535
 ).astype(np.float32)  # de uint16 sRGB a luz lineal, sin temporales de 26 MP
 
-_LMS = np.array([[0.4122214708, 0.5363325363, 0.0514459929],
-                 [0.2119034982, 0.6806995451, 0.1073969566],
-                 [0.0883024619, 0.2817188376, 0.6299787005]], np.float32)
-_LAB = np.array([[0.2104542553, 0.7936177850, -0.0040720468],
-                 [1.9779984951, -2.4285922050, 0.4505937099],
-                 [0.0259040371, 0.7827717662, -0.8086757660]], np.float32)
-_LAB_INV = np.array([[1.0, 0.3963377774, 0.2158037573],
-                     [1.0, -0.1055613458, -0.0638541728],
-                     [1.0, -0.0894841775, -1.2914855480]], np.float32)
-_LMS_INV = np.array([[4.0767416621, -3.3077115913, 0.2309699292],
-                     [-1.2684380046, 2.6097574011, -0.3413193965],
-                     [-0.0041960863, -0.7034186147, 1.7076147010]], np.float32)
+_LMS = np.array(
+    [
+        [0.4122214708, 0.5363325363, 0.0514459929],
+        [0.2119034982, 0.6806995451, 0.1073969566],
+        [0.0883024619, 0.2817188376, 0.6299787005],
+    ],
+    np.float32,
+)
+_LAB = np.array(
+    [
+        [0.2104542553, 0.7936177850, -0.0040720468],
+        [1.9779984951, -2.4285922050, 0.4505937099],
+        [0.0259040371, 0.7827717662, -0.8086757660],
+    ],
+    np.float32,
+)
+_LAB_INV = np.array(
+    [[1.0, 0.3963377774, 0.2158037573], [1.0, -0.1055613458, -0.0638541728], [1.0, -0.0894841775, -1.2914855480]],
+    np.float32,
+)
+_LMS_INV = np.array(
+    [
+        [4.0767416621, -3.3077115913, 0.2309699292],
+        [-1.2684380046, 2.6097574011, -0.3413193965],
+        [-0.0041960863, -0.7034186147, 1.7076147010],
+    ],
+    np.float32,
+)
 
 
 def parse(raw) -> dict[str, float]:

@@ -39,7 +39,9 @@ def main() -> None:
     img = img[a.y0 : a.y1, a.x0 : a.x1]
     srgb = linear_to_srgb(img * 2**ev)
     if a.zoom != 1:
-        srgb = cv2.resize(srgb, None, fx=a.zoom, fy=a.zoom, interpolation=cv2.INTER_CUBIC if a.zoom > 1 else cv2.INTER_AREA)
+        srgb = cv2.resize(
+            srgb, None, fx=a.zoom, fy=a.zoom, interpolation=cv2.INTER_CUBIC if a.zoom > 1 else cv2.INTER_AREA
+        )
     im = Image.fromarray(to_uint8(srgb, dither=False))
     d = ImageDraw.Draw(im, "RGBA")
     font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 13)

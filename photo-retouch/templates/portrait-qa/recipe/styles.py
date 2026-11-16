@@ -52,16 +52,41 @@ from functools import lru_cache
 import cv2
 import numpy as np
 
-from camera_color import (apply_chroma, apply_matrix, apply_tone, camera_lstar, camera_matrix, fit_chroma, fit_mask, fit_tone,
-                          lab_of)
+from camera_color import (
+    apply_chroma,
+    apply_matrix,
+    apply_tone,
+    camera_lstar,
+    camera_matrix,
+    fit_chroma,
+    fit_mask,
+    fit_tone,
+    lab_of,
+)
 from camera_lut import camera_lut
 from common import ROOT, linear_to_srgb, luminance, save_jpeg, save_tiff16, srgb_to_linear, to_uint8
 from geometry import FRAMINGS, crop_box, load_crop
 from masks import background_full, guided_filter, key_wall, skin_chroma_mask
 from matte import cached as matte_cached
 from matte import upsample_alpha
-from measure import (BAND_CENTERS, BAND_SIGMAS, FACE_RX, MIN_BAND_PX, SIZE, band_energy, ellipse_mask, flat_face, light_shape, lit_skin, measure, upper_face,
-                     measure_reference, plane_fit, reference_profile, skin_bands)
+from measure import (
+    BAND_CENTERS,
+    BAND_SIGMAS,
+    FACE_RX,
+    MIN_BAND_PX,
+    SIZE,
+    band_energy,
+    ellipse_mask,
+    flat_face,
+    light_shape,
+    lit_skin,
+    measure,
+    upper_face,
+    measure_reference,
+    plane_fit,
+    reference_profile,
+    skin_bands,
+)
 from output import PROCESS, camera_original, comparison_card, raw_original, reference_image, reference_path, sheet
 from photos import PHOTOS
 from tone import fit_curve, lstar, pchip, y_from
@@ -106,8 +131,14 @@ STYLES = [
     # luz, sin dodge ni brillos bajados; cambian solo la pared (clara, como eligio) y los granos.
     # Antes era "color investigado" (piel iluminada 72 y una saturacion pareja), y la mejilla
     # quedaba 8 de croma por encima de la camara y la sombra 8 por debajo (v7).
-    Style("color", "Color de la camara", mono=False, keep_light=True, camera_look=True,
-          targets=dict(bg_top=90.0, bg_bottom=86.0, bg_a=0.0, bg_b=0.0)),
+    Style(
+        "color",
+        "Color de la camara",
+        mono=False,
+        keep_light=True,
+        camera_look=True,
+        targets=dict(bg_top=90.0, bg_bottom=86.0, bg_a=0.0, bg_b=0.0),
+    ),
 ]
 
 # Tres anclas: el negro, la piel iluminada (p90) y el techo de la piel (p98). Con dos, la
@@ -123,8 +154,13 @@ SHAPE_MAX = 1.5  # lo maximo que se hunde la sombra: con 2,2 las ojeras pasaban 
 # Se iguala solo la banda de 4 a 8 px (en unidades de cara, a SIZE). Las de 0 a 4 px no: la
 # referencia es una captura de un avatar y no tiene esa resolucion (Bae et al. §6), asi que
 # igualarlas borraba el detalle del RAW. La de 8-16 es el modelado: lo da la luz.
-MATCH_BANDS = (3,)  # la referencia es un avatar de ~400 px mostrado a SIZE: la banda 2 (2-4 px) cae en su limite de resolucion
-BAND_GAIN = (0.8, 1.3)  # con 2 la ganancia global (sin mapa por zona) oscurecia ojeras y marcaba manchas (Bae et al. §6, QA v4)
+MATCH_BANDS = (
+    3,
+)  # la referencia es un avatar de ~400 px mostrado a SIZE: la banda 2 (2-4 px) cae en su limite de resolucion
+BAND_GAIN = (
+    0.8,
+    1.3,
+)  # con 2 la ganancia global (sin mapa por zona) oscurecia ojeras y marcaba manchas (Bae et al. §6, QA v4)
 # Las bandas se separan con filtro guiado (He et al. 2010), no con gaussianas: un borde fuerte
 # (piel contra buzo negro, el logo, el perfil contra la pared) queda en la base y no en el
 # detalle, asi que subir el detalle no deja halos. EDGE_EPS es la varianza (en L*/100 al
@@ -161,6 +197,7 @@ def targets_of(style: Style) -> dict:
 
 # --- escena: todo lo que no depende del estilo -------------------------------
 
+
 @dataclass
 class Scene:
     n: int
@@ -174,7 +211,9 @@ class Scene:
     skin_ev: float  # dodge de la foto (photos.py): solo si la cara quedo en sombra
     mid_box: tuple[int, int, int]  # el cuadrado del encuadre medio en esta escena (el de la referencia)
     color: np.ndarray  # matriz 3x3 al color del JPEG de la camara (camera_color.py), para el estilo en color
-    wall: np.ndarray  # color de la pared detras de cada pixel (lineal, float16): la parte de pared de los pixeles del borde
+    wall: (
+        np.ndarray
+    )  # color de la pared detras de cada pixel (lineal, float16): la parte de pared de los pixeles del borde
 
 
 def face_ellipse(geo) -> tuple[float, float, float, float]:
@@ -191,8 +230,14 @@ def build_scene(name: str, framing: str, n: int) -> Scene:
     alpha = upsample_alpha(img, a_small, face_ellipse(geo))
     if PHOTOS[name].get("wall_keys"):
         k = n / side
-        alpha = key_wall(img, alpha, [((x - x0) * k, (y - y0) * k, h * k, (sx - x0) * k, (sy - y0) * k)
-                                      for x, y, h, sx, sy in PHOTOS[name]["wall_keys"]])
+        alpha = key_wall(
+            img,
+            alpha,
+            [
+                ((x - x0) * k, (y - y0) * k, h * k, (sx - x0) * k, (sy - y0) * k)
+                for x, y, h, sx, sy in PHOTOS[name]["wall_keys"]
+            ],
+        )
     cx, cy, rx, ry = face_ellipse(geo)
     face = ellipse_mask((n, n), cx, cy, rx, ry)
     norm = np.clip(img / max(float(np.percentile(img, 99)), 1e-6), 0, 1)
@@ -208,13 +253,19 @@ def build_scene(name: str, framing: str, n: int) -> Scene:
     k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (int(geo[2] / 4) | 1, int(geo[2] / 4) | 1))
     closed = cv2.morphologyEx((skin > 0.5).astype(np.uint8), cv2.MORPH_CLOSE, k) > 0
     lum = luminance(norm)
-    bright = (lum > np.percentile(lum[skin > 0.5], 90)) & ellipse_mask((n, n), cx, cy, rx * 1.2, ry * 1.15) if (skin > 0.5).any() else closed
+    bright = (
+        (lum > np.percentile(lum[skin > 0.5], 90)) & ellipse_mask((n, n), cx, cy, rx * 1.2, ry * 1.15)
+        if (skin > 0.5).any()
+        else closed
+    )
     full = np.maximum(skin, ((closed | bright) & (alpha > 0.5)).astype(np.float32) * region)
     # Desenfoque normalizado por el alpha (convolucion normalizada): el promedio se toma solo
     # sobre la persona. Con el desenfoque solo, la pared entraba como cero y el pincel caia
     # de 0,57 a 0,16 en los ~100 px antes del borde: una franja de otro tono y otro color a
     # lo largo de la mandibula (perfil en color, QA v5).
-    dodge = cv2.GaussianBlur(full * alpha, (0, 0), geo[2] / 6) / np.maximum(cv2.GaussianBlur(alpha, (0, 0), geo[2] / 6), 0.05)
+    dodge = cv2.GaussianBlur(full * alpha, (0, 0), geo[2] / 6) / np.maximum(
+        cv2.GaussianBlur(alpha, (0, 0), geo[2] / 6), 0.05
+    )
     dodge = np.clip(dodge / max(float(np.percentile(dodge[face], 90)), 1e-3), 0, 1) * alpha
     # El color de la piel se mueve solo donde el color de la foto ya es de piel: el pincel
     # sin huecos tocaba tambien el buzo negro junto al cuello y al subir la croma se ponia
@@ -225,8 +276,20 @@ def build_scene(name: str, framing: str, n: int) -> Scene:
     tint = cv2.GaussianBlur(gate, (0, 0), max(1.0, n / 1024)) * dodge
     del norm, lab, a_, b_, off, gate, full, lum, region
     mid_box = preset_box(name, "medio", n) if framing == "abierto" else (0, 0, n)
-    return Scene(n, img, alpha, geo, face, skin, dodge.astype(np.float32), tint.astype(np.float32),
-                 PHOTOS[name].get("skin_ev", 0.0), mid_box, camera_matrix(name, img, skin), wall_behind(img, alpha))
+    return Scene(
+        n,
+        img,
+        alpha,
+        geo,
+        face,
+        skin,
+        dodge.astype(np.float32),
+        tint.astype(np.float32),
+        PHOTOS[name].get("skin_ev", 0.0),
+        mid_box,
+        camera_matrix(name, img, skin),
+        wall_behind(img, alpha),
+    )
 
 
 def wall_behind(rgb: np.ndarray, alpha: np.ndarray) -> np.ndarray:
@@ -244,8 +307,14 @@ def wall_behind(rgb: np.ndarray, alpha: np.ndarray) -> np.ndarray:
     pure = pure.astype(np.float32)
     out = np.empty(rgb.shape, np.float16)
     lo = 512
-    small, ws = cv2.resize(rgb * pure[..., None], (lo, lo), interpolation=cv2.INTER_AREA), cv2.resize(pure, (lo, lo), interpolation=cv2.INTER_AREA)
-    wide = cv2.GaussianBlur(small, (0, 0), 120 * lo / MASTER) / np.maximum(cv2.GaussianBlur(ws, (0, 0), 120 * lo / MASTER), 1e-4)[..., None]
+    small, ws = (
+        cv2.resize(rgb * pure[..., None], (lo, lo), interpolation=cv2.INTER_AREA),
+        cv2.resize(pure, (lo, lo), interpolation=cv2.INTER_AREA),
+    )
+    wide = (
+        cv2.GaussianBlur(small, (0, 0), 120 * lo / MASTER)
+        / np.maximum(cv2.GaussianBlur(ws, (0, 0), 120 * lo / MASTER), 1e-4)[..., None]
+    )
     wide = cv2.resize(wide, (n, n), interpolation=cv2.INTER_LINEAR)
     sig = max(0.8, 12 * unit)
     den = cv2.GaussianBlur(pure, (0, 0), sig)
@@ -284,9 +353,20 @@ def crop_scene(scene: Scene, box: tuple[int, int, int]) -> Scene:
     x0, y0, side = box
     sl = (slice(y0, y0 + side), slice(x0, x0 + side))
     cx, cy, r = scene.geo
-    return Scene(side, scene.img[sl], scene.alpha[sl], (cx - x0, cy - y0, r), scene.face[sl], scene.skin[sl],
-                 scene.dodge[sl], scene.tint[sl], scene.skin_ev,
-                 (scene.mid_box[0] - x0, scene.mid_box[1] - y0, scene.mid_box[2]), scene.color, scene.wall[sl])
+    return Scene(
+        side,
+        scene.img[sl],
+        scene.alpha[sl],
+        (cx - x0, cy - y0, r),
+        scene.face[sl],
+        scene.skin[sl],
+        scene.dodge[sl],
+        scene.tint[sl],
+        scene.skin_ev,
+        (scene.mid_box[0] - x0, scene.mid_box[1] - y0, scene.mid_box[2]),
+        scene.color,
+        scene.wall[sl],
+    )
 
 
 def face_unit(scene: Scene) -> float:
@@ -295,6 +375,7 @@ def face_unit(scene: Scene) -> float:
 
 
 # --- render ------------------------------------------------------------------
+
 
 @dataclass
 class Params:
@@ -324,6 +405,7 @@ def shaped(scene: Scene, style: Style, p: Params) -> tuple[np.ndarray, np.ndarra
     grande del log de la luminancia, solo con piel) se estira o se comprime alrededor de
     la piel iluminada, que queda fija. La textura no se toca.
     """
+
     def look(x: np.ndarray) -> np.ndarray:
         """El color de la camara: puntual, igual para todos los pixeles."""
         return x if style.mono else apply_matrix(x, scene.color)
@@ -360,7 +442,9 @@ def headroom(scene: Scene, f: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np
     return f / k, y / k
 
 
-def reduce_shine(scene: Scene, f: np.ndarray, y: np.ndarray, mix, wall: np.ndarray, amount: float = 0.35) -> tuple[np.ndarray, np.ndarray]:
+def reduce_shine(
+    scene: Scene, f: np.ndarray, y: np.ndarray, mix, wall: np.ndarray, amount: float = 0.35
+) -> tuple[np.ndarray, np.ndarray]:
     """Baja un poco el brillo de la piel (frente, pomulos, nariz): es temporal, como un grano.
 
     Suave a proposito: bajarlo mucho dejaba un parche plano y grisaceo en la frente. Se
@@ -473,7 +557,10 @@ def edit_wall(scene: Scene, rgb: np.ndarray, toe: np.ndarray | None = None, *, w
     sigma = lo / 80  # ~50 px a 4170: sigue la sombra de la persona sobre la pared
     wall = cv2.GaussianBlur(small, (0, 0), sigma) / np.maximum(cv2.GaussianBlur(ws, (0, 0), sigma), 1e-4)[..., None]
     # donde la persona tapa todo el entorno, la pared se extrapola desde mas lejos
-    wide = cv2.GaussianBlur(small, (0, 0), 4 * sigma) / np.maximum(cv2.GaussianBlur(ws, (0, 0), 4 * sigma), 1e-4)[..., None]
+    wide = (
+        cv2.GaussianBlur(small, (0, 0), 4 * sigma)
+        / np.maximum(cv2.GaussianBlur(ws, (0, 0), 4 * sigma), 1e-4)[..., None]
+    )
     cover = np.clip(cv2.GaussianBlur(ws, (0, 0), sigma) / 0.15, 0, 1)[..., None]
     wall = cover * wall + (1 - cover) * wide
     target = wall_target(scene, want, lo)
@@ -481,7 +568,9 @@ def edit_wall(scene: Scene, rgb: np.ndarray, toe: np.ndarray | None = None, *, w
     # lejos de la persona: de 1,5 % a 4 % del lado del encuadre abierto
     free = (a_lo < 0.02).astype(np.uint8)
     dist = cv2.distanceTransform(free, cv2.DIST_L2, 5)
-    far = cv2.resize(np.clip((dist - 0.015 * lo) / (0.025 * lo), 0, 1).astype(np.float32), (n, n), interpolation=cv2.INTER_LINEAR)
+    far = cv2.resize(
+        np.clip((dist - 0.015 * lo) / (0.025 * lo), 0, 1).astype(np.float32), (n, n), interpolation=cv2.INTER_LINEAR
+    )
     if toe is not None:
         # cuanto multiplico la curva a la pared de al lado de cada pixel, con el mismo pincel
         k_lo = cv2.resize(toe, (lo, lo), interpolation=cv2.INTER_AREA) * ws
@@ -509,7 +598,9 @@ def edit_wall(scene: Scene, rgb: np.ndarray, toe: np.ndarray | None = None, *, w
     gain -= 1.0
     unit = n / MASTER
     r = max(1, int(round(2 * unit)))
-    some = cv2.dilate((scene.alpha > 0.02).astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * r + 1,) * 2))
+    some = cv2.dilate(
+        (scene.alpha > 0.02).astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * r + 1,) * 2)
+    )
     behind = wall_behind(rgb, scene.alpha).astype(np.float32)
     behind -= rgb
     behind *= some[..., None]
@@ -661,9 +752,30 @@ def film_grain(srgb: np.ndarray, r: float) -> np.ndarray:
     with tempfile.TemporaryDirectory() as d:
         src, dst = f"{d}/in.png", f"{d}/out.png"
         cv2.imwrite(src, grey)
-        subprocess.run([str(GRAIN_BIN), src, dst, "-r", str(r), "-sigmaR", "0", "-sigmaFilter", "0.8",
-                        "-NmonteCarlo", "100", "-zoom", "1", "-algorithmID", "0", "-color", "0"],
-                       check=True, capture_output=True, env={"OMP_NUM_THREADS": str(GRAIN_THREADS), **os.environ})
+        subprocess.run(
+            [
+                str(GRAIN_BIN),
+                src,
+                dst,
+                "-r",
+                str(r),
+                "-sigmaR",
+                "0",
+                "-sigmaFilter",
+                "0.8",
+                "-NmonteCarlo",
+                "100",
+                "-zoom",
+                "1",
+                "-algorithmID",
+                "0",
+                "-color",
+                "0",
+            ],
+            check=True,
+            capture_output=True,
+            env={"OMP_NUM_THREADS": str(GRAIN_THREADS), **os.environ},
+        )
         out = cv2.imread(dst, cv2.IMREAD_GRAYSCALE)
     # El programa devuelve la pelicula ya filtrada por el ampliador (gaussiana de 0,8 px): se resta
     # la imagen con ese mismo filtro y la capa queda solo grano. Restando la imagen sin filtrar,
@@ -705,6 +817,7 @@ def nnls(A: np.ndarray, b: np.ndarray) -> np.ndarray:
 
 # --- medir y resolver --------------------------------------------------------
 
+
 def profile_of(srgb: np.ndarray, scene: Scene) -> dict:
     """Los mismos numeros que se miden en la referencia, sobre mi version, a SIZE px."""
     n = srgb.shape[0]
@@ -727,14 +840,29 @@ def profile_of(srgb: np.ndarray, scene: Scene) -> dict:
     shade = light_shape(L, skin if skin.sum() > 500 else face, face_ellipse(geo)[2] / 4)
     ex = face_ellipse(geo)
     inner = ellipse_mask((SIZE, SIZE), ex[0], ex[1], ex[2] * 0.8, ex[3] * 0.8) & (alpha > 0.9)
-    return dict(p1=st.p1, p99=st.p99, face50=float(levels[0]), face75=float(levels[1]), face90=float(levels[2]),
-                bg=st.bg, shade10=shade[0], shade50=shade[1], shade90=shade[2], lit=lit_skin(L, face, ex[2]), top=lit_skin(L, face, ex[2], 98),
-                face_bands=band_energy(L, flat_face(L, upper_face((SIZE, SIZE), *ex) & (alpha > 0.9), ex[2] / FACE_RX), ex[2] / FACE_RX), grain_bands=band_energy(L, back)[:3],
-                skin_a=float(lab[..., 1][inner].mean()), skin_b=float(lab[..., 2][inner].mean()),
-                skin_bands=skin_bands(lab, inner),
-                bg_a=float(lab[..., 1][back].mean()) if back.any() else 0.0,
-                bg_b=float(lab[..., 2][back].mean()) if back.any() else 0.0,
-                bg_plane=plane_fit(L, back) if back.sum() > 500 else None)
+    return dict(
+        p1=st.p1,
+        p99=st.p99,
+        face50=float(levels[0]),
+        face75=float(levels[1]),
+        face90=float(levels[2]),
+        bg=st.bg,
+        shade10=shade[0],
+        shade50=shade[1],
+        shade90=shade[2],
+        lit=lit_skin(L, face, ex[2]),
+        top=lit_skin(L, face, ex[2], 98),
+        face_bands=band_energy(
+            L, flat_face(L, upper_face((SIZE, SIZE), *ex) & (alpha > 0.9), ex[2] / FACE_RX), ex[2] / FACE_RX
+        ),
+        grain_bands=band_energy(L, back)[:3],
+        skin_a=float(lab[..., 1][inner].mean()),
+        skin_b=float(lab[..., 2][inner].mean()),
+        skin_bands=skin_bands(lab, inner),
+        bg_a=float(lab[..., 1][back].mean()) if back.any() else 0.0,
+        bg_b=float(lab[..., 2][back].mean()) if back.any() else 0.0,
+        bg_plane=plane_fit(L, back) if back.sum() > 500 else None,
+    )
 
 
 def input_points(scene: Scene, y: np.ndarray) -> dict:
@@ -759,7 +887,9 @@ def solve(scene: Scene, style: Style, want: dict, box: tuple[int, int, int], ite
     y0 = (scene.img @ MONO_MIX) if style.mono else luminance(scene.img)
     w = scene.skin
     sigma = scene.geo[2] / 5
-    low = cv2.GaussianBlur(np.log2(np.maximum(y0, 1e-5)) * w, (0, 0), sigma) / (cv2.GaussianBlur(w, (0, 0), sigma) + 1e-4)
+    low = cv2.GaussianBlur(np.log2(np.maximum(y0, 1e-5)) * w, (0, 0), sigma) / (
+        cv2.GaussianBlur(w, (0, 0), sigma) + 1e-4
+    )
     depth = 1.0
     if (w > 0.5).any():
         p.shade_center = float(np.percentile(low[w > 0.5], 90))
@@ -825,7 +955,9 @@ def solve_camera(name: str, scene: Scene, style: Style) -> Params:
     p.curve_in, p.curve_out = fit_tone(lstar(y), camera_lstar(cam), person, wall)
     lab = lab_of(clean_color(scene, apply_tone(f, y, p.curve_in, p.curve_out)))
     del f, y
-    p.chroma_L, p.chroma_gain, p.chroma_turn = fit_chroma(lab, cv2.cvtColor(cam.astype(np.float32), cv2.COLOR_RGB2LAB), person)
+    p.chroma_L, p.chroma_gain, p.chroma_turn = fit_chroma(
+        lab, cv2.cvtColor(cam.astype(np.float32), cv2.COLOR_RGB2LAB), person
+    )
     # el enfoque se mide a la resolucion de la maestra, no a SOLVE: 0,2 lleva la textura de
     # 1-4 px de un perfil a la de la camara (add_detail)
     p.detail = CAMERA_DETAIL
@@ -844,7 +976,10 @@ def solve_color(p: Params, style: Style, want: dict, got: dict) -> None:
     got_c = float(np.hypot(got["skin_a"], got["skin_b"]))
     got_h = float(np.arctan2(got["skin_b"], got["skin_a"]))
     if "skin_a" in want:
-        want_c, want_h = float(np.hypot(want["skin_a"], want["skin_b"])), float(np.arctan2(want["skin_b"], want["skin_a"]))
+        want_c, want_h = (
+            float(np.hypot(want["skin_a"], want["skin_b"])),
+            float(np.arctan2(want["skin_b"], want["skin_a"])),
+        )
     else:
         want_c, want_h = want.get("skin_c", got_c / p.chroma), float(np.radians(style.skin_hue))
     hue_tot = p.hue + p.hue_bands
@@ -880,8 +1015,10 @@ def solve_color(p: Params, style: Style, want: dict, got: dict) -> None:
 
 def fill_empty(p: Params, got_bands: list, ref_bands: list | None) -> None:
     """Una franja sin pixeles (o sin color) toma el valor de la vecina: la interpolacion no salta."""
-    ok = [k >= MIN_BAND_PX and np.hypot(a, b) >= MIN_HUE_CHROMA and (ref_bands is None or ref_bands[i][0] >= MIN_BAND_PX)
-          for i, (k, a, b) in enumerate(got_bands)]
+    ok = [
+        k >= MIN_BAND_PX and np.hypot(a, b) >= MIN_HUE_CHROMA and (ref_bands is None or ref_bands[i][0] >= MIN_BAND_PX)
+        for i, (k, a, b) in enumerate(got_bands)
+    ]
     if not any(ok):
         return
     idx = np.flatnonzero(ok)
@@ -946,41 +1083,65 @@ def export_all(master: np.ndarray, name: str, key: str, lossless: bool = True) -
 
 
 def params_dict(p: Params, grain: float) -> dict:
-    return dict(curve_in=[float(v) for v in p.curve_in], curve_out=[float(v) for v in p.curve_out],
-                shape=p.shape, skin_ev=p.skin_ev, band_gains=[float(v) for v in p.band_gains],
-                grain=float(grain), hue_deg=float(np.degrees(p.hue)), chroma=p.chroma,
-                hue_bands_deg=[float(np.degrees(v)) for v in p.hue_bands], chroma_bands=[float(v) for v in p.chroma_bands],
-                shine=p.shine, chroma_L=[float(v) for v in p.chroma_L], chroma_gain=[float(v) for v in p.chroma_gain],
-                chroma_turn_deg=[float(np.degrees(v)) for v in p.chroma_turn], detail=p.detail)
+    return dict(
+        curve_in=[float(v) for v in p.curve_in],
+        curve_out=[float(v) for v in p.curve_out],
+        shape=p.shape,
+        skin_ev=p.skin_ev,
+        band_gains=[float(v) for v in p.band_gains],
+        grain=float(grain),
+        hue_deg=float(np.degrees(p.hue)),
+        chroma=p.chroma,
+        hue_bands_deg=[float(np.degrees(v)) for v in p.hue_bands],
+        chroma_bands=[float(v) for v in p.chroma_bands],
+        shine=p.shine,
+        chroma_L=[float(v) for v in p.chroma_L],
+        chroma_gain=[float(v) for v in p.chroma_gain],
+        chroma_turn_deg=[float(np.degrees(v)) for v in p.chroma_turn],
+        detail=p.detail,
+    )
 
 
 def adaptation(p: Params, style: Style, grain: float = 0.0) -> str:
     """Lo que el estilo tuvo que hacerle a esta foto para parecerse a la referencia."""
     pts = " ".join(f"{i:.0f}>{o:.0f}" for i, o in zip(p.curve_in, p.curve_out))
     if style.camera_look:
-        return f"curva de la camara {pts} | croma por L* " + " ".join(
-            f"{c:.0f}:x{g:.2f}/{np.degrees(t):+.0f}" for c, g, t in zip(p.chroma_L, p.chroma_gain, p.chroma_turn)) + f" | detalle +{p.detail:.2f}"
+        return (
+            f"curva de la camara {pts} | croma por L* "
+            + " ".join(
+                f"{c:.0f}:x{g:.2f}/{np.degrees(t):+.0f}" for c, g, t in zip(p.chroma_L, p.chroma_gain, p.chroma_turn)
+            )
+            + f" | detalle +{p.detail:.2f}"
+        )
     ev = (p.shape - 1) * 100
-    row = f"curva {pts} | sombra {'relleno' if ev < 0 else 'hundida'} {abs(ev):.0f} % | escalas " + " ".join(f"x{g:.2f}" for g in p.band_gains)
+    row = f"curva {pts} | sombra {'relleno' if ev < 0 else 'hundida'} {abs(ev):.0f} % | escalas " + " ".join(
+        f"x{g:.2f}" for g in p.band_gains
+    )
     if grain:
         row += f" | grano r {grain:.3f} px"
     if not style.mono:
         cap = " (tope)" if p.chroma >= style.chroma_cap - 1e-3 else ""
         row += f" | matiz {np.degrees(p.hue):+.1f} grados | croma x{p.chroma:.2f}{cap}"
-        row += " | por brillo " + " ".join(f"{np.degrees(p.hue + h):+.0f}/x{p.chroma * c:.2f}" for h, c in zip(p.hue_bands, p.chroma_bands))
+        row += " | por brillo " + " ".join(
+            f"{np.degrees(p.hue + h):+.0f}/x{p.chroma * c:.2f}" for h, c in zip(p.hue_bands, p.chroma_bands)
+        )
     return row
 
 
 def card_rows(name: str, want: dict, got: dict) -> list[str]:
     rows = [f"{name}"]
     if "lit" in want:
-        rows.append(f"piel iluminada {want['lit']:3.0f} / {got['lit']:3.0f}   negro {want['p1']:3.0f} / {got['p1']:3.0f}")
+        rows.append(
+            f"piel iluminada {want['lit']:3.0f} / {got['lit']:3.0f}   negro {want['p1']:3.0f} / {got['p1']:3.0f}"
+        )
     else:
         rows.append(f"piel iluminada {got['lit']:3.0f}   negro {got['p1']:3.0f} (los de la camara)")
     if "shade10" in want:
         rows.append(f"sombra de la cara {want['shade10']:3.0f} / {got['shade10']:3.0f}")
     if want.get("face_bands"):
-        rows.append("escalas " + " ".join(f"{want['face_bands'][k]:.1f}/{got['face_bands'][k]:.1f}" for k in MATCH_BANDS))
+        rows.append(
+            "escalas " + " ".join(f"{want['face_bands'][k]:.1f}/{got['face_bands'][k]:.1f}" for k in MATCH_BANDS)
+        )
     if want.get("grain_bands"):
         rows.append("grano " + " ".join(f"{w:.2f}/{g:.2f}" for w, g in zip(want["grain_bands"], got["grain_bands"])))
     if want.get("bg_plane") and got.get("bg_plane"):
@@ -1000,7 +1161,11 @@ def originals_print(name: str) -> str:
     y se vuelven a exportar aunque se haya pedido un solo estilo.
     """
     h = hashlib.sha256(str(MASTER).encode())
-    files = [ROOT / "work" / f"{name}-base.tif", ROOT / "work" / f"{name}-camara.jpg", ROOT / "originales" / f"{name}.RAF"]
+    files = [
+        ROOT / "work" / f"{name}-base.tif",
+        ROOT / "work" / f"{name}-camara.jpg",
+        ROOT / "originales" / f"{name}.RAF",
+    ]
     files += [ROOT / "recipe" / f for f in ("photos.py", "geometry.py", "output.py", "common.py")]
     for path in files:
         h.update(path.read_bytes() if path.exists() else b"-")
@@ -1044,7 +1209,10 @@ def render_photo(name: str, chosen: list[Style], originals: bool = True) -> None
 def exported(name: str, framing: str, key: str) -> np.ndarray:
     """Un encuadre a 1024 px ya exportado, achicado para las hojas (sRGB 0..1)."""
     img = cv2.imread(str(ROOT / "editadas" / name / framing / f"{name}-{key}.jpg"))
-    return cv2.resize(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), (420, 420), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
+    return (
+        cv2.resize(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), (420, 420), interpolation=cv2.INTER_AREA).astype(np.float32)
+        / 255
+    )
 
 
 def summarize(chosen: list[Style], every: bool) -> None:
@@ -1054,7 +1222,10 @@ def summarize(chosen: list[Style], every: bool) -> None:
     for k, style in enumerate(STYLES):
         if style not in chosen:
             continue
-        items = [(n, exported(n, "medio", style.key), card_rows(n, by[(n, style.key)]["want"], by[(n, style.key)]["got"])) for n in PHOTOS]
+        items = [
+            (n, exported(n, "medio", style.key), card_rows(n, by[(n, style.key)]["want"], by[(n, style.key)]["got"]))
+            for n in PHOTOS
+        ]
         ref = reference_image(style.reference) if style.reference else None
         comparison_card(style.label, ref, items, PROCESS / f"{190 + k}-comparacion-{style.key}-v7.jpg")
     (ROOT / "work" / "ajustes.json").write_text(json.dumps(records, indent=1, default=float))
@@ -1069,7 +1240,9 @@ def summarize(chosen: list[Style], every: bool) -> None:
 def workers() -> int:
     """Cuantas fotos a la vez, con la regla de la Mac: dos (cada proceso pesa ~2,5 GB) con la memoria
     normal, una con la presion en aviso y al menos 30 % libre, y ninguna si ya esta saturada."""
-    level = subprocess.run(["sysctl", "-n", "kern.memorystatus_vm_pressure_level"], capture_output=True, text=True).stdout.strip()
+    level = subprocess.run(
+        ["sysctl", "-n", "kern.memorystatus_vm_pressure_level"], capture_output=True, text=True
+    ).stdout.strip()
     out = subprocess.run(["memory_pressure"], capture_output=True, text=True).stdout
     free = int(out.rsplit("free percentage:", 1)[1].split("%")[0]) if "free percentage:" in out else 0
     load = os.getloadavg()[0]
@@ -1091,7 +1264,9 @@ def main(args: list[str]) -> None:
     n = workers()
     env = {"OMP_NUM_THREADS": str(GRAIN_THREADS // n), **os.environ}
     with ThreadPoolExecutor(n) as pool:
-        jobs = [pool.submit(subprocess.run, [sys.executable, __file__, name, *keys], check=True, env=env) for name in PHOTOS]
+        jobs = [
+            pool.submit(subprocess.run, [sys.executable, __file__, name, *keys], check=True, env=env) for name in PHOTOS
+        ]
         for job in jobs:
             job.result()
     summarize(chosen, every=not keys)

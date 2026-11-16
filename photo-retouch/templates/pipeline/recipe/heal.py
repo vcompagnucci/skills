@@ -15,9 +15,12 @@ OFFSETS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)]
 def _inpaint(win: np.ndarray, hole: np.ndarray, radius: int) -> np.ndarray:
     # inpaint en float32 devuelve basura en OpenCV; en 16 bits anda bien (y sobra precision)
     win16 = np.clip(win * 65535.0, 0, 65535).astype(np.uint16)
-    return np.dstack(
-        [cv2.inpaint(np.ascontiguousarray(win16[..., k]), hole, radius, cv2.INPAINT_TELEA) for k in range(3)]
-    ).astype(np.float32) / 65535.0
+    return (
+        np.dstack(
+            [cv2.inpaint(np.ascontiguousarray(win16[..., k]), hole, radius, cv2.INPAINT_TELEA) for k in range(3)]
+        ).astype(np.float32)
+        / 65535.0
+    )
 
 
 def heal(img: np.ndarray, x: int, y: int, r: int) -> None:

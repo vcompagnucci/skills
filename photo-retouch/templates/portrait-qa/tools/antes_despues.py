@@ -40,7 +40,13 @@ MAX_SHIFT = 8.0
 R, ZOOM = 110, 2  # medio lado del recorte en px de la maestra, y su ampliacion en la lamina
 SEARCH = 4  # el lugar que mas cambio se busca a 1/4
 BASE = "maestra"  # el estilo de <foto>.tif del pipeline, la maestra sin estilo (como pantalla/<foto>-maestra.png)
-LABELS = {BASE: "Maestra", "color": "Color", "ref-a": "Ref A", "ref-b": "Ref B", "ref-c": "Ref C"}  # la clave de cada estilo (styles.py) y su etiqueta; si falta, la clave
+LABELS = {
+    BASE: "Maestra",
+    "color": "Color",
+    "ref-a": "Ref A",
+    "ref-b": "Ref B",
+    "ref-c": "Ref C",
+}  # la clave de cada estilo (styles.py) y su etiqueta; si falta, la clave
 
 
 def masters(folder: Path) -> dict[tuple[str, str], Path]:
@@ -91,7 +97,9 @@ def registered(cam: np.ndarray, ref: np.ndarray, x: int, y: int, r: int) -> np.n
     if np.hypot(dx, dy) > MAX_SHIFT:  # la pared distinta puede enganar a la correlacion
         dx, dy = CAMERA_SHIFT
     m = np.float32([[1, 0, x - r + dx], [0, 1, y - r + dy]])
-    return cv2.warpAffine(cam, m, (2 * r, 2 * r), flags=cv2.INTER_CUBIC | cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT)
+    return cv2.warpAffine(
+        cam, m, (2 * r, 2 * r), flags=cv2.INTER_CUBIC | cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_REFLECT
+    )
 
 
 def changed(before: np.ndarray, after: np.ndarray) -> np.ndarray:
@@ -117,12 +125,18 @@ def most_changed(before: np.ndarray, after: np.ndarray, r: int, native: bool = T
     if not ys.size:
         return None
     if native:
-        moved = [cv2.cvtColor(im[ys, xs].reshape(-1, 1, 3).astype(np.float32) / 255, cv2.COLOR_RGB2LAB) for im in (before, after)]
+        moved = [
+            cv2.cvtColor(im[ys, xs].reshape(-1, 1, 3).astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
+            for im in (before, after)
+        ]
         de_px = np.sqrt(((moved[1] - moved[0]) ** 2).sum(-1)).ravel()
         if de_px.max() <= MIN_DE:
             return None
     size = (w // SEARCH, h // SEARCH)
-    lab = [cv2.cvtColor(cv2.resize(im, size, interpolation=cv2.INTER_AREA).astype(np.float32) / 255, cv2.COLOR_RGB2LAB) for im in (before, after)]
+    lab = [
+        cv2.cvtColor(cv2.resize(im, size, interpolation=cv2.INTER_AREA).astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
+        for im in (before, after)
+    ]
     de = np.sqrt(((lab[1] - lab[0]) ** 2).sum(-1))
     k = np.clip((de - MIN_DE) / (FULL_DE - MIN_DE), 0, 1)
     if k.any():
@@ -137,7 +151,9 @@ def most_changed(before: np.ndarray, after: np.ndarray, r: int, native: bool = T
     return int(np.clip(x, m, w - m)), int(np.clip(y, m, h - m))
 
 
-def make(name: str, key: str, before_path: Path, after_path: Path, after_dir: Path, r: int = R, zoom: int = ZOOM) -> Image.Image | None:
+def make(
+    name: str, key: str, before_path: Path, after_path: Path, after_dir: Path, r: int = R, zoom: int = ZOOM
+) -> Image.Image | None:
     after_full = read(after_path)
     before_full = read(before_path)
     spot = most_changed(before_full, after_full, r, native=after_path.suffix.lower() != ".jpg")
@@ -168,14 +184,18 @@ def make(name: str, key: str, before_path: Path, after_path: Path, after_dir: Pa
             left = i * (side + GAP)
             label = col if i == 0 or i == 3 else f"{col} · {LABELS.get(key, key)}"
             draw.text((left + 4, top + 6), label, fill=(210, 210, 210), font=font)
-            canvas.paste(Image.fromarray(cv2.resize(im, (side, side), interpolation=cv2.INTER_CUBIC)), (left, top + label_h))
+            canvas.paste(
+                Image.fromarray(cv2.resize(im, (side, side), interpolation=cv2.INTER_CUBIC)), (left, top + label_h)
+            )
         top += label_h + side + GAP
     return canvas
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Laminas de antes y despues: camara | antes | despues | que cambio.")
-    ap.add_argument("--before", type=Path, required=True, metavar="DIR", help="editadas/ del respaldo de antes del arreglo")
+    ap.add_argument(
+        "--before", type=Path, required=True, metavar="DIR", help="editadas/ del respaldo de antes del arreglo"
+    )
     ap.add_argument("--after", type=Path, default=ROOT / "editadas", metavar="DIR", help="por defecto editadas/")
     ap.add_argument("photos", nargs="*", metavar="<photo>[:<style>]")
     args = ap.parse_args()

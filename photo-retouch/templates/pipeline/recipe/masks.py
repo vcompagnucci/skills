@@ -79,7 +79,16 @@ def background_mask(img: np.ndarray, faces=(), hand=(), sure=(), with_hand: bool
             keep[labels == i] = 1
     heads = np.zeros_like(bg)
     for cx, cy, rx, ry in faces:
-        cv2.ellipse(heads, (round(cx / 4), round(cy / 4)), (round(HOLE_HEAD[0] * rx / 4), round(HOLE_HEAD[1] * ry / 4)), 0, 0, 360, 1, -1)
+        cv2.ellipse(
+            heads,
+            (round(cx / 4), round(cy / 4)),
+            (round(HOLE_HEAD[0] * rx / 4), round(HOLE_HEAD[1] * ry / 4)),
+            0,
+            0,
+            360,
+            1,
+            -1,
+        )
     # El nivel de arriba se apaga lejos de la pared (adentro de la gente da ~0): un hueco encerrado entre
     # dos piernas no tenia contra que compararse (el triangulo de la foto de grupo). Para los huecos, el promedio de
     # la pared de al lado y, donde no llega, uno ancho.
@@ -94,7 +103,12 @@ def background_mask(img: np.ndarray, faces=(), hand=(), sure=(), with_hand: bool
     boxes = np.zeros_like(keep)
     for i, (x0, y0, x1, y1) in enumerate([*hand, *sure]):
         sl = np.s_[y0 // 4 : -(-y1 // 4), x0 // 4 : -(-x1 // 4)]
-        wall_px = (np.abs(a[sl]) < 3) & (b[sl] > WALL_B[0]) & (b[sl] < WALL_B[1]) & (L[sl] > np.maximum(floor, hole_level[sl] - HOLE_SHADE))
+        wall_px = (
+            (np.abs(a[sl]) < 3)
+            & (b[sl] > WALL_B[0])
+            & (b[sl] < WALL_B[1])
+            & (L[sl] > np.maximum(floor, hole_level[sl] - HOLE_SHADE))
+        )
         keep[sl] |= wall_px.astype(keep.dtype)
         if i >= len(hand):
             marked[sl] |= wall_px.astype(keep.dtype)
@@ -129,8 +143,9 @@ def holes(L: np.ndarray, a: np.ndarray, b: np.ndarray, level: np.ndarray, floor:
     baja el piso y la pared del hueco queda por encima. La textura se mide solo adentro: con la
     ventana cruzando el borde (ropa negra contra pared clara) todo hueco angosto daba textura.
     """
-    cand = ((np.abs(a) < 3) & (b > WALL_B[0]) & (b < WALL_B[1]) & (L > level - HOLE_SHADE) & (L < level + 30)
-            & (L > floor)).astype(np.uint8)
+    cand = (
+        (np.abs(a) < 3) & (b > WALL_B[0]) & (b < WALL_B[1]) & (L > level - HOLE_SHADE) & (L < level + 30) & (L > floor)
+    ).astype(np.uint8)
     cand = cv2.morphologyEx(cand, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
     cand[skip > 0] = 0
     m = cand.astype(np.float32)
@@ -192,7 +207,9 @@ def guided_filter_color(guide: np.ndarray, src: np.ndarray, radius: int, eps: fl
                 var[..., i, j] = var[..., j, i] = cv2.boxFilter(g[..., i] * g[..., j], -1, k) - mean_i[i] * mean_i[j]
         a = np.linalg.solve(var + eye, cov_ip[..., None])[..., 0]
         b = mean_p - sum(a[..., c] * mean_i[c] for c in range(3))
-        q = sum(cv2.boxFilter(np.ascontiguousarray(a[..., c]), -1, k) * g[..., c] for c in range(3)) + cv2.boxFilter(b, -1, k)
+        q = sum(cv2.boxFilter(np.ascontiguousarray(a[..., c]), -1, k) * g[..., c] for c in range(3)) + cv2.boxFilter(
+            b, -1, k
+        )
         rows = min(strip, n - s0)
         out[s0 : s0 + rows] = q[s0 - a0 : s0 - a0 + rows]
     return out

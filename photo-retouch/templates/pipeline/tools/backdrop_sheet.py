@@ -56,7 +56,12 @@ def main(name: str, preview: bool, zoom: int, boxes=(), tag: str = "") -> Path:
         heads.append((f.get("id", "cara"), (x0, y0, x0 + side, y0 + side)))
     for fx0, fy0, fx1, fy1 in boxes:
         bw, bh = round((fx1 - fx0) * w0), round((fy1 - fy0) * h0)
-        heads.append((f"zona {fx0:g},{fy0:g},{fx1:g},{fy1:g}", (round(fx0 * w0), round(fy0 * h0), round(fx0 * w0) + max(bw, bh), round(fy0 * h0) + max(bw, bh))))
+        heads.append(
+            (
+                f"zona {fx0:g},{fy0:g},{fx1:g},{fy1:g}",
+                (round(fx0 * w0), round(fy0 * h0), round(fx0 * w0) + max(bw, bh), round(fy0 * h0) + max(bw, bh)),
+            )
+        )
     col, ccol = tw + 20, CROP_W + 20
     width = 20 + 4 * max(col, ccol)
     height = 60 + TOP_H + 30 + len(heads) * (CROP_W + 50)
@@ -68,7 +73,12 @@ def main(name: str, preview: bool, zoom: int, boxes=(), tag: str = "") -> Path:
         canvas.paste(im.resize((tw, TOP_H), Image.LANCZOS), (x, 52))
     y = 52 + TOP_H + 30
     for who, box in heads:
-        d.text((20, y), f"{who}: recorte {box[2] - box[0]} px, x{CROP_W / (box[2] - box[0]):.1f}", fill=(200, 200, 205), font=small)
+        d.text(
+            (20, y),
+            f"{who}: recorte {box[2] - box[0]} px, x{CROP_W / (box[2] - box[0]):.1f}",
+            fill=(200, 200, 205),
+            font=small,
+        )
         for i, (im, lab) in enumerate(zip(imgs, labels)):
             crop = im.crop(box).resize((CROP_W, CROP_W), Image.NEAREST)
             canvas.paste(crop, (20 + i * ccol, y + 26))

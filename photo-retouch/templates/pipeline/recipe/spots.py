@@ -51,7 +51,11 @@ def candidates(crop: np.ndarray, skin: np.ndarray, max_n: int = 48) -> list[dict
     score = blur(score, 1.0)
     # las arrugas y los pliegues dan lineas, no manchas: se descartan por forma
     round_ = np.maximum(roundness(score, 2.0), roundness(score, 4.0))
-    peaks = (score == cv2.dilate(score, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (17, 17)))) & (score > 2.6) & (round_ > 0.3)
+    peaks = (
+        (score == cv2.dilate(score, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (17, 17))))
+        & (score > 2.6)
+        & (round_ > 0.3)
+    )
     ys, xs = np.nonzero(peaks)
     order = np.argsort(-score[ys, xs])[:max_n]
     out = []
@@ -65,7 +69,17 @@ def candidates(crop: np.ndarray, skin: np.ndarray, max_n: int = 48) -> list[dict
             if np.mean(ring) < s0 * 0.4:
                 break
             r += 1
-        out.append({"x": cx, "y": cy, "r": r, "dL": float(dL[cy, cx]), "da": float(da[cy, cx]), "db": float(db[cy, cx]), "s": float(s0)})
+        out.append(
+            {
+                "x": cx,
+                "y": cy,
+                "r": r,
+                "dL": float(dL[cy, cx]),
+                "da": float(da[cy, cx]),
+                "db": float(db[cy, cx]),
+                "s": float(s0),
+            }
+        )
     return out
 
 
@@ -78,7 +92,11 @@ def sheet(name: str, face: dict, crop: np.ndarray, origin: tuple[int, int], cand
     over = Image.fromarray(to_uint8(srgb, dither=False))
     d = ImageDraw.Draw(over)
     for i, c in enumerate(cands, 1):
-        d.ellipse((c["x"] - c["r"] - 4, c["y"] - c["r"] - 4, c["x"] + c["r"] + 4, c["y"] + c["r"] + 4), outline=(0, 220, 255), width=2)
+        d.ellipse(
+            (c["x"] - c["r"] - 4, c["y"] - c["r"] - 4, c["x"] + c["r"] + 4, c["y"] + c["r"] + 4),
+            outline=(0, 220, 255),
+            width=2,
+        )
         d.text((c["x"] + c["r"] + 5, c["y"] - 8), str(i), fill=(0, 220, 255), font=font)
     # tiras ampliadas x4, con contexto
     z, half = 4, 30
@@ -97,9 +115,20 @@ def sheet(name: str, face: dict, crop: np.ndarray, origin: tuple[int, int], cand
         # marcas afuera del radio, para saber cual es el punto sin taparlo
         cxp, cyp, rr = gx + tile // 2, gy + tile // 2, (c["r"] + 4) * z
         for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-            gd.line([(cxp + dx * rr, cyp + dy * rr), (cxp + dx * (rr + 10), cyp + dy * (rr + 10))], fill=(0, 220, 255), width=2)
-        gd.text((gx, gy + tile + 3), f"{i + 1}  ({c['x'] + ox}, {c['y'] + oy}) r{c['r']}", fill=(235, 235, 235), font=small)
-        gd.text((gx, gy + tile + 19), f"dL {c['dL']:+.1f}  da {c['da']:+.1f}  db {c['db']:+.1f}", fill=(160, 160, 160), font=small)
+            gd.line(
+                [(cxp + dx * rr, cyp + dy * rr), (cxp + dx * (rr + 10), cyp + dy * (rr + 10))],
+                fill=(0, 220, 255),
+                width=2,
+            )
+        gd.text(
+            (gx, gy + tile + 3), f"{i + 1}  ({c['x'] + ox}, {c['y'] + oy}) r{c['r']}", fill=(235, 235, 235), font=small
+        )
+        gd.text(
+            (gx, gy + tile + 19),
+            f"dL {c['dL']:+.1f}  da {c['da']:+.1f}  db {c['db']:+.1f}",
+            fill=(160, 160, 160),
+            font=small,
+        )
     OUT.mkdir(parents=True, exist_ok=True)
     over.save(OUT / f"{name}-{face['id']}-mapa.png")
     grid.save(OUT / f"{name}-{face['id']}-tiras.png")

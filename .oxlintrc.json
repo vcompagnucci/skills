@@ -44,18 +44,18 @@
     "eslint/no-console": "off", // 21
     "node/no-process-env": "off", // 20
     "eslint/no-promise-executor-return": "off", // 18
-    "eslint/no-inline-comments": "off", // 17
     "unicorn/require-array-join-separator": "off", // 17
     "unicorn/consistent-function-scoping": "off", // 16
     "eslint/no-implicit-coercion": "off", // 15
     "eslint/func-style": "off", // 14
+    "eslint/no-inline-comments": "off", // 14
     "eslint/sort-imports": "off", // 13
+    "eslint/max-lines-per-function": "off", // 10
     "eslint/no-empty-function": "off", // 10
     "eslint/prefer-named-capture-group": "off", // 10
     "unicorn/no-array-callback-reference": "off", // 10
     "unicorn/prefer-query-selector": "off", // 9
     "eslint/prefer-template": "off", // 8
-    "eslint/max-lines-per-function": "off", // 7
     "eslint/max-params": "off", // 6
     "eslint/no-continue": "off", // 5
     "import/group-exports": "off", // 5
@@ -65,6 +65,7 @@
     "unicorn/filename-case": "off", // 5
     "unicorn/no-process-exit": "off", // 5
     "unicorn/prefer-spread": "off", // 5
+    "eslint/max-lines": "off", // 4
     "promise/prefer-await-to-then": "off", // 4
     "promise/prefer-catch": "off", // 4
     "unicorn/number-literal-case": "off", // 4
@@ -76,7 +77,6 @@
     "unicorn/max-nested-calls": "off", // 3
     "unicorn/prefer-global-this": "off", // 3
     "eslint/complexity": "off", // 2
-    "eslint/max-lines": "off", // 2
     "eslint/no-nested-ternary": "off", // 2
     "eslint/radix": "off", // 2
     "import/exports-last": "off", // 2

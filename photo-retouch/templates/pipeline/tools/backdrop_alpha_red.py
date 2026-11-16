@@ -35,8 +35,14 @@ def main(name: str, box=None, tag: str = "") -> Path:
         wall = (a16 < 32768).astype(np.uint8)
         _, _, stats, _ = cv2.connectedComponentsWithStats(wall, connectivity=8)
         H, W = wall.shape
-        islands = sorted(((int(s[0]), int(s[1]), int(s[0] + s[2]), int(s[1] + s[3]), int(s[4])) for s in stats[1:]
-                          if s[4] >= 50 and s[0] > 0 and s[1] > 0 and s[0] + s[2] < W and s[1] + s[3] < H), key=lambda i: -i[4])
+        islands = sorted(
+            (
+                (int(s[0]), int(s[1]), int(s[0] + s[2]), int(s[1] + s[3]), int(s[4]))
+                for s in stats[1:]
+                if s[4] >= 50 and s[0] > 0 and s[1] > 0 and s[0] + s[2] < W and s[1] + s[3] < H
+            ),
+            key=lambda i: -i[4],
+        )
         print(name, f"{len(islands)} islas", islands[:20])
         s = LONG / max(H, W)
         size = (round(W * s), round(H * s))

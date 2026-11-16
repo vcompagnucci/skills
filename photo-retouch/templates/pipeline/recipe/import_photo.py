@@ -71,8 +71,15 @@ def wall_boxes(base: np.ndarray) -> list:
     texture = np.abs(L - cv2.GaussianBlur(L, (0, 0), 6))
     found = []
     for box in WALL_BOXES:
-        ys, xs = slice(int(box[0] * L.shape[0]), int(box[1] * L.shape[0])), slice(int(box[2] * L.shape[1]), int(box[3] * L.shape[1]))
-        if np.median(texture[ys, xs]) < 1.5 and np.percentile(np.hypot(a[ys, xs], b[ys, xs]), 90) < 15 and np.median(L[ys, xs]) > 30:
+        ys, xs = (
+            slice(int(box[0] * L.shape[0]), int(box[1] * L.shape[0])),
+            slice(int(box[2] * L.shape[1]), int(box[3] * L.shape[1])),
+        )
+        if (
+            np.median(texture[ys, xs]) < 1.5
+            and np.percentile(np.hypot(a[ys, xs], b[ys, xs]), 90) < 15
+            and np.median(L[ys, xs]) > 30
+        ):
             found.append(box)
     return found
 
@@ -89,8 +96,17 @@ def develop_raw(path: Path, key: str) -> tuple[np.ndarray, np.ndarray, str]:
         if matrix_ok:
             base = demosaic(raw, shot) @ rgb_cam(raw).T
         else:  # sin matriz de la camara: que LibRaw lleve a sRGB lineal
-            base = raw.postprocess(user_wb=shot, output_color=rawpy.ColorSpace.sRGB, gamma=(1, 1), no_auto_bright=True,
-                                   output_bps=16, highlight_mode=rawpy.HighlightMode.Clip).astype(np.float32) / 65535
+            base = (
+                raw.postprocess(
+                    user_wb=shot,
+                    output_color=rawpy.ColorSpace.sRGB,
+                    gamma=(1, 1),
+                    no_auto_bright=True,
+                    output_bps=16,
+                    highlight_mode=rawpy.HighlightMode.Clip,
+                ).astype(np.float32)
+                / 65535
+            )
     before = base * (0.95 / max(float(np.percentile(base.max(axis=2), 99.995)), 1e-6))
     boxes = wall_boxes(base) if matrix_ok else []
     wb_from = "camera"
@@ -103,8 +119,12 @@ def develop_raw(path: Path, key: str) -> tuple[np.ndarray, np.ndarray, str]:
 
 
 ORIENT = {  # EXIF orientation -> como llevar los pixeles a derecho
-    2: lambda a: a[:, ::-1], 3: lambda a: a[::-1, ::-1], 4: lambda a: a[::-1],
-    5: lambda a: np.swapaxes(a, 0, 1), 6: lambda a: np.rot90(a, -1), 7: lambda a: np.rot90(a, 1)[::-1],
+    2: lambda a: a[:, ::-1],
+    3: lambda a: a[::-1, ::-1],
+    4: lambda a: a[::-1],
+    5: lambda a: np.swapaxes(a, 0, 1),
+    6: lambda a: np.rot90(a, -1),
+    7: lambda a: np.rot90(a, 1)[::-1],
     8: lambda a: np.rot90(a, 1),
 }
 
@@ -171,11 +191,15 @@ def decode_raster(path: Path, key: str) -> tuple[np.ndarray, int]:
 def faces_on(screen: Path, scale: float) -> list[dict]:
     """Las caras, como ovalos de photos.py (cx, cy, rx, ry nativos): el recuadro de Vision va de las cejas al menton,
     el ovalo de las cuatro sube a la frente. Factores promediados contra los ovalos a mano de la de grupo y un retrato."""
-    out = subprocess.run([str(built(VISION, VISION_BIN)), str(screen)], capture_output=True, text=True, check=True).stdout
+    out = subprocess.run(
+        [str(built(VISION, VISION_BIN)), str(screen)], capture_output=True, text=True, check=True
+    ).stdout
     faces = []
     for i, f in enumerate(json.loads(out or "[]")):
         x, y, w, h = (f[k] * scale for k in ("x", "y", "w", "h"))
-        faces.append({"id": f"cara-{i + 1}", "oval": [round(x + w / 2), round(y + h * 0.42), round(w * 0.45), round(h * 0.57)]})
+        faces.append(
+            {"id": f"cara-{i + 1}", "oval": [round(x + w / 2), round(y + h * 0.42), round(w * 0.45), round(h * 0.57)]}
+        )
     return faces
 
 
@@ -197,8 +221,12 @@ def studio_wall(screen: Path) -> bool:
 
 
 def drop_layers(key: str) -> None:
-    for f in [*backdrop.layer_paths(key), backdrop.LAYERS / f"{key}-capa-editor.png", backdrop.LAYERS / f"{key}-luz-editor.png",
-              viewer.SCREENS / f"{key}-capa.png"]:
+    for f in [
+        *backdrop.layer_paths(key),
+        backdrop.LAYERS / f"{key}-capa-editor.png",
+        backdrop.LAYERS / f"{key}-luz-editor.png",
+        viewer.SCREENS / f"{key}-capa.png",
+    ]:
         f.unlink(missing_ok=True)
 
 

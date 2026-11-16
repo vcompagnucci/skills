@@ -106,7 +106,9 @@ def compute(img_lin: np.ndarray, coarse_bg: np.ndarray, face=None) -> tuple[np.n
     srgb = np.clip(linear_to_srgb(small / norm_scale(small)), 0, 1).astype(np.float64)
     s = SIZE / img_lin.shape[0]
     face_small = tuple(v * s for v in face) if face else None
-    tri = trimap(cv2.resize(coarse_bg, (SIZE, SIZE), interpolation=cv2.INTER_AREA), int(SIZE * BAND) | 1, face_small, srgb)
+    tri = trimap(
+        cv2.resize(coarse_bg, (SIZE, SIZE), interpolation=cv2.INTER_AREA), int(SIZE * BAND) | 1, face_small, srgb
+    )
     alpha = estimate_alpha_cf(srgb, tri)
     fg = estimate_foreground_ml(srgb, alpha)
     return alpha.astype(np.float32), fg.astype(np.float32), tri.astype(np.float32)
@@ -275,7 +277,9 @@ def refine_edges(img: np.ndarray, alpha: np.ndarray, face=None, guide_scale: flo
         guide_scale = float(np.percentile(img[::4, ::4], 99.5))
     np.divide(guide, max(guide_scale, 1e-6), out=guide)
     np.sqrt(np.clip(guide, 0, 1, out=guide), out=guide)
-    calado = np.clip(guided_filter_color(guide, solid[y0:y1, x0:x1].astype(np.float32), max(1, round(3 * n / 4170)), 1e-4), 0, 1)
+    calado = np.clip(
+        guided_filter_color(guide, solid[y0:y1, x0:x1].astype(np.float32), max(1, round(3 * n / 4170)), 1e-4), 0, 1
+    )
     del guide
     target = on_line * a_c + (1 - on_line) * np.where(di > 0, calado, np.maximum(a_dark, calado))
     del calado
@@ -379,7 +383,9 @@ def refine_edges(img: np.ndarray, alpha: np.ndarray, face=None, guide_scale: flo
     return np.clip(out, 0, 1, out=out)
 
 
-SKIN_SIGMA = 0.4  # desenfoque del sensor, en m, donde no se puede medir: 2 px a 4170 (un perfil mide 5,2 px de 10 a 90 %)
+SKIN_SIGMA = (
+    0.4  # desenfoque del sensor, en m, donde no se puede medir: 2 px a 4170 (un perfil mide 5,2 px de 10 a 90 %)
+)
 SKIN_SMOOTH = 1.0  # suavizado del contorno a lo largo del borde, en m
 SKIN_TANG = 3.0  # ventana a lo largo del borde para medirlo, en m
 SKIN_REL = (0.45, 0.2)  # la rampa entera hasta |F - B| / pared 0.45, nada desde 0.65
@@ -465,8 +471,15 @@ RIM_SKIN = (0.05, 0.1)  # hay piel en la mezcla: wF desde 0.05, entero desde 0.1
 RIM_SOLID = (0.75, 0.1)  # o casi sin pared: alpha de la mezcla desde 0.75, entero desde 0.85
 
 
-def skin_hair_alpha(I: np.ndarray, F: np.ndarray, B: np.ndarray, a_c: np.ndarray, skin: np.ndarray, hair_px: int = 2,
-                    h_sigma: float = 10.0) -> np.ndarray:
+def skin_hair_alpha(
+    I: np.ndarray,
+    F: np.ndarray,
+    B: np.ndarray,
+    a_c: np.ndarray,
+    skin: np.ndarray,
+    hair_px: int = 2,
+    h_sigma: float = 10.0,
+) -> np.ndarray:
     """Piso del alpha donde un mechon oscuro corre pegado al filo de la piel: piel + pelo, sin pared.
 
     En un perfil, entre la ceja y el parpado (QA v7, la mordida blanca de 4 a 10 px) el
@@ -575,8 +588,13 @@ def unmix3(x: np.ndarray, f: np.ndarray, h: np.ndarray) -> np.ndarray:
     t_h = np.clip(vr / np.maximum(vv, 1e-12), 0, 1)
     fh = f - h
     t_fh = np.clip(((x - h) * fh).sum(1) / np.maximum((fh * fh).sum(1), 1e-12), 0, 1)
-    err = np.stack([((r - t_f[:, None] * u) ** 2).sum(1), ((r - t_h[:, None] * v) ** 2).sum(1),
-                    ((x - h - t_fh[:, None] * fh) ** 2).sum(1)])
+    err = np.stack(
+        [
+            ((r - t_f[:, None] * u) ** 2).sum(1),
+            ((r - t_h[:, None] * v) ** 2).sum(1),
+            ((x - h - t_fh[:, None] * fh) ** 2).sum(1),
+        ]
+    )
     side = np.argmin(err, axis=0)
     edge = np.choose(side, [1 - t_f, 1 - t_h, np.zeros_like(t_fh)])
     edge_f = np.choose(side, [t_f, np.zeros_like(t_h), t_fh])
@@ -590,8 +608,17 @@ S_RED = 0.1  # R/G al menos 10 % sobre el de la piel
 S_WEIGHT = (0.026, 0.012)  # cuanto pliegue tiene que haber cerca para medir S (rampa: sin escalon donde se acaba)
 
 
-def second_colour(I: np.ndarray, F: np.ndarray, B: np.ndarray, off: np.ndarray, di: np.ndarray, do: np.ndarray,
-                  skin: np.ndarray, a_dark: np.ndarray, m: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | None:
+def second_colour(
+    I: np.ndarray,
+    F: np.ndarray,
+    B: np.ndarray,
+    off: np.ndarray,
+    di: np.ndarray,
+    do: np.ndarray,
+    skin: np.ndarray,
+    a_dark: np.ndarray,
+    m: int,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | None:
     """Alpha con dos colores de persona: piel F y un pliegue S de otro color, contra la pared B.
 
     A traves de un lente de anteojos la mejilla termina en una punta rojo oscuro (S), tan oscura como la
@@ -721,7 +748,10 @@ def key_thin_hair(img: np.ndarray, alpha: np.ndarray) -> np.ndarray:
 def wall_level(y: np.ndarray, alpha: np.ndarray, k: float, sig: float) -> np.ndarray:
     """El brillo de la pared de al lado: promedio de la pared pura (radio `sig`), y donde no hay
     pared cerca, un promedio ancho calculado a 1/8."""
-    pure = cv2.erode((alpha < 0.01).astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * max(1, round(4 * k)) + 1,) * 2))
+    pure = cv2.erode(
+        (alpha < 0.01).astype(np.uint8),
+        cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * max(1, round(4 * k)) + 1,) * 2),
+    )
     pure = pure.astype(np.float32)
     den = cv2.GaussianBlur(pure, (0, 0), sig)
     near = cv2.GaussianBlur(y * pure, (0, 0), sig) / np.maximum(den, 1e-6)
@@ -738,7 +768,9 @@ def wall_level(y: np.ndarray, alpha: np.ndarray, k: float, sig: float) -> np.nda
     return near
 
 
-def foreground_tiled(img_lin: np.ndarray, alpha: np.ndarray, scale: float, tiles: int = 2, overlap: int = 160) -> np.ndarray:
+def foreground_tiled(
+    img_lin: np.ndarray, alpha: np.ndarray, scale: float, tiles: int = 2, overlap: int = 160
+) -> np.ndarray:
     """Color del primer plano por partes con superposicion: misma calidad, la mitad de memoria.
 
     A 4170 px la estimacion entera pasaba los 4 GB (regla de la Mac). Es local, asi que

@@ -42,7 +42,9 @@ def camera_original(name: str, framing: str, size: int = 2048) -> np.ndarray:
     path = ROOT / "work" / f"{name}-camara.jpg"
     if not path.exists():
         raw = subprocess.run(
-            ["exiftool", "-b", "-PreviewImage", str(ROOT / "originales" / f"{name}.RAF")], capture_output=True, check=True
+            ["exiftool", "-b", "-PreviewImage", str(ROOT / "originales" / f"{name}.RAF")],
+            capture_output=True,
+            check=True,
         ).stdout
         img = cv2.imdecode(np.frombuffer(raw, np.uint8), cv2.IMREAD_COLOR)  # ya aplica la rotacion EXIF
         cv2.imwrite(str(path), img, [cv2.IMWRITE_JPEG_QUALITY, 97])
@@ -94,7 +96,9 @@ def histogram(rgb: np.ndarray) -> np.ndarray:
     return h / h.max()
 
 
-def comparison_card(title: str, ref_img: np.ndarray | None, items: list[tuple[str, np.ndarray, list[str]]], path: Path) -> None:
+def comparison_card(
+    title: str, ref_img: np.ndarray | None, items: list[tuple[str, np.ndarray, list[str]]], path: Path
+) -> None:
     """Por cada foto: la referencia arriba, mi version abajo, histogramas encimados y los numeros."""
     d, gap, hist_h = 300, 20, 110
     lines = max(len(rows) for _, _, rows in items)
@@ -122,8 +126,12 @@ def comparison_card(title: str, ref_img: np.ndarray | None, items: list[tuple[st
             draw.line(pts, fill=color, width=2)
         for j, row in enumerate(rows):
             draw.text((x, hy + hist_h + 8 + j * 24), row, fill=(255, 196, 0) if j == 0 else (200, 200, 200), font=font)
-    draw.text((gap, h - 28), "Histograma de L*: gris = referencia, amarillo = mi version. Numeros: referencia / mia, en L* (0 negro, 100 blanco).",
-              fill=(140, 140, 140), font=font)
+    draw.text(
+        (gap, h - 28),
+        "Histograma de L*: gris = referencia, amarillo = mi version. Numeros: referencia / mia, en L* (0 negro, 100 blanco).",
+        fill=(140, 140, 140),
+        font=font,
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
     canvas.save(path, quality=88)
 

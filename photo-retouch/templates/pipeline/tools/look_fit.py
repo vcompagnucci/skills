@@ -91,8 +91,10 @@ def main(keys: list[str]) -> None:
             p, m = fit(name, look["base"], target)
             out[name] = {"exposure": p.get("exposure", 0.0), "blacks": p.get("blacks", 0)}
             s, b = m["skin"], m["black"]
-            print(f"  {name} exp {out[name]['exposure']:+.2f} blacks {out[name]['blacks']:+d} | piel {s['p50']:.0f}/{s['p90']:.0f}"
-                  f" C {s['C']:.1f} | ropa {b['p50']:.1f} p1 {m['tone'][0]:.1f} | cara quemada {m['face_clip']:.2f} %")
+            print(
+                f"  {name} exp {out[name]['exposure']:+.2f} blacks {out[name]['blacks']:+d} | piel {s['p50']:.0f}/{s['p90']:.0f}"
+                f" C {s['C']:.1f} | ropa {b['p50']:.1f} p1 {m['tone'][0]:.1f} | cara quemada {m['face_clip']:.2f} %"
+            )
         (NOTES / "estilos" / f"ajuste-{key}.json").write_text(json.dumps(out, indent=1))
 
 

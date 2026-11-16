@@ -96,14 +96,15 @@ def cap_slope(T: np.ndarray, slope: float | None, window: tuple[float, float]) -
     d = np.diff(T)
     capped = np.clip(d[i0:i1], 0, slope * np.diff(LIGHT_X)[i0:i1])
     out = T.copy()
-    out[i0:i1 + 1] = T[i1] - np.concatenate([np.cumsum(capped[::-1])[::-1], [0.0]])
+    out[i0 : i1 + 1] = T[i1] - np.concatenate([np.cumsum(capped[::-1])[::-1], [0.0]])
     if i0 > 0 and T[i0] > 0:  # la rampa desde 0, estirada hasta el nuevo comienzo de la ventana
         out[:i0] = T[:i0] * out[i0] / T[i0]
     return np.maximum.accumulate(np.clip(out, 0, 100))
 
 
-def shoulder_cut(L: np.ndarray, lifted: np.ndarray, knee: float, ceiling: float, detail_sigma: float,
-                 alpha: np.ndarray) -> np.ndarray:
+def shoulder_cut(
+    L: np.ndarray, lifted: np.ndarray, knee: float, ceiling: float, detail_sigma: float, alpha: np.ndarray
+) -> np.ndarray:
     """Cuanto bajar cada pixel para que sus brillos vayan hacia `ceiling` desde `knee` (pendiente 1 en la rodilla).
     - Se comprime la luz a `detail_sigma` px, no el pixel: el brillo del ojo y el poro quedan arriba.
     - Nunca baja mas de lo que subio el relleno (`lifted`): donde no se subio luz no toca nada, y un pixel del borde a
@@ -122,8 +123,17 @@ def shoulder_cut(L: np.ndarray, lifted: np.ndarray, knee: float, ceiling: float,
     return np.minimum(cut, lifted)
 
 
-def light_map(lin: np.ndarray, skin: np.ndarray, brush: np.ndarray, alpha: np.ndarray, T: np.ndarray, sigma: float,
-              knee: float = 100.0, ceiling: float = 100.0, detail_sigma: float = 0.0) -> np.ndarray:
+def light_map(
+    lin: np.ndarray,
+    skin: np.ndarray,
+    brush: np.ndarray,
+    alpha: np.ndarray,
+    T: np.ndarray,
+    sigma: float,
+    knee: float = 100.0,
+    ceiling: float = 100.0,
+    detail_sigma: float = 0.0,
+) -> np.ndarray:
     """La luz suave de la piel llevada por T, sumada en L* dentro del pincel; a* y b* quedan. Luz lineal (h, w, 3)."""
     if np.allclose(T, LIGHT_X) and ceiling >= 100:
         return lin
@@ -160,7 +170,7 @@ def skin_and_brush(lin: np.ndarray, faces: list, alpha: np.ndarray) -> tuple[np.
     del Lab, C, h
     zone = ref_measure.ellipses(lin.shape[:2], faces, OVAL_GROW)
     for cx, cy, rx, ry in faces:  # el cuello: sin el, la luz de la cara cortaba en la mandibula
-        zone[max(0, round(cy)):round(cy + NECK * ry), max(0, round(cx - rx)):round(cx + rx)] = True
+        zone[max(0, round(cy)) : round(cy + NECK * ry), max(0, round(cx - rx)) : round(cx + rx)] = True
     skin = zone & color & (alpha > 0.5)
     r = float(np.mean([f[2] for f in faces]))
     k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (int(r / 1.5) | 1,) * 2)
@@ -184,8 +194,18 @@ def alpha_of(photo: str, shape: tuple[int, int]) -> np.ndarray:
 
 
 # --- el ajuste ----------------------------------------------------------------------------------
-def fit(lin: np.ndarray, faces: list, alpha: np.ndarray, measure_at, want_q: np.ndarray, slope: float | None,
-        iters: int, T: np.ndarray | None = None, ceiling: float = 100.0, log=print) -> dict:
+def fit(
+    lin: np.ndarray,
+    faces: list,
+    alpha: np.ndarray,
+    measure_at,
+    want_q: np.ndarray,
+    slope: float | None,
+    iters: int,
+    T: np.ndarray | None = None,
+    ceiling: float = 100.0,
+    log=print,
+) -> dict:
     """Igualar los percentiles de la piel de `lin` a want_q. measure_at(img) devuelve mis percentiles medidos como
     ref_measure. Devuelve T, el techo, la imagen y la historia."""
     skin, brush, r = skin_and_brush(lin, faces, alpha)
@@ -203,7 +223,10 @@ def fit(lin: np.ndarray, faces: list, alpha: np.ndarray, measure_at, want_q: np.
         q = measure_at(out)
         dq = float(np.abs(q - want_q).mean())
         history.append({"it": it, "dq": dq, "q": q.tolist(), "ceiling": ceiling, "T": T[::8].tolist()})
-        log(f"  vuelta {it}: piel a {dq:.2f} L* de la referencia (p99 {q[-1]:.1f} contra {want_q[-1]:.1f}), techo {ceiling:.1f}", flush=True)
+        log(
+            f"  vuelta {it}: piel a {dq:.2f} L* de la referencia (p99 {q[-1]:.1f} contra {want_q[-1]:.1f}), techo {ceiling:.1f}",
+            flush=True,
+        )
         if dq < TOL_Q or it == iters - 1:
             break
         T = cap_slope(np.interp(T, *quantile_map(q, want_q)), slope, window)
@@ -258,8 +281,16 @@ def run(photo: str, style: str, slope: float | None = SLOPE, n: int | None = Non
     alpha_full = alpha_of(photo, (H, W))
     a_small = cv2.resize(alpha_full, (small.shape[1], small.shape[0]), interpolation=cv2.INTER_AREA)
     pre = fit(small, [tuple(v * k for v in f) for f in faces], a_small, measure_at, want_q, slope, ITERS, log=log)
-    record = {"photo": photo, "style": style, "reference": ref, "slope": slope, "want": want_q.tolist(),
-              "window": pre["window"], "knee": pre["knee"], "preview": {"side": PREVIEW, "history": pre["history"]}}
+    record = {
+        "photo": photo,
+        "style": style,
+        "reference": ref,
+        "slope": slope,
+        "want": want_q.tolist(),
+        "window": pre["window"],
+        "knee": pre["knee"],
+        "preview": {"side": PREVIEW, "history": pre["history"]},
+    }
     OUT_NOTES.mkdir(parents=True, exist_ok=True)
     if n is not None:
         save_png(linear_to_srgb(pre["image"]), PROCESS / f"exacta-{key}.png")
@@ -267,13 +298,23 @@ def run(photo: str, style: str, slope: float | None = SLOPE, n: int | None = Non
         del small, a_small
         lin = TO_LINEAR[m16]
         del m16
-        full = fit(lin, faces, alpha_full, measure_at, want_q, slope, MASTER_ITERS, T=pre["T"], ceiling=pre["ceiling"], log=log)
+        full = fit(
+            lin, faces, alpha_full, measure_at, want_q, slope, MASTER_ITERS, T=pre["T"], ceiling=pre["ceiling"], log=log
+        )
         del lin
         record["master"] = {"history": full["history"], "ceiling": full["ceiling"], "T": full["T"][::8].tolist()}
         srgb = linear_to_srgb(full.pop("image"))
         tif, png = EDITED / f"{key}-exacta.tif", EDITED / f"{key}-exacta.png"
-        atomic(tif, lambda p: tifffile.imwrite(p, to_uint16(srgb), compression="zlib", photometric="rgb", iccprofile=_srgb_icc()))
-        atomic(png, lambda p: Image.fromarray(to_uint8(srgb)).save(p, format="PNG", icc_profile=_srgb_icc(), compress_level=6))
+        atomic(
+            tif,
+            lambda p: tifffile.imwrite(
+                p, to_uint16(srgb), compression="zlib", photometric="rgb", iccprofile=_srgb_icc()
+            ),
+        )
+        atomic(
+            png,
+            lambda p: Image.fromarray(to_uint8(srgb)).save(p, format="PNG", icc_profile=_srgb_icc(), compress_level=6),
+        )
         del srgb
         log(f"{key}-exacta: escrita", flush=True)
     # la previa va aparte: una prueba (tools/exacta_check.py) no pisa lo medido de la maestra

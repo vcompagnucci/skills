@@ -58,8 +58,9 @@ def to_srgb(data: bytes) -> Image.Image:
     im = im.convert("RGB")
     if icc:
         src = ImageCms.ImageCmsProfile(io.BytesIO(icc))
-        im = ImageCms.profileToProfile(im, src, SRGB, renderingIntent=ImageCms.Intent.RELATIVE_COLORIMETRIC,
-                                       outputMode="RGB")
+        im = ImageCms.profileToProfile(
+            im, src, SRGB, renderingIntent=ImageCms.Intent.RELATIVE_COLORIMETRIC, outputMode="RGB"
+        )
     return im
 
 

@@ -67,15 +67,40 @@ from viewer import SCREEN, SCREENS, screen
 # tinte, y vibrancia de 15 como mucho: el color de la gente es el de la maestra. Medido con tools/style_pilot.py
 # (proceso-notas/estilos/luz-<ref>.txt)
 STYLES = {
-    "beige": {"name": "Warm beige", "ref": "stripe",  # luminoso y suave: sombras abiertas, poco contraste
-              "light": {"exposure": 0.15, "contrast": -5, "highlights": -10, "shadows": 30, "whites": 5, "blacks": -12, "vibrance": 5},
-              "background": {"saturation": -100, "temperature": 55, "tint": 16}},
-    "white": {"name": "Bright white", "ref": "ramp",  # claro y nitido: negros firmes, luces contenidas contra el blanco
-              "light": {"exposure": 0.15, "contrast": 5, "highlights": -20, "shadows": 20, "whites": 8, "blacks": -15, "vibrance": 10},
-              "background": {"saturation": -100, "exposure": "top", "evenness": 65}},  # "top": lleva lo mas claro a WHITE_TOP
-    "falloff": {"name": "Dark falloff", "ref": "apple",  # denso: mas contraste y color, negros profundos con detalle
-                "light": {"contrast": 20, "highlights": -12, "shadows": 8, "blacks": -10, "vibrance": 15},
-                "background": {"saturation": -100, "falloff": 100}},
+    "beige": {
+        "name": "Warm beige",
+        "ref": "stripe",  # luminoso y suave: sombras abiertas, poco contraste
+        "light": {
+            "exposure": 0.15,
+            "contrast": -5,
+            "highlights": -10,
+            "shadows": 30,
+            "whites": 5,
+            "blacks": -12,
+            "vibrance": 5,
+        },
+        "background": {"saturation": -100, "temperature": 55, "tint": 16},
+    },
+    "white": {
+        "name": "Bright white",
+        "ref": "ramp",  # claro y nitido: negros firmes, luces contenidas contra el blanco
+        "light": {
+            "exposure": 0.15,
+            "contrast": 5,
+            "highlights": -20,
+            "shadows": 20,
+            "whites": 8,
+            "blacks": -15,
+            "vibrance": 10,
+        },
+        "background": {"saturation": -100, "exposure": "top", "evenness": 65},
+    },  # "top": lleva lo mas claro a WHITE_TOP
+    "falloff": {
+        "name": "Dark falloff",
+        "ref": "apple",  # denso: mas contraste y color, negros profundos con detalle
+        "light": {"contrast": 20, "highlights": -12, "shadows": 8, "blacks": -10, "vibrance": 15},
+        "background": {"saturation": -100, "falloff": 100},
+    },
 }
 # Mas versiones, pedidas el 2026-10-15 ("armame versiones solo tocando estos parametros de la sidebar derecha"):
 # solo valores del panel, sin maestras propias (styles.py <foto> no las renderiza; --seed-looks las suma al editor).
@@ -88,18 +113,24 @@ LOOKS = {
     # Simon Ringsmuth, Digital Photography School, "How to do basic processing on a portrait in 5 minutes":
     # "I always start with these" (Clarity -5 no esta en el panel; el balance, con el gotero: ya esta en la entrega)
     # https://digital-photography-school.com/how-to-do-basic-processing-on-a-portrait-in-5-minutes-using-lightroom/
-    "natural": {"name": "Natural headshot",
-                "light": {"highlights": -25, "shadows": 20, "whites": 20, "blacks": -25, "saturation": 5},
-                "background": {}},
+    "natural": {
+        "name": "Natural headshot",
+        "light": {"highlights": -25, "shadows": 20, "whites": 20, "blacks": -25, "saturation": 5},
+        "background": {},
+    },
     # SLR Lounge, retrato de alto contraste (Clarity -20, la viñeta y la curva "Vintage Punch" no estan en el panel)
     # https://www.slrlounge.com/?p=140798
-    "contrast": {"name": "High contrast",
-                 "light": {"contrast": 25, "highlights": -30, "shadows": -15, "whites": -30, "blacks": -30},
-                 "background": {}},
+    "contrast": {
+        "name": "High contrast",
+        "light": {"contrast": 25, "highlights": -30, "shadows": -15, "whites": -30, "blacks": -30},
+        "background": {},
+    },
     # la misma receta en blanco y negro, que es como la publica SLR Lounge
-    "contrast_bw": {"name": "High contrast B&W",
-                    "light": {"contrast": 25, "highlights": -30, "shadows": -15, "whites": -30, "blacks": -30, "saturation": -100},
-                    "background": {}},
+    "contrast_bw": {
+        "name": "High contrast B&W",
+        "light": {"contrast": 25, "highlights": -30, "shadows": -15, "whites": -30, "blacks": -30, "saturation": -100},
+        "background": {},
+    },
     # Fotos de equipo en color de empresas con gusto (2026-10-17, pedido: "linear, apple, robinhood, public, nothing"),
     # medidas con tools/ref_measure.py (proceso/estilos-medida-<ref>.png). Primera vuelta: los percentiles de piel de la
     # referencia copiados con un juego para las cuatro, y el fotografo: "adaptar los estilos bien a las fotos, no es
@@ -117,25 +148,52 @@ LOOKS = {
     #   linea", 2026-10-17); los tres estilos de prensa de STYLES no lo llevan, ya estaban aprobados.
     # Apple Srouji (laboratorio desenfocado) quedo afuera: no tiene pared que copiar, y pintar la nuestra de azul era
     # el filtro. Apple ya esta en Dark falloff.
-    "robinhood": {"name": "White wall, light skin", "ref": "robinhood",  # blanco puro y parejo, piel clara, limpio
-                  "base": {"contrast": 5, "highlights": -20, "shadows": 20, "whites": -8, "blacks": -10, "vibrance": 10},
-                  "photos": {"PHOTO_A": {"exposure": 0.29, "blacks": -12}},  # tools/look_fit.py (una entrada por foto de la sesion)
-                  "background": {"smoothing": 100, "saturation": -100, "evenness": 90, "exposure": "top:97"}},
-    "public": {"name": "Cream wall", "ref": "public",  # blanco hueso calido parejo, negros hondos, piel con color
-               "base": {"contrast": 10, "highlights": -20, "shadows": 10, "whites": -8, "blacks": -12, "vibrance": 10},
-               "photos": {"PHOTO_A": {"exposure": 0.28, "blacks": -12}},  # tools/look_fit.py (una entrada por foto de la sesion)
-               "background": {"smoothing": 100, "saturation": -100, "temperature": 75, "tint": 22, "evenness": 85, "exposure": "top:86"}},
+    "robinhood": {
+        "name": "White wall, light skin",
+        "ref": "robinhood",  # blanco puro y parejo, piel clara, limpio
+        "base": {"contrast": 5, "highlights": -20, "shadows": 20, "whites": -8, "blacks": -10, "vibrance": 10},
+        "photos": {
+            "PHOTO_A": {"exposure": 0.29, "blacks": -12}
+        },  # tools/look_fit.py (una entrada por foto de la sesion)
+        "background": {"smoothing": 100, "saturation": -100, "evenness": 90, "exposure": "top:97"},
+    },
+    "public": {
+        "name": "Cream wall",
+        "ref": "public",  # blanco hueso calido parejo, negros hondos, piel con color
+        "base": {"contrast": 10, "highlights": -20, "shadows": 10, "whites": -8, "blacks": -12, "vibrance": 10},
+        "photos": {
+            "PHOTO_A": {"exposure": 0.28, "blacks": -12}
+        },  # tools/look_fit.py (una entrada por foto de la sesion)
+        "background": {
+            "smoothing": 100,
+            "saturation": -100,
+            "temperature": 75,
+            "tint": 22,
+            "evenness": 85,
+            "exposure": "top:86",
+        },
+    },
     # Carl Pei con flash: de la referencia solo la direccion (punch, negros hondos, color). Su fondo es una oficina: la
     # pared queda como esta, gris.
-    "nothing": {"name": "Deep blacks, grey wall", "ref": "nothing",
-                "base": {"contrast": 15, "highlights": -20, "shadows": 10, "whites": -8, "blacks": -15, "vibrance": 12},
-                "photos": {"PHOTO_A": {"exposure": 0.29, "blacks": -15}},  # tools/look_fit.py (una entrada por foto de la sesion)
-                "background": {"smoothing": 100, "saturation": -100}},
+    "nothing": {
+        "name": "Deep blacks, grey wall",
+        "ref": "nothing",
+        "base": {"contrast": 15, "highlights": -20, "shadows": 10, "whites": -8, "blacks": -15, "vibrance": 12},
+        "photos": {
+            "PHOTO_A": {"exposure": 0.29, "blacks": -15}
+        },  # tools/look_fit.py (una entrada por foto de la sesion)
+        "background": {"smoothing": 100, "saturation": -100},
+    },
     # Linear (/careers, el del sillon): pared blanca neutra pareja, suave pero no lavado
-    "linear": {"name": "Soft contrast, white wall", "ref": "linear-sofa",
-               "base": {"contrast": -5, "highlights": -15, "shadows": 20, "blacks": -8},
-               "photos": {"PHOTO_A": {"exposure": 0.01, "blacks": -8}},  # tools/look_fit.py (una entrada por foto de la sesion)
-               "background": {"smoothing": 100, "saturation": -100, "evenness": 70, "exposure": "top:84"}},
+    "linear": {
+        "name": "Soft contrast, white wall",
+        "ref": "linear-sofa",
+        "base": {"contrast": -5, "highlights": -15, "shadows": 20, "blacks": -8},
+        "photos": {
+            "PHOTO_A": {"exposure": 0.01, "blacks": -8}
+        },  # tools/look_fit.py (una entrada por foto de la sesion)
+        "background": {"smoothing": 100, "saturation": -100, "evenness": 70, "exposure": "top:84"},
+    },
 }
 WHITE_TOP = 94.0  # L* de la parte mas clara del papel blanco: el de Ramp mide 93,9
 PREVIEW = ROOT / "work" / "estilos" / "piloto"
@@ -143,10 +201,19 @@ VERSIONS = EDITED / "versiones.json"
 EYES = EDITED / "ojeras" / "ojeras.json"
 
 # los controles del editor (CONFIG en viewer_template.html): carpeta y nombre de cada parametro, y su paso
-LIGHT_UI = {"exposure": ("Light", "Exposure"), "brightness": ("Light", "Brightness"), "contrast": ("Light", "Contrast"),
-            "highlights": ("Light", "Highlights"), "shadows": ("Light", "Shadows"), "whites": ("Light", "Whites"),
-            "blacks": ("Light", "Blacks"), "temperature": ("Color", "Temperature"), "tint": ("Color", "Tint"),
-            "vibrance": ("Color", "Vibrance"), "saturation": ("Color", "Saturation")}
+LIGHT_UI = {
+    "exposure": ("Light", "Exposure"),
+    "brightness": ("Light", "Brightness"),
+    "contrast": ("Light", "Contrast"),
+    "highlights": ("Light", "Highlights"),
+    "shadows": ("Light", "Shadows"),
+    "whites": ("Light", "Whites"),
+    "blacks": ("Light", "Blacks"),
+    "temperature": ("Color", "Temperature"),
+    "tint": ("Color", "Tint"),
+    "vibrance": ("Color", "Vibrance"),
+    "saturation": ("Color", "Saturation"),
+}
 BACKGROUND_UI = {k: ("Background", k.capitalize()) for k in backdrop.KEYS}
 STEP = {"exposure": 0.01}  # el resto, enteros
 
@@ -163,7 +230,9 @@ def faces(name: str, scale: float) -> list[tuple[float, float, float, float]]:
 def alpha_for(name: str, native: np.ndarray, out: np.ndarray) -> np.ndarray:
     """Alpha (1 = persona) al tamano de `out`. El matting sale de la maestra nativa y se guarda."""
     boxes = PHOTOS[name].get("backdrop_sure", ())
-    coarse, hand = background_mask(native, faces(name, 1.0), PHOTOS[name].get("backdrop_holes", ()), boxes, with_hand=True)
+    coarse, hand = background_mask(
+        native, faces(name, 1.0), PHOTOS[name].get("backdrop_holes", ()), boxes, with_hand=True
+    )
     small, tri = cached(name, native, coarse, faces(name, 1.0), hand, boxes)
     if boxes and hand.shape != out.shape[:2]:
         hand = cv2.resize(hand, (out.shape[1], out.shape[0]), interpolation=cv2.INTER_NEAREST)
@@ -192,7 +261,13 @@ def layers_for(name: str, m16: np.ndarray, rebuild: bool = False) -> backdrop.La
     deps = [EDITED / f"{name}.tif", matte_path(name)]
     newest = max((p.stat().st_mtime for p in deps if p.exists()), default=0)
     current = fresh(name, PHOTOS[name].get("backdrop_sure", ())) and keep_done(name) == keep_wanted(name)
-    if not rebuild and current and capa.exists() and luz.exists() and min(capa.stat().st_mtime, luz.stat().st_mtime) >= newest:
+    if (
+        not rebuild
+        and current
+        and capa.exists()
+        and luz.exists()
+        and min(capa.stat().st_mtime, luz.stat().st_mtime) >= newest
+    ):
         return backdrop.load_layers(name)
     native = TO_LINEAR[m16]
     alpha = alpha_for(name, native, native)
@@ -213,7 +288,9 @@ def rounded(key: str, v: float) -> float:
 def preset(name: str, key: str, layers: backdrop.Layers) -> tuple[dict, dict]:
     """Los parametros de un estilo para una foto, redondeados al paso de cada control: (luz y color, fondo)."""
     s = (STYLES | LOOKS)[key]
-    raw = s["light"] if "light" in s else s["base"] | s["photos"].get(name, {})  # LOOKS de empresas: base + lo de cada foto
+    raw = (
+        s["light"] if "light" in s else s["base"] | s["photos"].get(name, {})
+    )  # LOOKS de empresas: base + lo de cada foto
     light = {k: rounded(k, float(raw.get(k, 0))) for k in LIGHT_KEYS}
     bg = {k: 0.0 for k in backdrop.KEYS}
     for k, v in s["background"].items():
@@ -246,8 +323,13 @@ def render(name: str, keys: list[str], preview: bool) -> dict:
     else:
         img16, a16, b16 = m16, layers.alpha16, layers.behind16
     person = a16 == 65535
-    report = {"photo": name, "size": list(img16.shape[:2]), "person": round(float(person.mean()), 4),
-              "wall_before": wall_numbers(TO_LINEAR[img16], name), "styles": {}}
+    report = {
+        "photo": name,
+        "size": list(img16.shape[:2]),
+        "person": round(float(person.mean()), 4),
+        "wall_before": wall_numbers(TO_LINEAR[img16], name),
+        "styles": {},
+    }
     if preview:
         PREVIEW.mkdir(parents=True, exist_ok=True)
         np.save(PREVIEW / f"{name}-alpha.npy", (a16 / 65535).astype(np.float16))
@@ -255,8 +337,11 @@ def render(name: str, keys: list[str], preview: bool) -> dict:
     for key in keys:
         light, bg = preset(name, key, layers)
         o16 = backdrop.render(img16, 0, 0, img16.shape[:2], layers, light, bg, a16, b16)
-        report["styles"][key] = {"light": {k: v for k, v in light.items() if v}, "background": {k: v for k, v in bg.items() if v},
-                                 "wall_after": wall_numbers(TO_LINEAR[o16], name)}
+        report["styles"][key] = {
+            "light": {k: v for k, v in light.items() if v},
+            "background": {k: v for k, v in bg.items() if v},
+            "wall_after": wall_numbers(TO_LINEAR[o16], name),
+        }
         if preview:
             save_png(srgb_float(o16), PREVIEW / f"{name}-{key}.png")
             continue
@@ -310,20 +395,32 @@ def seed(table: dict = STYLES, update_only: bool = False) -> None:
     made = {}
     for name in STUDIO:
         layers = backdrop.load_layers(name)
-        made[name] = [{"id": f"preset-{key}", "name": s["name"],
-                       "values": equivalents.shifted(ui_values(*preset(name, key, layers), level), starts.get(name, {}))}
-                      for key, s in table.items()]
+        made[name] = [
+            {
+                "id": f"preset-{key}",
+                "name": s["name"],
+                "values": equivalents.shifted(ui_values(*preset(name, key, layers), level), starts.get(name, {})),
+            }
+            for key, s in table.items()
+        ]
     data = json.loads(VERSIONS.read_text()) if VERSIONS.exists() else {"photos": {}}
     for name in STUDIO:
         base = equivalents.shifted(zero, starts.get(name, {}))
-        state = data["photos"].get(name) or {"version": 1, "values": dict(base), "baseValues": dict(base),
-                                             "presets": [], "activePresetId": None}
+        state = data["photos"].get(name) or {
+            "version": 1,
+            "values": dict(base),
+            "baseValues": dict(base),
+            "presets": [],
+            "activePresetId": None,
+        }
         if update_only:
             new = {p["id"]: p for p in made[name]}
             state["presets"] = [new.get(p["id"], p) for p in state["presets"] if p["id"] not in RETIRED]
         else:
             keep = [p for p in state["presets"] if p["name"] not in names and p["id"] not in RETIRED]
-            state["presets"] = keep + made[name] if table is LOOKS else made[name] + keep  # las de LOOKS, abajo de lo que ya habia
+            state["presets"] = (
+                keep + made[name] if table is LOOKS else made[name] + keep
+            )  # las de LOOKS, abajo de lo que ya habia
         if state["activePresetId"] not in {p["id"] for p in state["presets"]}:
             state["activePresetId"] = None
         data["photos"][name] = state
@@ -347,4 +444,6 @@ if __name__ == "__main__":
     rep = render(photo, keys, "--preview" in sys.argv)
     notes = NOTES / "estilos"
     notes.mkdir(parents=True, exist_ok=True)
-    (notes / f"fondo-{photo}{'-piloto' if '--preview' in sys.argv else ''}.json").write_text(json.dumps(rep, ensure_ascii=False, indent=1))
+    (notes / f"fondo-{photo}{'-piloto' if '--preview' in sys.argv else ''}.json").write_text(
+        json.dumps(rep, ensure_ascii=False, indent=1)
+    )

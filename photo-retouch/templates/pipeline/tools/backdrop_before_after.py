@@ -33,7 +33,9 @@ GAP, HEAD = 8, 22
 def old_layers(name: str, folder: Path) -> backdrop.Layers:
     rgba = backdrop.read_png16(folder / f"{name}-capa.png")
     light = TO_LINEAR[backdrop.read_png16(folder / f"{name}-luz.png")]
-    return backdrop.Layers(np.ascontiguousarray(rgba[..., 3]), np.ascontiguousarray(rgba[..., :3]), light, backdrop.top_lightness(light))
+    return backdrop.Layers(
+        np.ascontiguousarray(rgba[..., 3]), np.ascontiguousarray(rgba[..., :3]), light, backdrop.top_lightness(light)
+    )
 
 
 def to8(img16: np.ndarray) -> np.ndarray:
@@ -62,11 +64,20 @@ def main(name: str, box: tuple[int, int, int, int], keys: list[str], zoom: int, 
         L0 = lab(TO_LINEAR[people])[..., 0]
         black = L0 < BLACK
         lift = [lab(TO_LINEAR[o])[..., 0][black] - L0[black] for o in outs]
-        report["styles"][key] = {"dE_mean": round(float(de.mean()), 3), "dE_p99": round(float(np.percentile(de, 99)), 2),
-                                 "px_dE_over_2": int((de > 2).sum()), "black_px": int(black.sum()),
-                                 **{f"black_lift_{t}": {"p99": round(float(np.percentile(v, 99)), 2) if v.size else 0.0,
-                                                        "max": round(float(v.max()), 2) if v.size else 0.0,
-                                                        "px_over_1": int((v > 1).sum())} for t, v in zip(("antes", "despues"), lift)}}
+        report["styles"][key] = {
+            "dE_mean": round(float(de.mean()), 3),
+            "dE_p99": round(float(np.percentile(de, 99)), 2),
+            "px_dE_over_2": int((de > 2).sum()),
+            "black_px": int(black.sum()),
+            **{
+                f"black_lift_{t}": {
+                    "p99": round(float(np.percentile(v, 99)), 2) if v.size else 0.0,
+                    "max": round(float(v.max()), 2) if v.size else 0.0,
+                    "px_over_1": int((v > 1).sum()),
+                }
+                for t, v in zip(("antes", "despues"), lift)
+            },
+        }
         demap = np.repeat((np.clip(de / DE_WHITE, 0, 1) * 255).astype(np.uint8)[..., None], 3, -1)
         rows.append((STYLES[key]["name"], [to8(people), to8(outs[0]), to8(outs[1]), demap]))
     alphas = [np.repeat(to8(layers.alpha16[y0:y1, x0:x1])[..., None], 3, -1) for layers in (old, new)]
@@ -80,7 +91,12 @@ def main(name: str, box: tuple[int, int, int, int], keys: list[str], zoom: int, 
         for c, img in enumerate(imgs):
             left = GAP + c * (tw + GAP)
             sheet.paste(tile(img, zoom), (left, top + HEAD))
-            draw.text((left + 2, top + 3), f"{title} - {labels[c] if r < len(keys) else ('Antes', 'Despues')[c]}", fill=(220, 220, 220), font=font)
+            draw.text(
+                (left + 2, top + 3),
+                f"{title} - {labels[c] if r < len(keys) else ('Antes', 'Despues')[c]}",
+                fill=(220, 220, 220),
+                font=font,
+            )
     suffix = f"-{tag}" if tag else ""
     out = PROCESS / f"estilos-antes-despues-{name}{suffix}.png"
     sheet.save(out)
@@ -95,5 +111,11 @@ def main(name: str, box: tuple[int, int, int, int], keys: list[str], zoom: int, 
 if __name__ == "__main__":
     opts = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    main(args[0], tuple(int(v) for v in args[1].split(",")), opts.get("keys", ",".join(STYLES)).split(","),
-         int(opts.get("zoom", 2)), ROOT / opts.get("before", "work/estilos/antes-recuadros"), opts.get("name", ""))
+    main(
+        args[0],
+        tuple(int(v) for v in args[1].split(",")),
+        opts.get("keys", ",".join(STYLES)).split(","),
+        int(opts.get("zoom", 2)),
+        ROOT / opts.get("before", "work/estilos/antes-recuadros"),
+        opts.get("name", ""),
+    )

@@ -84,7 +84,9 @@ def audit(name: str) -> None:
     L = lightness(luminance(lin))
     pct = np.percentile(L[::2, ::2], [0.1, 1, 5, 50, 95, 99, 99.9])
     print(f"{name}  {W}x{H}")
-    print(f"  L* p0.1 {pct[0]:.1f}  p1 {pct[1]:.1f}  p5 {pct[2]:.1f}  p50 {pct[3]:.1f}  p95 {pct[4]:.1f}  p99 {pct[5]:.1f}  p99.9 {pct[6]:.1f}")
+    print(
+        f"  L* p0.1 {pct[0]:.1f}  p1 {pct[1]:.1f}  p5 {pct[2]:.1f}  p50 {pct[3]:.1f}  p95 {pct[4]:.1f}  p99 {pct[5]:.1f}  p99.9 {pct[6]:.1f}"
+    )
     print(f"  recorte: blancos {white:.4f} %  negros {black:.4f} %")
     del L
 
@@ -102,9 +104,18 @@ def audit(name: str) -> None:
     yy, xx = np.mgrid[0:h, 0:w]
     rr = np.hypot((xx - w / 2) / (w / 2), (yy - h / 2) / (h / 2)) / np.sqrt(2)
     bands = [(0, 0.35), (0.35, 0.6), (0.6, 0.8), (0.8, 1.01)]
-    vals = [np.median(Ls[wall & (rr >= a) & (rr < b)]) if (wall & (rr >= a) & (rr < b)).sum() > 20 else np.nan for a, b in bands]
-    print("  pared por radio (centro -> esquina): " + "  ".join(f"{v:.1f}" for v in vals) + f"   ({int(wall.sum())} bloques)")
-    print(f"  pared L* p5 {np.percentile(Ls[wall], 5):.1f}  p50 {np.median(Ls[wall]):.1f}  p95 {np.percentile(Ls[wall], 95):.1f}")
+    vals = [
+        np.median(Ls[wall & (rr >= a) & (rr < b)]) if (wall & (rr >= a) & (rr < b)).sum() > 20 else np.nan
+        for a, b in bands
+    ]
+    print(
+        "  pared por radio (centro -> esquina): "
+        + "  ".join(f"{v:.1f}" for v in vals)
+        + f"   ({int(wall.sum())} bloques)"
+    )
+    print(
+        f"  pared L* p5 {np.percentile(Ls[wall], 5):.1f}  p50 {np.median(Ls[wall]):.1f}  p95 {np.percentile(Ls[wall], 95):.1f}"
+    )
 
     for face in p["faces"]:
         cx, cy, rx, ry = face["oval"][:4]
@@ -119,8 +130,10 @@ def audit(name: str) -> None:
         cand = eyes & (c < 14)
         sclera = cand & (cl[..., 0] >= np.percentile(cl[..., 0][cand], 80)) if cand.sum() > 50 else cand
         Le, ae, be = (np.median(cl[..., k][sclera]) for k in range(3)) if sclera.sum() else (np.nan,) * 3
-        print(f"  {face['id']:<11} piel L* {Lf:.1f}  a* {af:.1f}  b* {bf:.1f}  tono {np.degrees(np.arctan2(bf, af)):.1f}"
-              f"   blanco del ojo L* {Le:.1f}  a* {ae:+.1f}  b* {be:+.1f}")
+        print(
+            f"  {face['id']:<11} piel L* {Lf:.1f}  a* {af:.1f}  b* {bf:.1f}  tono {np.degrees(np.arctan2(bf, af)):.1f}"
+            f"   blanco del ojo L* {Le:.1f}  a* {ae:+.1f}  b* {be:+.1f}"
+        )
 
     # ruido: pared (recuadros) y oscuro liso, a resolucion completa en una franja del centro
     walls = []
@@ -132,15 +145,21 @@ def audit(name: str) -> None:
     bl = lab(band)
     flat = np.sqrt(np.maximum(blur(bl[..., 0] ** 2, 6) - blur(bl[..., 0], 6) ** 2, 0)) < 1.5
     dark = flat & (bl[..., 0] < 25) & (np.hypot(bl[..., 1], bl[..., 2]) < 6)
-    print(f"  ruido oscuro liso: {noise(bl, dark)}   L* ahi {np.median(bl[..., 0][dark]) if dark.any() else float('nan'):.1f}")
+    print(
+        f"  ruido oscuro liso: {noise(bl, dark)}   L* ahi {np.median(bl[..., 0][dark]) if dark.any() else float('nan'):.1f}"
+    )
     del bl, band
 
     shifts = np.array(ca_shift(srgb, H, W))
     if len(shifts):
         for a, b in ((0, 0.5), (0.5, 0.8), (0.8, 1.01)):
             s = shifts[(shifts[:, 0] >= a) & (shifts[:, 0] < b)]
-            print(f"  aberracion (radio {a:.1f}-{min(b, 1):.1f}, {len(s)} recuadros): R-G {np.nanmedian(s[:, 1]):+.2f} px  B-G {np.nanmedian(s[:, 2]):+.2f} px"
-                  f"   (max |B-G| {np.nanmax(np.abs(s[:, 2])):.2f})" if len(s) else f"  aberracion (radio {a:.1f}-{b:.1f}): sin bordes")
+            print(
+                f"  aberracion (radio {a:.1f}-{min(b, 1):.1f}, {len(s)} recuadros): R-G {np.nanmedian(s[:, 1]):+.2f} px  B-G {np.nanmedian(s[:, 2]):+.2f} px"
+                f"   (max |B-G| {np.nanmax(np.abs(s[:, 2])):.2f})"
+                if len(s)
+                else f"  aberracion (radio {a:.1f}-{b:.1f}): sin bordes"
+            )
 
 
 if __name__ == "__main__":

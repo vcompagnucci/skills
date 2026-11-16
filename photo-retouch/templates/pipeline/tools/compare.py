@@ -41,7 +41,9 @@ def main() -> None:
     ims = []
     for im in panels:
         if a.zoom != 1:
-            im = cv2.resize(im, None, fx=a.zoom, fy=a.zoom, interpolation=cv2.INTER_NEAREST if a.zoom > 1 else cv2.INTER_AREA)
+            im = cv2.resize(
+                im, None, fx=a.zoom, fy=a.zoom, interpolation=cv2.INTER_NEAREST if a.zoom > 1 else cv2.INTER_AREA
+            )
         ims.append(to_uint8(im, dither=False))
     gap = np.full((ims[0].shape[0], 6, 3), 20, np.uint8)
     out = Image.fromarray(np.concatenate([x for im in ims for x in (im, gap)][:-1], 1))

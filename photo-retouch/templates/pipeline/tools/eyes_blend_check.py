@@ -39,7 +39,9 @@ def check(name: str) -> None:
         layer, top = z[e["face"]], z[f"{e['face']}-200"]
         oy, ox = (int(v) for v in z[f"{e['face']}-origen"])
         support = np.zeros((h, w), bool)
-        support[oy - y : oy - y + layer.shape[0], ox - x : ox - x + layer.shape[1]] = np.any((layer != 0) | (top != 0), axis=-1)
+        support[oy - y : oy - y + layer.shape[0], ox - x : ox - x + layer.shape[1]] = np.any(
+            (layer != 0) | (top != 0), axis=-1
+        )
         # la nitidez mueve hasta ~15 px alrededor de la capa: la costura se mira mas alla
         from scipy.ndimage import binary_dilation
 
@@ -51,7 +53,9 @@ def check(name: str) -> None:
             out16 = np.abs(p16.astype(int) - final16[y : y + h, x : x + w])[~near].max()
             out8 = np.abs(p8.astype(int) - final8[y : y + h, x : x + w])[~near].max()
             inside = np.abs(p16.astype(int) - final16[y : y + h, x : x + w]).max()
-            print(f"{name} {e['face']} {tag:>3} %: afuera de la ojera difiere {out16} (16 bits) y {out8} (8 bits); adentro, hasta {inside / 65535:.1%}")
+            print(
+                f"{name} {e['face']} {tag:>3} %: afuera de la ojera difiere {out16} (16 bits) y {out8} (8 bits); adentro, hasta {inside / 65535:.1%}"
+            )
             ends[tag] = p16.astype(np.float64) / 65535
         base = final16[y : y + h, x : x + w].astype(np.float64) / 65535
         # el render exacto a t, en el mismo parche

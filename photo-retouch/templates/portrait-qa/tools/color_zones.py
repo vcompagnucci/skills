@@ -84,7 +84,9 @@ def main(name: str, key: str) -> bool:
         d = (o[0] - c[0], o[1] - c[1], (o[2] - c[2] + 180) % 360 - 180)
         ok = all(abs(v) <= t for v, t in zip(d, TOL))
         ok_all &= ok
-        print(f"  {'PASA ' if ok else 'FALLA'} {label:16s} {c[0]:5.1f} {c[1]:5.1f} {c[2]:5.1f}   {o[0]:5.1f} {o[1]:5.1f} {o[2]:5.1f}   {d[0]:+5.1f} {d[1]:+5.1f} {d[2]:+5.1f}")
+        print(
+            f"  {'PASA ' if ok else 'FALLA'} {label:16s} {c[0]:5.1f} {c[1]:5.1f} {c[2]:5.1f}   {o[0]:5.1f} {o[1]:5.1f} {o[2]:5.1f}   {d[0]:+5.1f} {d[1]:+5.1f} {d[2]:+5.1f}"
+        )
     return ok_all
 
 

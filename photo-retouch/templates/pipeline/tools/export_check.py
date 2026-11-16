@@ -37,21 +37,53 @@ PHOTO = os.environ.get("EDITOR_TEST_PHOTO") or STUDIO[0]
 H, W = tifffile.TiffFile(EDITED / f"{PHOTO}.tif").pages[0].shape[:2]
 _H169 = min(round(W * 9 / 16), H)
 # ajustes y fondo de verdad (los de "Deep blacks, grey wall" con la pared tocada), para que el export los aplique
-ADJUST = {"exposure": 0.29, "contrast": 15, "highlights": -20, "shadows": 10, "whites": -8, "blacks": -15, "vibrance": 12}
+ADJUST = {
+    "exposure": 0.29,
+    "contrast": 15,
+    "highlights": -20,
+    "shadows": 10,
+    "whites": -8,
+    "blacks": -15,
+    "vibrance": 12,
+}
 BACKGROUND = {"exposure": 0.2, "evenness": 50, "smoothing": 100}
-CROPS = {"whole": [0, 0, W, H], "free": [round(W * 0.12), round(H * 0.11), round(W * 0.72), round(H * 0.67)],
-         "16:9": [0, (H - _H169) // 4, W, _H169]}
+CROPS = {
+    "whole": [0, 0, W, H],
+    "free": [round(W * 0.12), round(H * 0.11), round(W * 0.72), round(H * 0.67)],
+    "16:9": [0, (H - _H169) // 4, W, _H169],
+}
 SIZES = [1024, 2048, "full"]
-FORMATS = {"png": (16, "PNG", ".png"), "tiff": (16, "TIFF", ".tif"), "webp": (8, "WEBP", ".webp"), "jpeg": (8, "JPEG", ".jpg"),
-           "dng": (16, "DNG", ".dng")}
-LIMIT = {"png": (0.05, 1), "tiff": (0.05, 1), "webp": (0.6, 1), "jpeg": (1.5, 6), "dng": (0.05, 1)}  # media y p99 maximos, niveles de 8 bits
+FORMATS = {
+    "png": (16, "PNG", ".png"),
+    "tiff": (16, "TIFF", ".tif"),
+    "webp": (8, "WEBP", ".webp"),
+    "jpeg": (8, "JPEG", ".jpg"),
+    "dng": (16, "DNG", ".dng"),
+}
+LIMIT = {
+    "png": (0.05, 1),
+    "tiff": (0.05, 1),
+    "webp": (0.6, 1),
+    "jpeg": (1.5, 6),
+    "dng": (0.05, 1),
+}  # media y p99 maximos, niveles de 8 bits
 
 
 def fetch(fmt: str, box: list, size) -> tuple[dict, bytes]:
-    body = {"photo": PHOTO, "image": "edit", "box": box, "size": size, "format": fmt, "under_eyes": 70,
-            "adjust": ADJUST, "background": BACKGROUND, "version": "Export check"}
-    req = urllib.request.Request(f"http://127.0.0.1:{PORT}/api/prepare", json.dumps(body).encode(),
-                                 {"Content-Type": "application/json"})
+    body = {
+        "photo": PHOTO,
+        "image": "edit",
+        "box": box,
+        "size": size,
+        "format": fmt,
+        "under_eyes": 70,
+        "adjust": ADJUST,
+        "background": BACKGROUND,
+        "version": "Export check",
+    }
+    req = urllib.request.Request(
+        f"http://127.0.0.1:{PORT}/api/prepare", json.dumps(body).encode(), {"Content-Type": "application/json"}
+    )
     meta = json.load(urllib.request.urlopen(req, timeout=600))
     data = urllib.request.urlopen(f"http://127.0.0.1:{PORT}/api/file/{meta['id']}", timeout=600).read()
     return meta, data
@@ -98,10 +130,12 @@ def decode(fmt: str, data: bytes) -> tuple[np.ndarray, int, bool, str]:
 
 def reference_part(ref16: np.ndarray, box: list, w: int, h: int) -> np.ndarray:
     x, y, bw, bh = box
-    crop = ref16[y:y + bh, x:x + bw]
+    crop = ref16[y : y + bh, x : x + bw]
     if (bw, bh) == (w, h):
         return crop
-    return (linear_to_srgb(cv2.resize(TO_LINEAR[crop], (w, h), interpolation=cv2.INTER_AREA)) * 65535 + 0.5).astype(np.uint16)
+    return (linear_to_srgb(cv2.resize(TO_LINEAR[crop], (w, h), interpolation=cv2.INTER_AREA)) * 65535 + 0.5).astype(
+        np.uint16
+    )
 
 
 def main() -> None:
@@ -131,12 +165,27 @@ def main() -> None:
                 }
                 ok = all(checks.values())
                 failed += not ok
-                row = {"crop": crop_name, "size": size, "format": fmt, "name": meta["name"], "w": img.shape[1], "h": img.shape[0],
-                       "bits": bits, "mb": round(len(data) / 1e6, 1), "diff_mean": mean, "diff_p99": p99, "checks": checks, "ok": ok}
+                row = {
+                    "crop": crop_name,
+                    "size": size,
+                    "format": fmt,
+                    "name": meta["name"],
+                    "w": img.shape[1],
+                    "h": img.shape[0],
+                    "bits": bits,
+                    "mb": round(len(data) / 1e6, 1),
+                    "diff_mean": mean,
+                    "diff_p99": p99,
+                    "checks": checks,
+                    "ok": ok,
+                }
                 rows.append(row)
                 bad = ", ".join(k for k, v in checks.items() if not v)
-                print(f"{'ok ' if ok else 'MAL'} {crop_name:6} {str(size):5} {fmt:5} {row['w']:>5}x{row['h']:<5} {bits:>2}b "
-                      f"{row['mb']:>6} MB  diff {mean} / p99 {p99}  {meta['name']}{'  <- ' + bad if bad else ''}", flush=True)
+                print(
+                    f"{'ok ' if ok else 'MAL'} {crop_name:6} {str(size):5} {fmt:5} {row['w']:>5}x{row['h']:<5} {bits:>2}b "
+                    f"{row['mb']:>6} MB  diff {mean} / p99 {p99}  {meta['name']}{'  <- ' + bad if bad else ''}",
+                    flush=True,
+                )
                 del img, ref, data
     out = NOTES / "export" / "check.json"
     out.parent.mkdir(parents=True, exist_ok=True)

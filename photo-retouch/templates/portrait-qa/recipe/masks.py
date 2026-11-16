@@ -10,6 +10,7 @@ import numpy as np
 
 from common import linear_to_srgb, luminance
 
+
 def background_mask(img: np.ndarray) -> np.ndarray:
     """1 = fondo, 0 = persona, con bordes suaves. Float32 al tamano de `img`.
 
@@ -116,7 +117,9 @@ def guided_filter_color(guide: np.ndarray, src: np.ndarray, radius: int, eps: fl
                 var[..., i, j] = var[..., j, i] = cv2.boxFilter(g[..., i] * g[..., j], -1, k) - mean_i[i] * mean_i[j]
         a = np.linalg.solve(var + eye, cov_ip[..., None])[..., 0]
         b = mean_p - sum(a[..., c] * mean_i[c] for c in range(3))
-        q = sum(cv2.boxFilter(np.ascontiguousarray(a[..., c]), -1, k) * g[..., c] for c in range(3)) + cv2.boxFilter(b, -1, k)
+        q = sum(cv2.boxFilter(np.ascontiguousarray(a[..., c]), -1, k) * g[..., c] for c in range(3)) + cv2.boxFilter(
+            b, -1, k
+        )
         rows = min(strip, n - s0)
         out[s0 : s0 + rows] = q[s0 - a0 : s0 - a0 + rows]
     return out
@@ -145,8 +148,6 @@ def refine(img: np.ndarray, coarse: np.ndarray) -> np.ndarray:
     return np.clip(guided_filter(guide, coarse.astype(np.float32), radius, 1e-3), 0, 1).astype(np.float32)
 
 
-
-
 def _gauss(feat: np.ndarray, sample: np.ndarray) -> np.ndarray:
     """Log-verosimilitud de cada pixel bajo una gaussiana ajustada a `sample`."""
     mean = sample.mean(axis=0)
@@ -171,7 +172,9 @@ def skin_chroma_mask(img: np.ndarray, alpha: np.ndarray, geo: tuple[float, float
     soft = cv2.GaussianBlur(img, (0, 0), max(1.5, n / 400))
     total = np.maximum(soft.sum(axis=2), 1e-6)
     lum = luminance(soft)
-    feat = np.stack([soft[..., 0] / total, soft[..., 1] / total, np.log2(np.maximum(lum, 1e-6)) / 8], axis=2).astype(np.float32)
+    feat = np.stack([soft[..., 0] / total, soft[..., 1] / total, np.log2(np.maximum(lum, 1e-6)) / 8], axis=2).astype(
+        np.float32
+    )
     yy, xx = np.ogrid[:n, :n]
     solid = alpha > 0.95
     inner = ((((xx - cx) / (0.55 * r)) ** 2 + ((yy - (cy + 0.1 * r)) / (0.6 * r)) ** 2) < 1) & solid
@@ -217,9 +220,11 @@ def key_wall(img: np.ndarray, alpha: np.ndarray, keys: list[tuple[float, float, 
         # sin borde: la correccion se apaga hacia el contorno de la zona, salvo donde la zona
         # toca el borde de la foto (ahi no hay nada con que empalmar)
         far = 10 * n
+
         def edge(lo, hi, size):
             d = np.arange(hi - lo, dtype=np.float32)
             return np.minimum(d if lo > 0 else far, d[::-1] if hi < size else far)
+
         ramp = np.minimum.outer(edge(y0, y1, n), edge(x0, x1, n))
         fade = np.clip(ramp / max(2.0, 0.25 * half), 0, 1)
         region = out[y0:y1, x0:x1]
